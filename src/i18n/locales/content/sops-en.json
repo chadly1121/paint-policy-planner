@@ -186,5 +186,25 @@
   "sop047": {
     "title": "SOP-047 – Subcontractor Management",
     "content": "PURPOSE\nTo ensure subcontractors meet company standards.\n\nREQUIREMENTS\n• Subcontractors must follow all SOPs.\n• Provide proof of insurance and safety compliance.\n• Work must be inspected by foreman.\n\nVIOLATIONS\n• Unsafe or unprofessional conduct may result in removal from site.\n• Subcontractors do not override company SOPs."
+  },
+  "sop048": {
+    "title": "SOP-048 – Environmental Protection & Waste Disposal",
+    "content": "PURPOSE\nTo ensure all waste is handled responsibly, legally, and professionally while protecting the environment and customer property.\n\nRULES\n• Dispose of all waste in approved containers only.\n• Separate garbage, recyclables, and hazardous waste.\n• Never dump liquids, paint, or solvents down drains, toilets, or outside.\n\nPAINT & COATINGS\n• Do not pour paint into sinks, toilets, or onto the ground.\n• Allow small amounts of water-based paint to dry before disposal if permitted.\n• Solvent-based materials must be disposed of according to local regulations.\n\nDUST & DEBRIS\n• Vacuum dust; do not sweep into the air.\n• Bag debris before disposal.\n\nViolations may result in discipline and fines."
+  },
+  "sop049": {
+    "title": "SOP-049 – Security & Theft Prevention",
+    "content": "PURPOSE\nTo protect company tools, materials, vehicles, and customer property.\n\nRULES\n• Lock vehicles at all times when unattended.\n• Do not leave tools or materials unsecured.\n• Do not allow unauthorized persons access to tools or vehicles.\n\nJOB SITES\n• Secure tools at end of day.\n• Do not leave valuables visible.\n\nREPORTING\n• Report lost, missing, or stolen items immediately.\n• Failure to report may result in disciplinary action."
+  },
+  "sop050": {
+    "title": "SOP-050 – After-Hours & Site Access",
+    "content": "PURPOSE\nTo control access to job sites outside normal working hours.\n\nRULES\n• No after-hours access without approval.\n• No bringing family, friends, or unauthorized persons to job sites.\n• Keys, codes, and access credentials are confidential.\n\nEND OF DAY\n• Lock doors and windows as instructed.\n• Arm alarms if applicable.\n\nUnauthorized access is grounds for discipline."
+  },
+  "sop051": {
+    "title": "SOP-051 – Technology, Phones & Device Use",
+    "content": "PURPOSE\nTo minimize distractions and protect company data.\n\nRULES\n• Personal phone use is limited to breaks.\n• No social media use during work hours.\n• No unauthorized photos or videos.\n\nCOMPANY DEVICES\n• Use company devices for work only.\n• Protect passwords and login credentials.\n• Report lost or damaged devices immediately.\n\nViolation may result in loss of device privileges."
+  },
+  "sop052": {
+    "title": "SOP-052 – Company Image, Uniform & Appearance",
+    "content": "PURPOSE\nTo present a professional image to customers, builders, and the public.\n\nSTANDARDS\n• Wear clean company clothing or approved workwear.\n• Clothing must be free of excessive paint, rips, or offensive content.\n• Maintain basic personal hygiene.\n\nON SITE\n• No inappropriate language.\n• No smoking or vaping on site or in vehicles.\n• Behave professionally at all times.\n\nEmployees represent the company at all times while on the job."
   }
 }
