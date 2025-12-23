@@ -66,5 +66,25 @@
   "sop017": {
     "title": "SOP-017 – Damage Prevention & Property Protection",
     "content": "PURPOSE\nTo prevent damage to customer property, finishes, fixtures, and surrounding areas.\n\nRULES\n• Treat every home as occupied and finished.\n• Never lean tools against walls or furniture.\n• Never drag tools or hoses across finished surfaces.\n• Never place tools on counters or furniture.\n\nLADDERS & EQUIPMENT\n• Pad ladder contact points.\n• Use drop cloths under ladders.\n• Do not rest ladders on finished trim or cabinets.\n\nINCIDENTS\n• Any damage must be reported immediately.\n• Do not hide or ignore damage.\n• Complete incident report same day.\n\nFailure to report damage is a serious violation."
+  },
+  "sop018": {
+    "title": "SOP-018 – Foreman Authority & Decision-Making",
+    "content": "PURPOSE\nTo clearly define the authority, responsibility, and decision-making power of foremen on job sites to prevent delays, confusion, and scope creep.\n\nAUTHORITY\n• The foreman is the highest authority on site unless otherwise stated.\n• All crew members must follow foreman instructions.\n• Foremen enforce all SOPs without exception.\n\nDECISION RULES\nForemen MAY decide:\n• Daily work sequencing\n• Tool and material usage\n• Minor workflow adjustments\n• Quality corrections\n• Safety stoppages\n\nForemen MAY NOT decide:\n• Price changes\n• Scope changes\n• Free extras for customers\n• Deviations from written SOPs\n• Ignoring damage or incidents\n\nESCALATION\n• Any scope, cost, or customer request outside the contract must be escalated to Chad or management immediately.\n• When in doubt: STOP and ASK.\n\nFailure to follow foreman direction is insubordination."
+  },
+  "sop019": {
+    "title": "SOP-019 – Customer Interaction & Communication",
+    "content": "PURPOSE\nTo ensure professional, consistent, and controlled communication with customers.\n\nGENERAL RULES\n• Be polite, professional, and brief.\n• Do not overshare information.\n• Do not speculate or guess.\n• Do not promise anything.\n\nWHAT EMPLOYEES MAY SAY\n• What work is scheduled today\n• General progress updates\n• That questions will be passed to management\n\nWHAT EMPLOYEES MAY NOT SAY\n• Pricing or discounts\n• Schedule guarantees\n• Opinions on other trades\n• Criticism of the home or prior work\n• Authorization for extra work\n\nCUSTOMER REQUESTS\n• All change requests must be directed to the foreman.\n• The foreman escalates to management.\n• No verbal approvals."
+  },
+  "sop020": {
+    "title": "SOP-020 – Change Orders",
+    "content": "PURPOSE\nTo control scope, pricing, and approval of work outside the original agreement.\n\nRULES\n• No extra work is performed without a written change order.\n• Verbal approvals are invalid.\n• \"While you're here\" work is not allowed.\n\nPROCESS\n1. Customer requests change.\n2. Foreman documents request.\n3. Management prices change.\n4. Customer signs approval.\n5. Work is scheduled and completed.\n\nUnauthorized work will not be paid."
+  },
+  "sop021": {
+    "title": "SOP-021 – Safety at Heights & Ladder Use",
+    "content": "PURPOSE\nTo prevent falls and injuries when working at height.\n\nRULES\n• Inspect ladders daily.\n• Use the correct ladder for the task.\n• Never stand on the top step.\n• Maintain three points of contact.\n• Do not overreach.\n\nSETUP\n• Place ladders on stable ground.\n• Use ladder feet or levelers.\n• Secure ladders where required.\n\nPROHIBITED\n• Broken or damaged ladders\n• Standing on buckets, boxes, or makeshift platforms\n• Carrying heavy items while climbing\n\nViolations may result in removal from site."
+  },
+  "sop022": {
+    "title": "SOP-022 – Disciplinary Matrix & Enforcement",
+    "content": "PURPOSE\nTo ensure consistent, fair enforcement of all SOPs.\n\nDISCIPLINE LEVELS\n\nLevel 1 – Verbal Warning\n• Minor SOP violations\n• First-time offenses\n\nLevel 2 – Written Warning\n• Repeat violations\n• Safety issues\n• Tool neglect\n\nLevel 3 – Suspension\n• Serious violations\n• Damage concealment\n• Time theft\n\nLevel 4 – Termination\n• Willful safety violations\n• Dishonesty\n• Repeated insubordination\n\nNOTES\n• Discipline may skip levels depending on severity.\n• All incidents are documented.\n• Ignorance of SOPs is not an excuse."
   }
 }
