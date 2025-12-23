@@ -303,6 +303,19 @@ const Admin = () => {
         }
       }
 
+      // Send email notification (fire and forget)
+      supabase.functions.invoke("send-notification", {
+        body: {
+          type: "redemption_processed",
+          userId: request.user_id,
+          data: {
+            status: approve ? "approved" : "rejected",
+            pointsRequested: request.points_requested,
+            adminNotes: request.admin_notes,
+          },
+        },
+      }).catch(console.error);
+
       toast({
         title: approve ? "Request approved" : "Request rejected",
         description: approve

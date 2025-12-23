@@ -118,6 +118,17 @@ export const useQuiz = () => {
       setQuizComplete(true);
 
       if (data.passed) {
+        // Send email notification for section completion (fire and forget)
+        if (data.pointsEarned > 0) {
+          supabase.functions.invoke("send-notification", {
+            body: {
+              type: "section_completed",
+              userId: user.id,
+              data: { sectionKey, pointsEarned: data.pointsEarned },
+            },
+          }).catch(console.error);
+        }
+
         toast({
           title: "Congratulations! 🎉",
           description: data.pointsEarned > 0 
