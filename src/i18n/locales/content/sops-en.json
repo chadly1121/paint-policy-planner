@@ -126,5 +126,25 @@
   "sop032": {
     "title": "SOP-032 – Production Rates & Efficiency",
     "content": "PURPOSE\nTo maintain productivity and profitability.\n\nEXPECTATIONS\n• Employees are expected to meet reasonable production rates.\n• Work steadily and efficiently.\n• Excessive downtime is not acceptable.\n\nMONITORING\n• Foremen track progress daily.\n• Repeated inefficiency will be addressed.\n\nQuality is never sacrificed for speed."
+  },
+  "sop033": {
+    "title": "SOP-033 – Material Ordering & Inventory Control",
+    "content": "PURPOSE\nTo ensure materials are ordered accurately, inventory is tracked, shortages are avoided, and waste is minimized.\n\nORDERING\n• Materials are ordered only by foremen or management.\n• Orders must match approved specs (brand, color, sheen, quantity).\n• No last-minute or unauthorized substitutions.\n\nINVENTORY\n• Log all materials taken from the shop.\n• Update inventory upon return of unused materials.\n• Clearly label partial containers with job name and date.\n\nWASTE\n• Do not over-order.\n• Return usable materials to inventory.\n• Dispose of unusable materials properly."
+  },
+  "sop034": {
+    "title": "SOP-034 – Shop Operations & Opening/Closing",
+    "content": "PURPOSE\nTo keep the shop clean, safe, organized, and ready for daily operations.\n\nOPENING\n• Unlock doors and disarm alarm.\n• Turn on lights as needed.\n• Check shop cleanliness and safety.\n• Confirm equipment readiness.\n\nCLOSING\n• Clean work areas.\n• Put tools, sundries, and paint away.\n• Empty garbage and recycling.\n• Clean bathroom.\n• Turn off lights and equipment.\n• Set thermostat per policy.\n• Lock doors and arm alarm.\n\nThe shop must be left clean every day."
+  },
+  "sop035": {
+    "title": "SOP-035 – Client Walkthrough & Project Handover",
+    "content": "PURPOSE\nTo ensure a professional handover and reduce callbacks.\n\nPROCESS\n• Foreman schedules walkthrough.\n• Inspect all work before client review.\n• Address concerns calmly and professionally.\n• Document any punch-list items.\n\nHANDOVER\n• Complete punch-list.\n• Clean area thoroughly.\n• Obtain sign-off when possible.\n\nNo project is complete without proper handover."
+  },
+  "sop036": {
+    "title": "SOP-036 – Emergency Response",
+    "content": "PURPOSE\nTo respond quickly and safely to emergencies.\n\nEMERGENCIES INCLUDE\n• Injury\n• Fire\n• Flood\n• Chemical spill\n• Structural hazard\n\nPROCEDURE\n1. Stop work.\n2. Ensure personal safety.\n3. Call emergency services if required.\n4. Notify foreman immediately.\n5. Secure area.\n6. Complete incident report.\n\nDo not resume work until cleared."
+  },
+  "sop037": {
+    "title": "SOP-037 – Documentation, File Naming & Data Storage",
+    "content": "PURPOSE\nTo ensure consistent, traceable documentation.\n\nFILE NAMING\n• JobName_Date_Description\n• Example: Smith_St_2025-03-12_DailyReport\n\nSTORAGE\n• Upload files to designated folders only.\n• No personal devices for company records.\n• Photos must be clear and dated.\n\nRETENTION\n• Do not delete company records.\n• Follow retention policies."
   }
 }
