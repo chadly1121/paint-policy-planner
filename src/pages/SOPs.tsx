@@ -4,175 +4,183 @@ import { ClipboardList } from "lucide-react";
 
 const sopItems = [
   {
-    id: "sop-1",
-    title: "1. Job Site Preparation",
-    content: `Before beginning any painting job, complete the following steps:
-1. Conduct a walkthrough with the customer to confirm work areas and colors
-2. Protect all floors, furniture, and fixtures with drop cloths and plastic sheeting
-3. Remove outlet covers, light switch plates, and hardware
-4. Clean all surfaces to be painted - remove dust, dirt, and cobwebs
-5. Fill holes and cracks with appropriate filler and sand smooth
-6. Apply painter's tape to edges, trim, and any areas not being painted
-7. Take before photos for documentation`,
-  },
-  {
-    id: "sop-2",
-    title: "2. Surface Preparation & Priming",
-    content: `Proper surface prep ensures quality results:
-1. Sand glossy surfaces to promote adhesion
-2. Scrape and remove any loose or peeling paint
-3. Wash walls with TSP solution for kitchens/bathrooms or areas with heavy grime
-4. Allow all surfaces to dry completely before priming
-5. Apply primer to all bare wood, patched areas, and stained surfaces
-6. Use stain-blocking primer for water stains or tannin bleed
-7. Allow primer to dry according to manufacturer specifications`,
-  },
-  {
-    id: "sop-3",
-    title: "3. Interior Painting Procedure",
-    content: `Follow this sequence for interior painting:
-1. Start with the ceiling - cut in edges first, then roll
-2. Paint trim, doors, and windows next
-3. Paint walls last - cut in all edges and corners
-4. Roll walls using W-pattern for even coverage
-5. Apply thin, even coats - two coats minimum
-6. Allow proper dry time between coats (check product specifications)
-7. Remove tape while paint is still slightly tacky
-8. Touch up as needed after final coat dries`,
-  },
-  {
-    id: "sop-4",
-    title: "4. Exterior Painting Procedure",
-    content: `Exterior painting requires weather consideration:
-1. Check weather forecast - no rain for 24 hours minimum
-2. Do not paint in direct sunlight or temperatures below 50°F or above 90°F
-3. Power wash all surfaces and allow 48 hours to dry
-4. Scrape, sand, and prime all bare or damaged areas
-5. Caulk gaps around windows, doors, and trim
-6. Paint in the shade when possible - follow the sun around the house
-7. Use exterior-grade paint and primer only
-8. Apply two coats for complete coverage and durability`,
-  },
-  {
-    id: "sop-5",
-    title: "5. Equipment Care & Maintenance",
-    content: `Maintain all equipment properly:
-1. Clean brushes and rollers immediately after use
-2. Use appropriate cleaner (water for latex, solvent for oil-based)
-3. Store brushes hanging or lying flat - never on bristle ends
-4. Clean spray equipment thoroughly after each use
-5. Inspect ladders and scaffolding before each job
-6. Report any damaged or worn equipment immediately
-7. Store all equipment in designated areas when not in use`,
-  },
-  {
-    id: "sop-6",
-    title: "6. Color Matching & Custom Mixing",
-    content: `For color matching jobs:
-1. Obtain sample of existing color - chip at least quarter-sized
-2. Use spectrophotometer when available for accurate matching
-3. Test match on hidden area before proceeding
-4. Mix adequate quantity for entire job plus 10% extra
-5. Keep detailed records of custom formulas
-6. Label all custom-mixed paint with job name and formula
-7. Provide customer with color information for future touch-ups`,
-  },
-  {
-    id: "sop-7",
-    title: "7. Job Site Cleanup",
-    content: `Complete cleanup before leaving any job:
-1. Remove all tape carefully
-2. Perform touch-ups as needed
-3. Clean any paint drips or spills immediately
-4. Remove all drop cloths and protective materials
-5. Reinstall all outlet covers, switch plates, and hardware
-6. Vacuum or sweep all work areas
-7. Take after photos for documentation
-8. Conduct final walkthrough with customer
-9. Collect signature on completion form`,
-  },
-  {
-    id: "sop-8",
-    title: "SOP-008 – Driving, Transportation, Travel Time & Vehicle Use Policy (Ontario)",
+    id: "sop-001",
+    title: "SOP-001 – Priming a New Construction House",
     content: `PURPOSE
-To establish clear, enforceable rules for travel time, clocking in and out, transportation, and company vehicle use. This policy complies with the Ontario Employment Standards Act (ESA).
+To establish a consistent, efficient, and high-quality process for priming drywall in new construction homes.
 
-1. LEGAL BASIS (ONTARIO ESA)
-• Normal commuting time (home to first job site and last job site to home) is unpaid.
-• Travel time is paid only when the employer directs or requires travel (job-to-job travel, shop visits, supply pickups).
-• Employer-provided vehicles or fuel do not automatically make commuting paid time.
+NON-NEGOTIABLES
+• We DO NOT brush bare drywall. Ever.
+• Walls are rolled first. No cutting first.
+• All belongings, windows, fixtures, and hardware must be protected.
+• Safety check occurs before work begins.
 
-2. CORE RULES
-• You are paid only when you are working.
-• You clock in when you arrive at the job site.
-• You clock in to the correct customer job.
-• Nobody ever clocks in from home.
-• GPS and geofencing are used to verify clock-ins.
+PROCEDURE
 
-3. CLOCK-IN PROCEDURES
-• Clock in upon arrival at the job site.
-• If working at the shop for a customer job: Clock in to the customer job and add note: "Working at shop"
-• Do not clock in under "shop" unless explicitly instructed.
+1. Safety & Site Readiness
+• Confirm site is safe and free of hazards.
+• Confirm ventilation if spraying.
+• Protect windows, hinges, countertops, fixtures, floors, and non-painted surfaces.
 
-4. SHOP EXCEPTIONS (EMPLOYER-DIRECTED ONLY)
-• If management instructs you to go to the shop and you are the driver: You may clock in at the shop for the customer job; shop-to-job travel is paid.
-• Only the instructed driver clocks in.
-• No other employees clock in at the shop.
+2. Wall Priming
+• Roll all walls with drywall primer.
+• Do not cut first.
+• Maintain wet edge and even coverage.
 
-5. PERSONAL CARPOOLING (UNPAID)
-• Carpooling is a personal choice.
-• Drivers do not get paid for driving coworkers.
-• Personal carpooling does not convert travel into paid time.
+3. Ceiling Priming
+Option A – Spray & Back-Roll (Preferred):
+• Spray ceilings evenly.
+• Back-roll with 20 mil roller.
+• Spray all corners and angles normally brushed.
 
-6. RIDING WITH ANOTHER EMPLOYEE (UNPAID)
-• Riders do not clock in at the shop.
-• Riders do not load vehicles.
-• Riders do not perform work.
-• Receiving a ride is unpaid personal time.
+Option B – Roll + Spray Corners:
+• Roll ceilings with 20 mil roller.
+• Spray all vertical and horizontal corners afterward.
 
-7. PICKUPS, SUPPLIES & JOB-TO-JOB TRAVEL (PAID)
-• If directed to go to the shop, paint store, pick up supplies, or pick up employees: Clock in at the first required work stop.
-• Employer-directed travel during the workday is paid at regular rate (minimum wage or higher).
+FINAL CHECK
+• No missed areas.
+• No overspray.
+• Uniform primer coverage.`,
+  },
+  {
+    id: "sop-002",
+    title: "SOP-002 – Painting Ceilings (New Construction, Primed)",
+    content: `PURPOSE
+To produce a finished ceiling surface using spray and back-roll with minimal coats.
 
-8. END OF DAY
-• Clock out when work is complete.
-• Travel home is unpaid.
-• Applies to everyone, including foremen.
+NON-NEGOTIABLES
+• All drywall must be sanded.
+• Spray and back-roll only.
+• 20 mil roller only.
+• Protection is mandatory.
 
-9. COMPANY VEHICLES (PERSONAL USE)
-• Personal use is a privilege, not a right.
-• Driving a company vehicle to the shop or job site is unpaid.
-• Company-paid fuel for personal use is a bonus.
-• If you disagree, the vehicle will be parked at the shop.
+PROCEDURE
+1. Sand ceilings and remove dust.
+2. Protect windows, walls, fixtures, and floors.
+3. Spray ceilings evenly.
+4. Back-roll immediately with 20 mil roller.
+5. Aim for one-coat finish; second coat only if required.`,
+  },
+  {
+    id: "sop-003",
+    title: "SOP-003 – Interior Painting Sequence (New Construction)",
+    content: `MANDATORY ORDER
+1. Prime walls and ceilings
+2. Paint ceilings
+3. Paint walls
+4. Paint trim, doors, and frames
 
-10. LIVING TOGETHER / ROOMMATE SITUATIONS
-• Living together does not qualify for paid travel.
-• Transporting roommates is not employer-directed work.
-• Disputes will require employees to arrange their own transportation.
+RULES
+• No out-of-sequence work.
+• Each stage must be inspected before proceeding.`,
+  },
+  {
+    id: "sop-004",
+    title: "SOP-004 – Painting Walls (Post-Ceiling)",
+    content: `NON-NEGOTIABLES
+• Ceilings must be complete.
+• Protection remains in place.
+• No free-styling application methods.
 
-11. FOREMAN TRANSPORTATION & RIDE POLICY
+PROCEDURE
+• Inspect walls for damage; patch and spot-prime as needed.
+• Option A: Spray and back-roll (12–15 mil).
+• Option B: Roll only when spraying is not approved.
+• One full coat minimum; second coat if required.`,
+  },
+  {
+    id: "sop-005",
+    title: "SOP-005 – Bathroom & Facility Use Policy",
+    content: `GENERAL POLICY
+• Employees are strictly prohibited from using customer bathrooms, sinks, tubs, or drains.
+• No exceptions.
+
+BATHROOM BREAK SCHEDULE
+• Approved break times: 10:00 AM, 12:00 PM, 2:00 PM.
+• Use public or approved facilities only.
+
+PROHIBITED PRACTICES
+• No outdoor urination (bushes, woods, vehicles).
+• No flushing wipes, feminine products, paper towels.
+• Only toilet paper in toilets.
+
+DISCIPLINE
+• First offense: written warning.
+• Repeat offenses: suspension or termination.`,
+  },
+  {
+    id: "sop-006",
+    title: "SOP-006 – Equipment Storage & Vehicle Use",
+    content: `POLICY
+• Vehicles are mobile storage units.
+• Only bring tools needed for the task.
+• Do not unload full vehicles into job sites.
+• No tools left on site overnight (except labeled paint and tray liners).
+
+END OF DAY
+• Tools returned to vehicle or shop.
+• Vehicles locked.`,
+  },
+  {
+    id: "sop-007",
+    title: "SOP-007 – Equipment Sign-Out & Sundries Tracking",
+    content: `EQUIPMENT
+• All tools must be signed out.
+• Condition logged out and in.
+• Missing/damaged tools reported immediately.
+
+SUNDRIES
+• All consumables logged when taken from shop.
+• Weekly review and monthly audits.`,
+  },
+  {
+    id: "sop-008",
+    title: "SOP-008 – Driving, Transportation, Travel Time & Vehicle Use (Ontario)",
+    content: `LEGAL BASIS
+• Commuting is unpaid.
+• Employer-directed travel is paid.
+• Company vehicles/fuel do not make commuting paid.
+
+CORE RULES
+• Clock in at job site only.
+• Never clock in from home.
+• GPS/geofence enforced.
+
+SHOP EXCEPTIONS
+• Only instructed driver clocks in at shop.
+• Shop-to-job travel is paid.
+
+CARPOOLING
+• Personal choice.
+• Driver not paid.
+• Riders do not work or load vehicles.
+
+PICKUPS
+• Employer-directed pickups are paid.
+• Clock in at first required stop.
+
+END OF DAY
+• Clock out when work ends.
+• Travel home unpaid.
+
+COMPANY VEHICLES
+• Personal use is a privilege.
+• No paid commuting.
+• Fuel for personal use is a bonus.
+
+ROOMMATES
+• Living together does not create paid travel.
+• Disputes require personal transportation.
+
+FOREMAN RIDE POLICY
 • Foremen are not chauffeurs.
-• The company will not pay for extra trips done for employee convenience.
-• If a foreman is directed to go to the shop or supplier: He goes shop → job site. He does NOT return home to pick up coworkers.
-• Roommates must be ready first thing or arrange their own transportation.
+• No paid extra trips for employee convenience.
+• Shop → Job only when directed.
 
-12. NO SMOKING OR VAPING IN COMPANY VEHICLES
-• Smoking and vaping are strictly prohibited in all company vehicles.
-• Includes cigarettes, cigars, vapes, and cannabis.
-• Applies at all times, including personal use.
-• Violations may result in: Loss of vehicle privileges, cleaning/detailing costs charged, disciplinary action up to termination.
-
-13. COMPLIANCE & ENFORCEMENT
-• GPS and geofence data verify clock-ins.
-• Time theft, unauthorized detours, or manipulation will be corrected.
-• Repeated abuse may result in loss of vehicle or ride privileges.
-
-14. EMPLOYEE ACKNOWLEDGMENT
-I acknowledge that I have read, understand, and agree to comply with this policy.
-Employee Name: ____________________________
-Signature: ________________________________
-Date: ___________________
-Supervisor Signature: _______________________`,
+NO SMOKING OR VAPING
+• No smoking or vaping in company vehicles.
+• Applies at all times.
+• Violations result in loss of privileges and discipline.`,
   },
 ];
 
