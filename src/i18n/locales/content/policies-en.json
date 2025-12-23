@@ -1,0 +1,42 @@
+{
+  "policy1": {
+    "title": "1. Attendance & Punctuality",
+    "content": "Reliable attendance is essential:\n• Report to designated meeting location or job site at scheduled time\n• Notify supervisor at least 2 hours before shift if you will be late or absent\n• Excessive tardiness (3+ incidents per month) will result in disciplinary action\n• No-call/no-show will result in immediate disciplinary action\n• Scheduled time off requests must be submitted at least 2 weeks in advance\n• Unexcused absences may result in loss of hours or termination"
+  },
+  "policy2": {
+    "title": "2. Dress Code & Appearance",
+    "content": "Present a professional image:\n• Wear company-provided uniform shirt or approved work clothing\n• Pants must be work-appropriate (no shorts shorter than knee-length)\n• Closed-toe, non-slip work boots required at all times\n• No offensive graphics, logos, or language on clothing\n• Long hair must be tied back for safety\n• Remove or cover jewelry that could catch on equipment\n• Maintain good personal hygiene\n• Uniforms must be clean and in good condition"
+  },
+  "policy3": {
+    "title": "3. Vehicle & Driving Policy",
+    "content": "When driving company vehicles or on company business:\n• Valid driver's license required; must remain on file\n• Report any changes to license status immediately\n• Follow all traffic laws - tickets are employee's responsibility\n• No cell phone use while driving (including hands-free)\n• No passengers other than employees without supervisor approval\n• Report any accidents or damage immediately\n• Keep vehicles clean and fueled\n• Complete daily vehicle inspection checklist"
+  },
+  "policy4": {
+    "title": "4. Drug & Alcohol Policy",
+    "content": "Zero tolerance policy:\n• Employees must be free from impairment during work hours\n• No alcohol or illegal drugs on job sites or in company vehicles\n• Prescription medications that cause impairment must be reported to supervisor\n• Random drug testing may be conducted\n• Post-accident drug testing is mandatory\n• Positive test result will result in immediate termination\n• Employees must report any drug-related arrests or convictions"
+  },
+  "policy5": {
+    "title": "5. Cell Phone & Personal Device Use",
+    "content": "Minimize distractions:\n• Personal calls and texts should be limited to break times only\n• Phones must be on silent/vibrate during work hours\n• Taking photos or videos on job sites requires customer permission\n• Company-related communication (scheduling, updates) is permitted\n• Never use phone while on ladder or operating equipment\n• Earbuds/headphones not permitted during work activities\n• Use of phones during work may result in disciplinary action"
+  },
+  "policy6": {
+    "title": "6. Customer Relations",
+    "content": "Maintain professional relationships:\n• Greet customers politely and introduce yourself\n• Address customer concerns promptly and professionally\n• Never argue with customers - escalate issues to supervisor\n• Respect customer property and privacy\n• Do not discuss company business or other customers\n• Accept tips graciously if offered, but never solicit\n• Report any customer complaints to supervisor immediately\n• Leave every job site cleaner than you found it"
+  },
+  "policy7": {
+    "title": "7. Confidentiality",
+    "content": "Protect sensitive information:\n• Customer information is confidential - do not share externally\n• Do not discuss pricing, estimates, or job details with competitors\n• Company financial information is strictly confidential\n• Social media posts about work require management approval\n• Do not photograph customer property without permission\n• Proprietary techniques and formulas are trade secrets\n• Confidentiality obligations continue after employment ends"
+  },
+  "policy8": {
+    "title": "8. Anti-Harassment & Discrimination",
+    "content": "We maintain a respectful workplace:\n• Harassment of any kind will not be tolerated\n• Discrimination based on protected characteristics is prohibited\n• Report any concerns to supervisor or HR immediately\n• Retaliation against those who report concerns is prohibited\n• All complaints will be investigated promptly\n• Substantiated harassment will result in termination\n• We are committed to equal opportunity employment"
+  },
+  "policy9": {
+    "title": "9. Tool & Equipment Policy",
+    "content": "Care for company equipment:\n• Employees are responsible for tools assigned to them\n• Report lost, stolen, or damaged tools immediately\n• Personal tools may be used with supervisor approval\n• Do not loan company tools to non-employees\n• Return all company property upon separation\n• Cost of negligently damaged/lost tools may be deducted from pay\n• Use tools only for their intended purpose"
+  },
+  "policy10": {
+    "title": "10. Break & Meal Periods",
+    "content": "Breaks are provided as follows:\n• 15-minute paid break for shifts of 4+ hours\n• 30-minute unpaid meal break for shifts of 6+ hours\n• Second 15-minute paid break for shifts of 8+ hours\n• Breaks must be taken at appropriate times (not during critical tasks)\n• Do not leave job site during breaks without supervisor approval\n• Clean up eating areas after meals\n• Smoking only in designated areas, away from work zones"
+  }
+}

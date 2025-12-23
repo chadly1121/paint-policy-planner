@@ -1,0 +1,26 @@
+{
+  "safety1": {
+    "title": "1. Personal Protective Equipment (PPE)",
+    "content": "Lahat ng empleyado ay dapat magsuot ng angkop na PPE:\n• Safety glasses kapag nag-sasand, nagscrape, o nag-ispray\n• Dust masks (N95 minimum) kapag nag-sasand o nagtatrabaho sa mga alikabukin na materyales\n• Respirators kapag nag-ispray o nagtatrabaho sa mga produktong may solvents\n• Work gloves kapag humahawak ng magaspang na materyales o kemikal\n• Non-slip footwear sa lahat ng oras sa mga job site\n• Hard hats kapag kinakailangan ng mga kondisyon ng job site\n• Hearing protection kapag gumagamit ng power equipment\nAng hindi pagsusuot ng kinakailangang PPE ay magreresulta sa agarang pag-alis sa job site."
+  },
+  "safety2": {
+    "title": "2. Kaligtasan sa Hagdan",
+    "content": "Sundin ang mga patakarang ito sa kaligtasan ng hagdan nang walang eksepsyon:\n• Suriin ang hagdan bago ang bawat paggamit - tingnan ang pinsala, maluwag na bahagi\n• Ilagay ang hagdan sa matigas, patag na lupa lamang\n• Panatilihin ang tatlong punto ng kontak sa lahat ng oras\n• Huwag kailanman tumayo sa dalawang pinakataas na baitang ng stepladder\n• Ang mga extension ladder ay dapat lumampas ng 3 piye sa landing point\n• Huwag kailanman isandal ang hagdan sa bintana o hindi siguradong ibabaw\n• Huwag lumampas sa weight capacity (pintor + materyales)\n• Huwag kailanman ilipat ang hagdan habang may tao sa ibabaw nito\n• Gumamit ng ladder stabilizers para sa mga extension ladder kapag available"
+  },
+  "safety3": {
+    "title": "3. Kaligtasan sa Kemikal at HAZCOM",
+    "content": "Hawakan ang lahat ng kemikal nang may pag-iingat:\n• Basahin ang lahat ng label at Safety Data Sheets bago gamitin\n• Huwag kailanman paghaluin ang mga kemikal maliban kung partikular na inutusan\n• Gamitin ang mga produkto sa mga lugar na may maayos na bentilasyon lamang\n• Panatilihing nakasara ang mga lalagyan kapag hindi aktibong nagbubuhos\n• Itabi ang mga kemikal malayo sa mga pinagmumulan ng init at apoy\n• Itapon nang maayos ang mga basahan at basura - panganib ng kusang pagsunog\n• Alamin ang lokasyon ng mga eyewash station at first aid kit\n• Iulat kaagad sa superbisor ang anumang pagtagas ng kemikal\n• Huwag kailanman kumain, uminom, o manigarilyo habang humahawak ng mga kemikal"
+  },
+  "safety4": {
+    "title": "4. Kaligtasan sa Lead Paint (Mga Gusaling Bago ang 1978)",
+    "content": "Kapag nagtatrabaho sa mga gusaling itinayo bago ang 1978:\n• Ipagpalagay na ang lahat ng pintura ay naglalaman ng lead hanggang ma-test\n• Tanging mga manggagawang sertipikado sa RRP lamang ang maaaring mag-disturb ng lead paint\n• Takpan ang work area gamit ang plastic sheeting\n• Gumamit ng HEPA vacuum at mga wet method para mabawasan ang alikabok\n• Magsuot ng angkop na respirator (P100 minimum)\n• Huwag kumain, uminom, o manigarilyo sa mga work area\n• Maghugas ng mga kamay at mukha bago ang mga pahinga at pagkain\n• Magpalit ng damit bago umuwi\n• Itapon ang basura ayon sa mga regulasyon ng EPA"
+  },
+  "safety5": {
+    "title": "5. Kaligtasan sa Scaffolding",
+    "content": "Kapag gumagamit ng scaffolding:\n• Tanging mga may kakayahang tao lamang ang maaaring magtayo, magbago, o magtanggal ng scaffolding\n• Suriin ang scaffolding bago ang bawat shift\n• Siguraduhin na ang lahat ng mga lock at brace ay ligtas\n• Ang mga tabla ay dapat lumampas ng hindi bababa sa 6 pulgada sa mga support\n• Kinakailangan ang mga guardrail kapag nagtatrabaho sa 10 piye o mas mataas\n• Huwag kailanman umakyat sa mga cross brace\n• Panatilihing malinis ang mga platform mula sa basura at pagtagas\n• I-lock ang mga caster bago umakyat sa mga mobile scaffold\n• Huwag lumampas sa load capacity"
+  },
+  "safety6": {
+    "title": "6. Mga Pamamaraan sa Emergency",
+    "content": "Sa kaso ng emergency:\n• Alamin ang lokasyon ng lahat ng exit, fire extinguisher, at first aid kit\n• Tumawag sa 911 para sa mga emergency na nakamamatay\n• Iulat kaagad sa superbisor ang lahat ng pinsala, gaano man kaliit\n• Para sa chemical exposure: banlawan ng tubig sa loob ng 15+ minuto, humingi ng medikal na atensyon\n• Para sa mga pagkahulog: huwag ilipat ang nasaktan na tao maliban kung nasa agarang panganib\n• Para sa sunog: alertuhan ang iba, lumikas, tumawag sa 911, gamitin ang extinguisher lamang kung ligtas\n• Idokumento ang lahat ng insidente sa incident report form ng kumpanya\n• Ang mga first aid kit ay dapat i-restock pagkatapos ng anumang paggamit"
+  }
+}
