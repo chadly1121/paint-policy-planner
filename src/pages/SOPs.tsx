@@ -182,6 +182,83 @@ NO SMOKING OR VAPING
 • Applies at all times.
 • Violations result in loss of privileges and discipline.`,
   },
+  {
+    id: "sop-009",
+    title: "SOP-009 – Vacuum Use, Dust Control & Safety",
+    content: `PURPOSE
+To establish safe, effective, and professional procedures for the use, maintenance, cleaning, storage, and selection of vacuum systems on job sites and in the shop. This SOP ensures dust is captured at the source, health risks are minimized, and equipment is preserved.
+
+GENERAL POLICY
+• Always use a vacuum with an appropriate filter and a filter bag when vacuuming dry debris, dust, or fine particles.
+• Vacuuming without a filter or bag is prohibited except for specific wet applications.
+
+EQUIPMENT SELECTION
+• Use the correct vacuum for the task:
+  – Large construction vacuums (e.g., Festool or HEPA-equipped units) are for sanding drywall and other heavy dust-generating tasks.
+  – Smaller shop vacs may be used for light cleanup and non-hazardous debris.
+• Do not use a standard shop vacuum for fine drywall dust or hazardous dust without a proper HEPA-rated filter.
+
+FILTERS & BAGS
+• A vacuum must always have:
+  – An intact filter (correct type for the material)
+  – A filter bag installed
+• Never operate dry vacuum equipment without both a filter and a bag installed.
+• Exception: When vacuuming water or liquids, remove the dry-use bag and filter. After wet use, clean, dry, and reinstall the appropriate dry dust filter and bag for normal vacuuming.
+
+REUSABLE COMPONENTS
+• If the vacuum has reusable bags or reusable filters:
+  – Do not throw them out after one use.
+  – Properly clean or replace them per manufacturer instructions.
+• Reusable filters should last for years if cleaned and maintained after each use.
+
+SAFETY & DUST CONTROL
+• Dust generated from sanding, grinding, or cutting can contain respirable particles (silica, wood dust, gypsum, etc.) that are harmful when inhaled.
+• For tasks generating fine dust, use HEPA-rated vacuums that capture particles as small as 0.3 microns.
+• Whenever possible, attach the vacuum directly to the tool generating dust (e.g., sander or grinder) to capture dust at the source.
+• Never use compressed air to blow dust off surfaces — always vacuum with the appropriate filter or use wet methods.
+
+FILTER EFFICIENCY & HEALTH
+• For jobs with heavy dust or silica exposure, HEPA-rated filters (99.97% efficiency or better) are recommended for maximum capture of fine particulates.
+• Use appropriate PPE — respirators, eye protection — when vacuuming fine dust even with a proper filter.
+
+CLEANING & MAINTENANCE
+• After each use:
+  – Empty or replace the bag if full.
+  – Inspect the filter for damage or clogging.
+  – Clean reusable filters per manufacturer instructions.
+• Dispose of collected fine dust in sealed bags and in accordance with local waste regulations.
+
+HOSE & ACCESSORY CARE
+• Always store hoses and attachments with the vacuum or in a designated clean storage area.
+• Do not leave hoses, nozzles, or accessories scattered where they can be damaged.
+• Keep hoses free of kinks and inspect them regularly for holes or wear.
+
+STORAGE
+• Store vacuums in a clean, dry area — inside a job trailer or shop cabinet.
+• Protect vacuums from moisture, rain, and direct sunlight when stored on site.
+• Label vacuum systems with identification and filter type.
+
+JOBSITE HOUSEKEEPING
+• Use the vacuum to remove dust and debris regularly during work, not only at the end of the day.
+• For fine dust work (drywall sanding, joint compound dust), vacuum often to reduce airborne particles and cleanup time.
+• When working in customer homes, ensure thorough vacuum cleaning before removal of protective coverings to avoid spreading dust.
+
+SAFETY CONSIDERATIONS
+• Do not operate vacuum equipment if electrical cords or plugs are damaged.
+• If vacuuming combustible dust (e.g., fine wood dust in large quantities), ensure the unit is rated safe for the application and static discharge is controlled.
+• Never vacuum hazardous materials (e.g., asbestos, lead paint dust) unless using a certified vacuum with HEPA filtration appropriate for that hazard and in accordance with specialized regulations.
+
+TRAINING
+• Employees must be trained on:
+  – Correct vacuum selection
+  – Filter and bag installation
+  – Cleaning and maintenance
+  – Health risks associated with airborne dust
+
+ENFORCEMENT
+• Operating vacuums without the proper bag and filter is prohibited.
+• Misuse, damage, or neglect will result in discipline and may require the employee to replace or repair equipment.`,
+  },
 ];
 
 const SOPs = () => {
