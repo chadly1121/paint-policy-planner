@@ -86,5 +86,153 @@
   "sop022": {
     "title": "POE-022 – Matriz disciplinaria y aplicación",
     "content": "PROPÓSITO\nAsegurar una aplicación consistente y justa de todos los POE.\n\nNIVELES DE DISCIPLINA\n\nNivel 1 – Advertencia verbal\n• Violaciones menores de POE\n• Primeras ofensas\n\nNivel 2 – Advertencia escrita\n• Violaciones repetidas\n• Problemas de seguridad\n• Negligencia de herramientas\n\nNivel 3 – Suspensión\n• Violaciones graves\n• Ocultamiento de daños\n• Robo de tiempo\n\nNivel 4 – Terminación\n• Violaciones de seguridad intencionales\n• Deshonestidad\n• Insubordinación repetida\n\nNOTAS\n• La disciplina puede saltar niveles dependiendo de la gravedad.\n• Todos los incidentes se documentan.\n• La ignorancia de los POE no es excusa."
+  },
+  "sop023": {
+    "title": "POE-023 – Etiqueta y conducta en sitios de construcción nueva",
+    "content": "PROPÓSITO\nAsegurar un comportamiento profesional, eficiencia y respeto en todos los sitios de construcción nueva donde múltiples oficios están presentes.\n\nREGLAS\n• Somos invitados en el sitio del constructor.\n• Seguir las reglas del sitio, señalización y requisitos de seguridad en todo momento.\n• No interferir con otros oficios.\n• No tocar, mover o usar herramientas o materiales de otros oficios.\n\nCONDUCTA\n• Sin música fuerte.\n• Sin groserías, gritos o lenguaje inapropiado.\n• Sin deambular en áreas fuera de nuestro alcance.\n• No sentarse en superficies terminadas.\n\nLIMPIEZA\n• Mantener el área de trabajo limpia en todo momento.\n• No dejar escombros para otros oficios.\n• Limpiar diariamente según el POE de fin de día.\n\nLas violaciones serán reportadas a la gerencia y pueden resultar en remoción del sitio."
+  },
+  "sop024": {
+    "title": "POE-024 – Estándares de preparación por tipo de superficie",
+    "content": "PROPÓSITO\nEstandarizar la preparación de superficies para asegurar adhesión, durabilidad y calidad de acabado.\n\nPANELES DE YESO\n• Lijar todas las juntas y reparaciones.\n• Remover polvo antes de imprimar.\n• Imprimar localmente todos los parches.\n\nMADERA (MOLDURAS, PUERTAS, MARCOS)\n• Lijar suavemente.\n• Rellenar agujeros de clavos.\n• Sellar espacios.\n• Imprimar madera desnuda.\n\nSUPERFICIES PREVIAMENTE PINTADAS\n• Limpiar para remover polvo, grasa o residuos.\n• Lijar para opacar el brillo.\n• Reparar defectos antes de pintar.\n\nMETAL\n• Remover óxido.\n• Desengrasar superficie.\n• Imprimar con imprimador apropiado para metal.\n\nNo se aplica pintura sin preparación adecuada."
+  },
+  "sop025": {
+    "title": "POE-025 – Manejo, mezcla y almacenamiento de pintura",
+    "content": "PROPÓSITO\nAsegurar la calidad, consistencia y seguridad de la pintura.\n\nMANEJO\n• Almacenar pintura en posición vertical con tapas selladas.\n• Etiquetar toda la pintura con habitación, color, brillo y fecha.\n• No dejar pintura expuesta o abierta.\n\nMEZCLA\n• Revolver a fondo antes de usar.\n• Mezclar pinturas cuando sea necesario para asegurar consistencia.\n• No diluir a menos que esté aprobado.\n\nALMACENAMIENTO\n• Almacenar pintura en áreas con temperatura controlada.\n• Proteger de congelamiento o sobrecalentamiento.\n• Desechar pintura inutilizable correctamente.\n\nDERRAMES\n• Limpiar inmediatamente.\n• Reportar derrames grandes."
+  },
+  "sop026": {
+    "title": "POE-026 – Investigación y reporte de incidentes",
+    "content": "PROPÓSITO\nAsegurar que los incidentes sean reportados, documentados y corregidos.\n\nLOS INCIDENTES INCLUYEN\n• Lesiones\n• Daño a la propiedad\n• Casi accidentes\n• Falla de equipos\n• Violaciones de seguridad\n\nPROCESO\n1. Detener el trabajo si no es seguro.\n2. Asegurar el área.\n3. Notificar al capataz inmediatamente.\n4. Completar reporte de incidente el mismo día.\n5. Tomar fotos si aplica.\n\nSin represalias por reportar incidentes.\nNo reportar es una violación grave."
+  },
+  "sop027": {
+    "title": "POE-027 – Orientación de seguridad y seguridad en el sitio de trabajo",
+    "content": "PROPÓSITO\nAsegurar que todos los empleados entiendan las expectativas básicas de seguridad.\n\nREQUISITOS\n• Asistir a la orientación de seguridad.\n• Entender los peligros específicos del sitio.\n• Usar EPP requerido.\n• Seguir todos los POE de seguridad.\n\nSEGURIDAD GENERAL\n• Mantener los pasillos despejados.\n• Reportar peligros inmediatamente.\n• Usar herramientas solo como se ha entrenado.\n\nDERECHO A RECHAZAR\n• Los empleados pueden rechazar trabajo inseguro.\n• Reportar preocupaciones al capataz o gerencia.\n\nLas violaciones de seguridad pueden resultar en remoción inmediata del sitio."
+  },
+  "sop028": {
+    "title": "POE-028 – Incorporación de empleados y período de prueba",
+    "content": "PROPÓSITO\nAsegurar que los nuevos contratados estén capacitados, cumplan con las normas y sean evaluados antes de la integración completa.\n\nREQUISITOS DE INCORPORACIÓN\n• Revisar todos los POE\n• Firmar reconocimientos\n• Orientación de seguridad completada\n• Expectativas de herramientas, vehículos y conducta revisadas\n\nPERÍODO DE PRUEBA\n• Los primeros 30–90 días son de prueba\n• Se evalúa desempeño, actitud, puntualidad y cumplimiento de POE\n• El período de prueba puede extenderse o el empleo terminarse a discreción de la gerencia\n\nNo seguir los POE durante el período de prueba puede resultar en terminación inmediata."
+  },
+  "sop029": {
+    "title": "POE-029 – Reporte diario del capataz y estándares de fotos",
+    "content": "PROPÓSITO\nDocumentar el progreso, problemas y calidad diariamente.\n\nEL REPORTE DIARIO DEBE INCLUIR\n• Nombre del trabajo y fecha\n• Equipo en el sitio\n• Trabajo completado\n• Problemas o retrasos\n• Materiales usados\n• Incidentes de seguridad o daños\n\nESTÁNDARES DE FOTOS\n• Fotos de inicio del día\n• Fotos de progreso a mitad del día\n• Fotos de fin del día\n• Las fotos deben ser claras y etiquetadas\n\nLos reportes deben completarse diariamente antes de marcar salida."
+  },
+  "sop030": {
+    "title": "POE-030 – Trabajo de garantía y retoques",
+    "content": "PROPÓSITO\nManejar reclamos de garantía y trabajos de retoque de manera profesional y eficiente.\n\nREGLAS\n• El trabajo de garantía debe ser aprobado por la gerencia.\n• Sin retoques no autorizados.\n• Documentar el problema con fotos y notas.\n\nPROCESO\n1. Recibir solicitud de garantía.\n2. Inspeccionar y documentar.\n3. Aprobación de la gerencia.\n4. Programar reparación.\n5. Completar y documentar la reparación.\n\nEl trabajo de garantía no es gratis a menos que esté aprobado."
+  },
+  "sop031": {
+    "title": "POE-031 – Clima y condiciones ambientales",
+    "content": "PROPÓSITO\nAsegurar que los recubrimientos funcionen correctamente bajo las condiciones apropiadas.\n\nREGLAS\n• Seguir los límites de temperatura y humedad del fabricante.\n• Sin pintura exterior en lluvia, nieve o condiciones de congelamiento.\n• Monitorear el clima diariamente.\n\nCONDICIONES INTERIORES\n• Asegurar ventilación adecuada.\n• Controlar polvo y flujo de aire.\n\nLos capataces pueden detener el trabajo si las condiciones son inadecuadas."
+  },
+  "sop032": {
+    "title": "POE-032 – Tasas de producción y eficiencia",
+    "content": "PROPÓSITO\nMantener la productividad y rentabilidad.\n\nEXPECTATIVAS\n• Se espera que los empleados cumplan tasas de producción razonables.\n• Trabajar de manera constante y eficiente.\n• El tiempo de inactividad excesivo no es aceptable.\n\nMONITOREO\n• Los capataces rastrean el progreso diariamente.\n• La ineficiencia repetida será abordada.\n\nLa calidad nunca se sacrifica por la velocidad."
+  },
+  "sop033": {
+    "title": "POE-033 – Pedido de materiales y control de inventario",
+    "content": "PROPÓSITO\nAsegurar que los materiales se ordenen con precisión, el inventario se rastree, se eviten las escaseces y se minimice el desperdicio.\n\nPEDIDOS\n• Los materiales solo los ordenan los capataces o la gerencia.\n• Los pedidos deben coincidir con las especificaciones aprobadas (marca, color, brillo, cantidad).\n• Sin sustituciones de último minuto o no autorizadas.\n\nINVENTARIO\n• Registrar todos los materiales tomados del taller.\n• Actualizar inventario al devolver materiales no usados.\n• Etiquetar claramente contenedores parciales con nombre del trabajo y fecha.\n\nDESPERDICIO\n• No sobre-ordenar.\n• Devolver materiales usables al inventario.\n• Desechar materiales inutilizables correctamente."
+  },
+  "sop034": {
+    "title": "POE-034 – Operaciones del taller y apertura/cierre",
+    "content": "PROPÓSITO\nMantener el taller limpio, seguro, organizado y listo para las operaciones diarias.\n\nAPERTURA\n• Abrir puertas y desactivar alarma.\n• Encender luces según sea necesario.\n• Verificar limpieza y seguridad del taller.\n• Confirmar preparación del equipo.\n\nCIERRE\n• Limpiar áreas de trabajo.\n• Guardar herramientas, suministros y pintura.\n• Vaciar basura y reciclaje.\n• Limpiar baño.\n• Apagar luces y equipos.\n• Ajustar termostato según política.\n• Cerrar puertas con llave y activar alarma.\n\nEl taller debe dejarse limpio todos los días."
+  },
+  "sop035": {
+    "title": "POE-035 – Recorrido con el cliente y entrega del proyecto",
+    "content": "PROPÓSITO\nAsegurar una entrega profesional y reducir las llamadas de servicio.\n\nPROCESO\n• El capataz programa el recorrido.\n• Inspeccionar todo el trabajo antes de la revisión del cliente.\n• Abordar preocupaciones con calma y profesionalmente.\n• Documentar cualquier elemento de la lista de correcciones.\n\nENTREGA\n• Completar lista de correcciones.\n• Limpiar el área a fondo.\n• Obtener aprobación cuando sea posible.\n\nNingún proyecto está completo sin una entrega adecuada."
+  },
+  "sop036": {
+    "title": "POE-036 – Respuesta de emergencia",
+    "content": "PROPÓSITO\nResponder rápida y seguramente a emergencias.\n\nLAS EMERGENCIAS INCLUYEN\n• Lesión\n• Incendio\n• Inundación\n• Derrame químico\n• Peligro estructural\n\nPROCEDIMIENTO\n1. Detener el trabajo.\n2. Asegurar la seguridad personal.\n3. Llamar a servicios de emergencia si es necesario.\n4. Notificar al capataz inmediatamente.\n5. Asegurar el área.\n6. Completar reporte de incidente.\n\nNo reanudar el trabajo hasta que esté autorizado."
+  },
+  "sop037": {
+    "title": "POE-037 – Documentación, nombres de archivos y almacenamiento de datos",
+    "content": "PROPÓSITO\nAsegurar documentación consistente y rastreable.\n\nNOMBRES DE ARCHIVOS\n• NombreTrabajo_Fecha_Descripción\n• Ejemplo: Calle_Smith_2025-03-12_ReporteDiario\n\nALMACENAMIENTO\n• Subir archivos solo a carpetas designadas.\n• Sin dispositivos personales para registros de la empresa.\n• Las fotos deben ser claras y fechadas.\n\nRETENCIÓN\n• No eliminar registros de la empresa.\n• Seguir políticas de retención."
+  },
+  "sop038": {
+    "title": "POE-038 – Conciencia de espacios confinados (Operaciones de pintura)",
+    "content": "PROPÓSITO\nAsegurar que los empleados reconozcan los espacios confinados y eviten la entrada insegura sin la autorización y controles apropiados.\n\nDEFINICIÓN\nUn espacio confinado es un área que:\n• No está diseñada para ocupación continua\n• Tiene entrada/salida limitada\n• Puede contener peligros (mal aire, humos, polvo)\n\nEJEMPLOS\n• Espacios de arrastre\n• Áticos con acceso limitado\n• Cuartos mecánicos\n• Tanques o pozos\n\nREGLAS\n• Los empleados NO entran a espacios confinados a menos que estén específicamente capacitados y autorizados.\n• Sin lijar, pulverizar o recubrir en espacios confinados sin aprobación.\n• Si no está seguro, DETÉNGASE y contacte al capataz."
+  },
+  "sop039": {
+    "title": "POE-039 – Materiales peligrosos y HDS (Hojas de Datos de Seguridad)",
+    "content": "PROPÓSITO\nAsegurar el manejo seguro de materiales peligrosos.\n\nREGLAS\n• Todos los productos peligrosos deben tener una HDS disponible.\n• Los empleados deben revisar la HDS antes de usar.\n• Seguir los requisitos de EPP y ventilación.\n\nMANEJO\n• Almacenar químicos correctamente.\n• No mezclar productos a menos que esté aprobado.\n• Etiquetar todos los contenedores claramente.\n\nDERRAMES\n• Detener el trabajo.\n• Contener el derrame.\n• Notificar al capataz inmediatamente."
+  },
+  "sop040": {
+    "title": "POE-040 – Ruido y protección auditiva",
+    "content": "PROPÓSITO\nProteger la audición de la exposición excesiva al ruido.\n\nREGLAS\n• Protección auditiva requerida al usar equipos ruidosos:\n  – Lijadoras\n  – Pulverizadores\n  – Compresores\n  – Herramientas eléctricas\n• Usar tapones para los oídos u orejeras según se requiera.\n• Reemplazar protección auditiva dañada.\n\nPROHIBIDO\n• Ignorar los requisitos de protección auditiva.\n• Modificar equipos para aumentar el ruido."
+  },
+  "sop041": {
+    "title": "POE-041 – Seguridad eléctrica (Herramientas y energía)",
+    "content": "PROPÓSITO\nPrevenir lesiones eléctricas y daños a equipos.\n\nREGLAS\n• Inspeccionar cables diariamente.\n• No usar cables o herramientas dañadas.\n• Mantener cables alejados del agua y áreas de tráfico.\n• Usar protección GFCI donde se requiera.\n\nPROHIBIDO\n• Sobrecargar tomacorrientes.\n• Usar reparaciones improvisadas.\n• Pasar cables a través del agua."
+  },
+  "sop042": {
+    "title": "POE-042 – Capacitación anual, revisión y certificación",
+    "content": "PROPÓSITO\nAsegurar el cumplimiento continuo y el desarrollo de habilidades.\n\nREQUISITOS\n• Revisión anual de POE.\n• Capacitación anual de seguridad.\n• Capacitación de repaso en herramientas y equipos.\n• Documentación de capacitación completada.\n\nINCUMPLIMIENTO\n• No completar la capacitación puede resultar en remoción del sitio o disciplina."
+  },
+  "sop043": {
+    "title": "POE-043 – Conciencia sobre pintura con plomo y renovación",
+    "content": "PROPÓSITO\nProteger a los trabajadores y ocupantes de la exposición a materiales que contienen plomo durante la renovación y repintado.\n\nREGLAS\n• Asumir que los edificios anteriores a 1990 pueden contener pintura con plomo.\n• No perturbar pintura sospechosa de plomo sin aprobación.\n• Sin lijar en seco, esmerilar o raspar materiales sospechosos.\n• Usar contención y control de polvo en todo momento.\n\nSI SE SOSPECHA PLOMO\n• Detener el trabajo inmediatamente.\n• Notificar al capataz y a la gerencia.\n• No reanudar hasta que esté autorizado.\n\nSolo personal capacitado puede realizar trabajos relacionados con plomo."
+  },
+  "sop044": {
+    "title": "POE-044 – Uso, ajuste y cuidado del respirador",
+    "content": "PROPÓSITO\nAsegurar que los respiradores se usen correctamente para proteger la salud del empleado.\n\nREGLAS\n• Usar respiradores cuando lo requiera la tarea o la HDS.\n• Los empleados deben tener prueba de ajuste.\n• El vello facial que interfiere con el sello está prohibido.\n\nCUIDADO\n• Limpiar respiradores después de cada uso.\n• Almacenar en contenedores sellados y limpios.\n• Inspeccionar antes de cada uso.\n\nNo deben usarse respiradores dañados o mal ajustados."
+  },
+  "sop045": {
+    "title": "POE-045 – Equipo de Protección Personal (EPP)",
+    "content": "PROPÓSITO\nEstablecer estándares mínimos de EPP.\n\nEPP REQUERIDO (SEGÚN APLIQUE)\n• Gafas de seguridad\n• Guantes\n• Respiradores\n• Protección auditiva\n• Ropa protectora\n\nREGLAS\n• El EPP debe usarse cuando se requiera.\n• El EPP debe estar limpio y en buenas condiciones.\n• No modificar el EPP.\n\nNo usar EPP es una violación de seguridad."
+  },
+  "sop046": {
+    "title": "POE-046 – Señalización y barreras en el sitio de trabajo",
+    "content": "PROPÓSITO\nProteger a trabajadores, clientes y al público.\n\nREGLAS\n• Usar señalización para identificar peligros.\n• Poner barreras en áreas de lijado o pulverización.\n• Restringir acceso a zonas de trabajo.\n• Remover señalización solo cuando los peligros estén despejados.\n\nNo depender solo de advertencias verbales."
+  },
+  "sop047": {
+    "title": "POE-047 – Gestión de subcontratistas",
+    "content": "PROPÓSITO\nAsegurar que los subcontratistas cumplan con los estándares de la empresa.\n\nREQUISITOS\n• Los subcontratistas deben seguir todos los POE.\n• Proporcionar prueba de seguro y cumplimiento de seguridad.\n• El trabajo debe ser inspeccionado por el capataz.\n\nVIOLACIONES\n• La conducta insegura o no profesional puede resultar en remoción del sitio.\n• Los subcontratistas no anulan los POE de la empresa."
+  },
+  "sop048": {
+    "title": "POE-048 – Protección ambiental y eliminación de residuos",
+    "content": "PROPÓSITO\nAsegurar que todos los residuos se manejen de manera responsable, legal y profesional mientras se protege el medio ambiente y la propiedad del cliente.\n\nREGLAS\n• Desechar todos los residuos solo en contenedores aprobados.\n• Separar basura, reciclables y residuos peligrosos.\n• Nunca verter líquidos, pintura o solventes en desagües, inodoros o al exterior.\n\nPINTURA Y RECUBRIMIENTOS\n• No verter pintura en lavabos, inodoros o en el suelo.\n• Permitir que pequeñas cantidades de pintura a base de agua se sequen antes de desechar si está permitido.\n• Los materiales a base de solventes deben desecharse según las regulaciones locales.\n\nPOLVO Y ESCOMBROS\n• Aspirar el polvo; no barrer al aire.\n• Embolsar escombros antes de desechar.\n\nLas violaciones pueden resultar en disciplina y multas."
+  },
+  "sop049": {
+    "title": "POE-049 – Seguridad y prevención de robos",
+    "content": "PROPÓSITO\nProteger las herramientas, materiales, vehículos de la empresa y la propiedad del cliente.\n\nREGLAS\n• Cerrar vehículos con llave en todo momento cuando estén desatendidos.\n• No dejar herramientas o materiales sin asegurar.\n• No permitir que personas no autorizadas accedan a herramientas o vehículos.\n\nSITIOS DE TRABAJO\n• Asegurar herramientas al final del día.\n• No dejar objetos de valor visibles.\n\nREPORTE\n• Reportar artículos perdidos, faltantes o robados inmediatamente.\n• No reportar puede resultar en acción disciplinaria."
+  },
+  "sop050": {
+    "title": "POE-050 – Acceso fuera de horario y al sitio",
+    "content": "PROPÓSITO\nControlar el acceso a los sitios de trabajo fuera del horario laboral normal.\n\nREGLAS\n• Sin acceso fuera de horario sin aprobación.\n• No traer familiares, amigos o personas no autorizadas a los sitios de trabajo.\n• Las llaves, códigos y credenciales de acceso son confidenciales.\n\nFIN DEL DÍA\n• Cerrar puertas y ventanas con llave según se indique.\n• Activar alarmas si aplica.\n\nEl acceso no autorizado es motivo de disciplina."
+  },
+  "sop051": {
+    "title": "POE-051 – Tecnología, teléfonos y uso de dispositivos",
+    "content": "PROPÓSITO\nMinimizar distracciones y proteger datos de la empresa.\n\nREGLAS\n• El uso personal del teléfono está limitado a los descansos.\n• Sin uso de redes sociales durante horas de trabajo.\n• Sin fotos o videos no autorizados.\n\nDISPOSITIVOS DE LA EMPRESA\n• Usar dispositivos de la empresa solo para trabajo.\n• Proteger contraseñas y credenciales de inicio de sesión.\n• Reportar dispositivos perdidos o dañados inmediatamente.\n\nLas violaciones pueden resultar en pérdida de privilegios de dispositivos."
+  },
+  "sop052": {
+    "title": "POE-052 – Imagen de la empresa, uniforme y apariencia",
+    "content": "PROPÓSITO\nPresentar una imagen profesional a clientes, constructores y al público.\n\nESTÁNDARES\n• Usar ropa limpia de la empresa o ropa de trabajo aprobada.\n• La ropa debe estar libre de pintura excesiva, rasgaduras o contenido ofensivo.\n• Mantener higiene personal básica.\n\nEN EL SITIO\n• Sin lenguaje inapropiado.\n• Sin fumar o vapear en el sitio o en vehículos.\n• Comportarse profesionalmente en todo momento.\n\nLos empleados representan a la empresa en todo momento mientras están en el trabajo."
+  },
+  "sop053": {
+    "title": "POE-053 – Alcohol, drogas y deterioro",
+    "content": "PROPÓSITO\nAsegurar un lugar de trabajo seguro, profesional y productivo libre de deterioro.\n\nPOLÍTICA\n• Ningún empleado puede trabajar mientras esté deteriorado.\n• El alcohol, drogas ilegales o mal uso de medicamentos recetados están prohibidos durante las horas de trabajo.\n• Esto incluye sitios de trabajo, taller, vehículos y eventos de la empresa.\n\nEL DETERIORO INCLUYE\n• Habla arrastrada\n• Mala coordinación\n• Comportamiento inseguro\n• Olor a alcohol o drogas\n\nREGLAS\n• Tolerancia cero para el deterioro en el trabajo.\n• El uso de cannabis está prohibido durante las horas de trabajo, independientemente de la legalización.\n• Los medicamentos recetados no deben afectar el desempeño laboral.\n\nACCIÓN\n• El capataz puede remover a un empleado del sitio inmediatamente.\n• El empleado no podrá conducir.\n• Puede aplicarse disciplina hasta la terminación."
+  },
+  "sop054": {
+    "title": "POE-054 – Acoso, respeto y conducta en el lugar de trabajo",
+    "content": "PROPÓSITO\nMantener un ambiente de trabajo respetuoso, profesional y seguro.\n\nCOMPORTAMIENTO PROHIBIDO\n• Acoso (verbal, físico, sexual)\n• Intimidación o bullying\n• Discriminación\n• Amenazas o comportamiento agresivo\n\nEXPECTATIVAS\n• Tratar a compañeros de trabajo, clientes y otros oficios con respeto.\n• Lenguaje profesional en todo momento.\n• Sin bromas, comentarios o comportamiento que pueda ofender.\n\nREPORTE\n• Reportar preocupaciones al capataz o a la gerencia.\n• Sin represalias por reportar.\n\nLas violaciones pueden resultar en disciplina inmediata o terminación."
+  },
+  "sop055": {
+    "title": "POE-055 – Terminación y proceso de salida",
+    "content": "PROPÓSITO\nAsegurar una separación ordenada y profesional de la empresa.\n\nDESENCADENANTES\n• Renuncia voluntaria\n• Problemas de desempeño\n• Violaciones de POE\n• Violaciones de seguridad\n• Deshonestidad o mala conducta\n\nREQUISITOS DE SALIDA\n• Devolver todas las herramientas, equipos, llaves, uniformes y dispositivos.\n• Retirar pertenencias personales.\n• Recorrido final si aplica.\n\nPAGO FINAL\n• Emitido según los requisitos de la Ley de Normas de Empleo de Ontario.\n\nNo devolver propiedad de la empresa puede resultar en deducciones donde esté legalmente permitido."
+  },
+  "sop056": {
+    "title": "POE-056 – Evaluaciones de desempeño, aumentos y avance",
+    "content": "PROPÓSITO\nRecompensar el desempeño, habilidad y profesionalismo.\n\nCRITERIOS DE EVALUACIÓN\n• Cumplimiento de POE\n• Calidad del trabajo\n• Productividad\n• Asistencia y puntualidad\n• Actitud y trabajo en equipo\n\nEVALUACIONES\n• Realizadas anualmente o según se requiera.\n• Empleados en período de prueba evaluados antes.\n\nAUMENTOS\n• No son automáticos.\n• Basados en desempeño y necesidades del negocio.\n\nAVANCE\n• Roles de capataz y liderazgo se ganan, no se asumen.\n• El liderazgo requiere responsabilidad y cumplimiento de POE."
+  },
+  "sop057": {
+    "title": "POE-057 – Valores, misión y cultura de la empresa",
+    "content": "PROPÓSITO\nDefinir cómo operamos y qué esperamos.\n\nVALORES FUNDAMENTALES\n• Profesionalismo\n• Responsabilidad\n• Calidad\n• Seguridad\n• Respeto\n\nEXPECTATIVAS\n• Seguir los POE.\n• Enorgullecerse del trabajo.\n• Proteger la reputación de la empresa.\n• Tratar cada trabajo como si fuera tu propio hogar.\n\nCULTURA\n• Hacemos las cosas de la manera correcta, no de la manera fácil.\n• No se aceptan excusas.\n• Los problemas se reportan, no se ocultan.\n\nLos empleados representan a la empresa en todo momento."
+  },
+  "sop058": {
+    "title": "POE-058 – Primeros auxilios y respuesta médica",
+    "content": "PROPÓSITO\nAsegurar una respuesta rápida, segura y conforme a lesiones o incidentes médicos en sitios de trabajo, en el taller o mientras se usan vehículos de la empresa.\n\nEste POE aplica a todos los empleados, capataces y supervisores.\n\n1. BASE LEGAL Y DE SEGURIDAD (ONTARIO)\n• Los primeros auxilios son requeridos bajo las regulaciones de salud y seguridad de Ontario.\n• La respuesta de primeros auxilios NO reemplaza los servicios médicos de emergencia.\n• Los primeros auxilios se proporcionan para estabilizar lesiones hasta que haya atención adicional disponible.\n\n2. BOTIQUINES DE PRIMEROS AUXILIOS\n• Los botiquines aprobados deben estar disponibles en cada sitio de trabajo, en el taller y en vehículos de la empresa donde se requiera.\n• Los botiquines deben estar completamente abastecidos, limpios y accesibles.\n• Los artículos faltantes o usados deben reportarse y reabastecerse inmediatamente.\n\n3. ASISTENTES DE PRIMEROS AUXILIOS\n• Al menos un asistente capacitado debe estar presente donde se requiera.\n• Solo empleados capacitados pueden administrar primeros auxilios más allá de la asistencia básica.\n• La capacitación debe estar vigente y documentada.\n\n4. REGLAS GENERALES DE PRIMEROS AUXILIOS\n• Detener el trabajo inmediatamente si ocurre una lesión.\n• No entrar en pánico.\n• No mover a una persona lesionada a menos que haya peligro inmediato.\n• Usar guantes y EPP al proporcionar primeros auxilios.\n• Nunca administrar medicamentos.\n\n5. LESIONES MENORES\nEjemplos: Pequeños cortes, rasguños, quemaduras menores, astillas.\nProcedimiento:\n1. Detener el trabajo.\n2. Limpiar la herida.\n3. Aplicar primeros auxilios.\n4. Reportar lesión al capataz.\n5. Registrar en el libro de primeros auxilios.\n\n6. LESIONES GRAVES Y EMERGENCIAS MÉDICAS\nEjemplos: Cortes profundos, lesiones en la cabeza, lesiones oculares, fracturas, pérdida de conciencia, sangrado severo, dificultad respiratoria.\nProcedimiento:\n1. Detener el trabajo inmediatamente.\n2. Llamar a servicios de emergencia (911).\n3. No mover a la persona lesionada a menos que sea necesario por seguridad.\n4. Proporcionar primeros auxilios solo dentro del nivel de capacitación.\n5. Asignar a alguien para recibir a los paramédicos.\n6. Notificar a la gerencia inmediatamente.\n7. Completar reporte de incidente el mismo día.\n\n7. CONTROL DE SANGRADO\n• Aplicar presión directa.\n• Elevar si es apropiado.\n• Usar vendajes limpios.\n• No remover objetos incrustados.\n• Mantener presión hasta que llegue ayuda.\n\n8. LESIONES OCULARES\n• NO frotar el ojo.\n• Enjuagar con agua limpia si es apropiado.\n• Buscar atención médica inmediatamente para exposición a químicos o escombros.\n\n9. CALOR, FRÍO Y FATIGA\nEstrés por calor: Detener trabajo, mover a la sombra, proporcionar agua, monitorear condición.\nExposición al frío: Calentar al individuo gradualmente, remover ropa mojada, buscar ayuda médica si los síntomas persisten.\n\n10. RECHAZO DE PRIMEROS AUXILIOS\n• Si un empleado rechaza primeros auxilios, el rechazo debe documentarse.\n• El capataz debe ser notificado inmediatamente.\n\n11. REPORTE Y DOCUMENTACIÓN\n• TODAS las lesiones, sin importar cuán menores, deben reportarse.\n• El tratamiento de primeros auxilios debe registrarse.\n• Se requiere reporte de incidente para ayuda médica, tiempo perdido, daño a la propiedad o casi accidentes.\n• No reportar lesiones es una violación grave.\n\n12. TRANSPORTE DESPUÉS DE LESIÓN\n• Los empleados lesionados no pueden conducir ellos mismos si no es seguro.\n• Organizar transporte seguro o servicios de emergencia según se requiera.\n\n13. APLICACIÓN\n• No seguir este POE puede resultar en disciplina.\n• No reportar lesiones puede resultar en disciplina escalada.\n• La seguridad está antes que la producción."
+  },
+  "sop059": {
+    "title": "POE-059 – Guía de referencia rápida de primeros auxilios",
+    "content": "¿EMERGENCIA?\nLLAME AL 911 INMEDIATAMENTE\nLuego notifique al Capataz / Gerencia\n\nREGLAS GENERALES\n• Detener el trabajo inmediatamente si alguien está lesionado.\n• Mantener la calma.\n• NO mover a la persona lesionada a menos que haya peligro inmediato.\n• Usar guantes y EPP al dar primeros auxilios.\n• Nunca dar medicamentos.\n• Reportar TODAS las lesiones, incluso las menores.\n\nLESIONES MENORES\n\nCortes / Rasguños:\n• Limpiar herida\n• Aplicar presión si hay sangrado\n• Aplicar vendaje\n• Reportar al capataz\n• Registrar en libro de primeros auxilios\n\nQuemaduras menores:\n• Enfriar con agua limpia (NO hielo)\n• Cubrir holgadamente\n• Buscar atención médica si hay ampollas\n\nAstillas:\n• Remover si es visible y menor\n• Limpiar y vendar\n• Reportar\n\nLESIONES GRAVES – LLAME AL 911\nLlamar a servicios de emergencia inmediatamente para:\n• Sangrado abundante\n• Cortes profundos\n• Lesión en la cabeza\n• Lesión ocular\n• Fracturas\n• Pérdida de conciencia\n• Dificultad respiratoria\n• Dolor en el pecho\n• Quemaduras severas\n\nNO dejar sola a la persona lesionada.\n\nCONTROL DE SANGRADO\n• Aplicar presión directa\n• Elevar si es apropiado\n• Usar vendajes limpios\n• NO remover objetos incrustados\n• Mantener presión hasta que llegue ayuda\n\nLESIONES OCULARES\n• NO frotar el ojo\n• Enjuagar con agua limpia si es apropiado\n• Buscar atención médica inmediatamente para químicos, polvo, escombros u objetos afilados\n\nESTRÉS POR CALOR\nSíntomas: Mareos, dolor de cabeza, náuseas, confusión\nAcción:\n• Detener trabajo\n• Mover a la sombra\n• Proporcionar agua\n• Monitorear condición\n• Llamar al 911 si los síntomas empeoran\n\nEXPOSICIÓN AL FRÍO\n• Mover a área cálida\n• Remover ropa mojada\n• Calentar gradualmente\n• Buscar atención médica si el entumecimiento persiste\n\nDESPUÉS DE CUALQUIER LESIÓN\n• Notificar al capataz inmediatamente\n• Completar registro de primeros auxilios\n• Completar reporte de incidente si se requiere\n• NO ocultar lesiones\n\nIMPORTANTE\n• Los empleados lesionados NO deben conducir ellos mismos si no es seguro\n• Organizar transporte seguro o servicios de emergencia\n• La seguridad está antes que la producción\n\nPUBLICAR ESTA GUÍA:\n• En las camionetas\n• En el taller\n• En las carpetas del sitio de trabajo"
   }
 }
