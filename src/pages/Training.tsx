@@ -4,12 +4,26 @@ import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { GraduationCap, CheckCircle2, Search } from "lucide-react";
+import SectionLock from "@/components/gamification/SectionLock";
+import QuizModal from "@/components/quiz/QuizModal";
+import { useProgress } from "@/hooks/useProgress";
+
+const SECTION_KEY = "training";
 
 const trainingKeys = ["training1", "training2", "training3", "training4", "training5"];
 
 const Training = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [quizOpen, setQuizOpen] = useState(false);
+  
+  const { progress, isSectionUnlocked, refreshData } = useProgress();
+
+  const isCompleted = progress?.some(
+    (p) => p.section_key === SECTION_KEY && p.completed
+  ) ?? false;
+
+  const isUnlocked = isSectionUnlocked(SECTION_KEY);
 
   const trainingItems = useMemo(() => {
     return trainingKeys.map((key, index) => ({
@@ -36,6 +50,16 @@ const Training = () => {
         item.content.toLowerCase().includes(query)
     );
   }, [searchQuery, trainingItems]);
+
+  const sectionContent = useMemo(() => {
+    return trainingItems.map(item => `${item.title}: ${item.content}`).join('\n\n');
+  }, [trainingItems]);
+
+  const handleQuizComplete = (passed: boolean) => {
+    if (passed) {
+      refreshData();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -75,6 +99,13 @@ const Training = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SectionLock
+            isUnlocked={isUnlocked}
+            isCompleted={isCompleted}
+            sectionTitle={t("sections.training.title")}
+            onStartQuiz={() => setQuizOpen(true)}
+          />
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -93,6 +124,15 @@ const Training = () => {
           )}
         </CardContent>
       </Card>
+
+      <QuizModal
+        open={quizOpen}
+        onClose={() => setQuizOpen(false)}
+        sectionKey={SECTION_KEY}
+        sectionTitle={t("sections.training.title")}
+        sectionContent={sectionContent}
+        onComplete={handleQuizComplete}
+      />
     </div>
   );
 };
