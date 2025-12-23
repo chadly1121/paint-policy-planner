@@ -1,0 +1,78 @@
+{
+  "common": {
+    "companyName": "Roll On Painting",
+    "employeeManual": "Manwal ng Empleyado",
+    "searchSections": "Maghanap ng mga seksyon...",
+    "searchPlaceholder": "Maghanap gamit ang keyword...",
+    "lastUpdated": "Huling na-update",
+    "noResults": "Walang nahanap na resulta para sa",
+    "items": "mga item"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "sops": "Mga SOP",
+    "safetyProtocols": "Mga Protokol sa Kaligtasan",
+    "companyPolicies": "Mga Patakaran ng Kumpanya",
+    "trainingRequirements": "Mga Kinakailangan sa Pagsasanay",
+    "disciplinaryProcedures": "Mga Pamamaraan sa Disiplina"
+  },
+  "dashboard": {
+    "welcome": "Maligayang pagdating sa Manwal ng Empleyado",
+    "welcomeDescription": "Ang manwal na ito ay naglalaman ng lahat ng mahahalagang impormasyon na kailangan mo bilang miyembro ng koponan. Tingnan ang mga seksyon sa ibaba para mahanap ang mga patakaran, pamamaraan, at gabay para sa iyong tungkulin. Kung may mga katanungan ka, makipag-usap sa iyong superbisor.",
+    "totalPolicies": "Kabuuang Patakaran",
+    "sections": "Mga Seksyon",
+    "sopsCount": "Mga SOP",
+    "safetyRules": "Mga Panuntunan sa Kaligtasan",
+    "manualSections": "Mga Seksyon ng Manwal"
+  },
+  "sections": {
+    "sops": {
+      "title": "Karaniwang Pamamaraan sa Pagpapatakbo",
+      "description": "Hakbang-hakbang na gabay para sa mga gawain sa pagpipinta at proseso ng trabaho",
+      "searchPlaceholder": "Maghanap ng SOP gamit ang keyword..."
+    },
+    "safety": {
+      "title": "Mga Protokol sa Kaligtasan",
+      "description": "Mga gabay upang mapanatiling ligtas ka at ang iyong mga katrabaho sa bawat trabaho",
+      "searchPlaceholder": "Maghanap ng protokol sa kaligtasan gamit ang keyword...",
+      "alertTitle": "Kaligtasan Muna",
+      "alertDescription": "Inaasahang susundin ng lahat ng empleyado ang mga protokol sa kaligtasan na ito sa lahat ng oras. Ang mga paglabag ay maaaring magresulta sa aksyong pandisiplina hanggang sa pagtanggal sa trabaho."
+    },
+    "policies": {
+      "title": "Mga Patakaran ng Kumpanya",
+      "description": "Mga panuntunan at inaasahan sa lugar ng trabaho para sa lahat ng miyembro ng koponan",
+      "searchPlaceholder": "Maghanap ng patakaran gamit ang keyword..."
+    },
+    "training": {
+      "title": "Mga Kinakailangan sa Pagsasanay",
+      "description": "Mga kinakailangang sertipikasyon at patuloy na edukasyon para sa mga miyembro ng koponan",
+      "searchPlaceholder": "Maghanap ng kinakailangan sa pagsasanay gamit ang keyword...",
+      "checklistTitle": "Listahan ng Kinakailangang Sertipikasyon"
+    },
+    "disciplinary": {
+      "title": "Mga Pamamaraan sa Disiplina",
+      "description": "Progresibong disiplina at mga patakaran sa pagwawasto",
+      "searchPlaceholder": "Maghanap ng pamamaraan sa disiplina gamit ang keyword...",
+      "alertTitle": "Patas na Proseso",
+      "alertDescription": "Ang aming layunin ay laging tulungan ang mga empleyado na mapabuti. Ang aksyong pandisiplina ay huling paraan. Hinihikayat namin ang bukas na komunikasyon sa mga superbisor upang matugunan ang mga isyu bago lumala.",
+      "acknowledgment": "Sa pagpapatuloy ng iyong trabaho sa kumpanya, kinikilala mo na nabasa at naunawaan mo ang mga pamamaraan sa disiplina na ito. Kung may mga katanungan ka sa anumang patakaran, makipag-usap sa iyong superbisor o HR."
+    }
+  },
+  "certifications": {
+    "epaRrp": "Sertipikasyon ng EPA RRP",
+    "osha10": "OSHA 10 Oras na Konstruksyon",
+    "safetyOrientation": "Oryentasyon sa Kaligtasan ng Kumpanya",
+    "customerService": "Pagsasanay sa Serbisyo sa Customer",
+    "within90Days": "Sa loob ng 90 araw",
+    "within6Months": "Sa loob ng 6 na buwan",
+    "firstWeek": "Unang linggo",
+    "within30Days": "Sa loob ng 30 araw"
+  },
+  "language": {
+    "select": "Wika",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tl": "Tagalog"
+  }
+}

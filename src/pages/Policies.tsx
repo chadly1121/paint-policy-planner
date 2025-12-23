@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -130,6 +131,7 @@ const policyItems = [
 ];
 
 const Policies = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -152,9 +154,9 @@ const Policies = () => {
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="font-serif">Company Policies</CardTitle>
+              <CardTitle className="font-serif">{t("sections.policies.title")}</CardTitle>
               <CardDescription>
-                Workplace rules and expectations for all team members
+                {t("sections.policies.description")}
               </CardDescription>
             </div>
           </div>
@@ -163,7 +165,7 @@ const Policies = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search policies by keyword..."
+              placeholder={t("sections.policies.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -173,7 +175,7 @@ const Policies = () => {
             <PolicySection items={filteredItems} />
           ) : (
             <p className="text-center text-muted-foreground py-8">
-              No policies found matching "{searchQuery}"
+              {t("common.noResults")} "{searchQuery}"
             </p>
           )}
         </CardContent>

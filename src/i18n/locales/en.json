@@ -1,0 +1,78 @@
+{
+  "common": {
+    "companyName": "Roll On Painting",
+    "employeeManual": "Employee Manual",
+    "searchSections": "Search sections...",
+    "searchPlaceholder": "Search by keyword...",
+    "lastUpdated": "Last updated",
+    "noResults": "No results found matching",
+    "items": "items"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "sops": "SOPs",
+    "safetyProtocols": "Safety Protocols",
+    "companyPolicies": "Company Policies",
+    "trainingRequirements": "Training Requirements",
+    "disciplinaryProcedures": "Disciplinary Procedures"
+  },
+  "dashboard": {
+    "welcome": "Welcome to the Employee Handbook",
+    "welcomeDescription": "This manual contains all the essential information you need as a team member. Browse through the sections below to find policies, procedures, and guidelines for your role. If you have questions, please speak with your supervisor.",
+    "totalPolicies": "Total Policies",
+    "sections": "Sections",
+    "sopsCount": "SOPs",
+    "safetyRules": "Safety Rules",
+    "manualSections": "Manual Sections"
+  },
+  "sections": {
+    "sops": {
+      "title": "Standard Operating Procedures",
+      "description": "Step-by-step guides for painting tasks and job processes",
+      "searchPlaceholder": "Search SOPs by keyword..."
+    },
+    "safety": {
+      "title": "Safety Protocols",
+      "description": "Guidelines to keep you and your coworkers safe on every job",
+      "searchPlaceholder": "Search safety protocols by keyword...",
+      "alertTitle": "Safety First",
+      "alertDescription": "All employees are expected to follow these safety protocols at all times. Violations may result in disciplinary action up to and including termination."
+    },
+    "policies": {
+      "title": "Company Policies",
+      "description": "Workplace rules and expectations for all team members",
+      "searchPlaceholder": "Search policies by keyword..."
+    },
+    "training": {
+      "title": "Training Requirements",
+      "description": "Required certifications and ongoing education for team members",
+      "searchPlaceholder": "Search training requirements by keyword...",
+      "checklistTitle": "Required Certifications Checklist"
+    },
+    "disciplinary": {
+      "title": "Disciplinary Procedures",
+      "description": "Progressive discipline and corrective action policies",
+      "searchPlaceholder": "Search disciplinary procedures by keyword...",
+      "alertTitle": "Fair Process",
+      "alertDescription": "Our goal is always to help employees improve. Disciplinary action is a last resort. We encourage open communication with supervisors to address issues before they escalate.",
+      "acknowledgment": "By continuing employment with the company, you acknowledge that you have read and understand these disciplinary procedures. If you have questions about any policy, please speak with your supervisor or HR."
+    }
+  },
+  "certifications": {
+    "epaRrp": "EPA RRP Certification",
+    "osha10": "OSHA 10-Hour Construction",
+    "safetyOrientation": "Company Safety Orientation",
+    "customerService": "Customer Service Training",
+    "within90Days": "Within 90 days",
+    "within6Months": "Within 6 months",
+    "firstWeek": "First week",
+    "within30Days": "Within 30 days"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tl": "Tagalog"
+  }
+}

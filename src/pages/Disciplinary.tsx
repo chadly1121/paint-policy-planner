@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -74,6 +75,7 @@ All documentation is confidential.`,
 ];
 
 const Disciplinary = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -91,10 +93,9 @@ const Disciplinary = () => {
     <div className="space-y-6">
       <Alert className="border-amber-500/50 bg-amber-500/10">
         <Info className="h-5 w-5 text-amber-600" />
-        <AlertTitle className="text-amber-700">Fair Process</AlertTitle>
+        <AlertTitle className="text-amber-700">{t("sections.disciplinary.alertTitle")}</AlertTitle>
         <AlertDescription className="text-amber-700/90">
-          Our goal is always to help employees improve. Disciplinary action is a last resort.
-          We encourage open communication with supervisors to address issues before they escalate.
+          {t("sections.disciplinary.alertDescription")}
         </AlertDescription>
       </Alert>
 
@@ -105,9 +106,9 @@ const Disciplinary = () => {
               <AlertTriangle className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="font-serif">Disciplinary Procedures</CardTitle>
+              <CardTitle className="font-serif">{t("sections.disciplinary.title")}</CardTitle>
               <CardDescription>
-                Progressive discipline and corrective action policies
+                {t("sections.disciplinary.description")}
               </CardDescription>
             </div>
           </div>
@@ -116,7 +117,7 @@ const Disciplinary = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search disciplinary procedures by keyword..."
+              placeholder={t("sections.disciplinary.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -126,7 +127,7 @@ const Disciplinary = () => {
             <PolicySection items={filteredItems} />
           ) : (
             <p className="text-center text-muted-foreground py-8">
-              No procedures found matching "{searchQuery}"
+              {t("common.noResults")} "{searchQuery}"
             </p>
           )}
         </CardContent>
@@ -136,9 +137,7 @@ const Disciplinary = () => {
       <Card className="border-muted">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Important:</strong> By continuing employment with the company,
-            you acknowledge that you have read and understand these disciplinary procedures.
-            If you have questions about any policy, please speak with your supervisor or HR.
+            <strong className="text-foreground">Important:</strong> {t("sections.disciplinary.acknowledgment")}
           </p>
         </CardContent>
       </Card>

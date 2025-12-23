@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -601,6 +602,7 @@ SAFETY
 ];
 
 const SOPs = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -623,9 +625,9 @@ const SOPs = () => {
               <ClipboardList className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="font-serif">Standard Operating Procedures</CardTitle>
+              <CardTitle className="font-serif">{t("sections.sops.title")}</CardTitle>
               <CardDescription>
-                Step-by-step guides for completing painting tasks correctly and consistently
+                {t("sections.sops.description")}
               </CardDescription>
             </div>
           </div>
@@ -634,7 +636,7 @@ const SOPs = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search SOPs by keyword..."
+              placeholder={t("sections.sops.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -644,7 +646,7 @@ const SOPs = () => {
             <PolicySection items={filteredItems} />
           ) : (
             <p className="text-center text-muted-foreground py-8">
-              No SOPs found matching "{searchQuery}"
+              {t("common.noResults")} "{searchQuery}"
             </p>
           )}
         </CardContent>

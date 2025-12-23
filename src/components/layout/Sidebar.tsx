@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Home,
   ClipboardList,
@@ -12,23 +13,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-const navItems = [
-  { path: "/", label: "Dashboard", icon: Home },
-  { path: "/sops", label: "SOPs", icon: ClipboardList },
-  { path: "/safety", label: "Safety Protocols", icon: Shield },
-  { path: "/policies", label: "Company Policies", icon: FileText },
-  { path: "/training", label: "Training Requirements", icon: GraduationCap },
-  { path: "/disciplinary", label: "Disciplinary Procedures", icon: AlertTriangle },
-];
-
 interface SidebarProps {
   isOpen: boolean;
   onClose?: () => void;
 }
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const navItems = [
+    { path: "/", label: t("nav.dashboard"), icon: Home },
+    { path: "/sops", label: t("nav.sops"), icon: ClipboardList },
+    { path: "/safety", label: t("nav.safetyProtocols"), icon: Shield },
+    { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
+    { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
+    { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
+  ];
 
   const filteredItems = navItems.filter((item) =>
     item.label.toLowerCase().includes(searchQuery.toLowerCase())
@@ -48,9 +50,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </div>
           <div>
             <h1 className="font-serif text-lg font-bold text-sidebar-foreground">
-              Roll On Painting
+              {t("common.companyName")}
             </h1>
-            <p className="text-xs text-sidebar-foreground/60">Employee Manual</p>
+            <p className="text-xs text-sidebar-foreground/60">{t("common.employeeManual")}</p>
           </div>
         </div>
 
@@ -59,7 +61,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sidebar-foreground/50" />
             <Input
-              placeholder="Search sections..."
+              placeholder={t("common.searchSections")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="border-sidebar-border bg-sidebar-accent pl-10 text-sidebar-foreground placeholder:text-sidebar-foreground/50 focus-visible:ring-sidebar-ring"
@@ -93,7 +95,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         {/* Footer */}
         <div className="border-t border-sidebar-border px-6 py-4">
           <p className="text-xs text-sidebar-foreground/50">
-            Last updated: {new Date().toLocaleDateString()}
+            {t("common.lastUpdated")}: {new Date().toLocaleDateString()}
           </p>
         </div>
       </div>

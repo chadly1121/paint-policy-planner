@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,6 +92,7 @@ Failure to wear required PPE will result in immediate removal from job site.`,
 ];
 
 const Safety = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -108,10 +110,9 @@ const Safety = () => {
     <div className="space-y-6">
       <Alert className="border-destructive/50 bg-destructive/10">
         <AlertCircle className="h-5 w-5 text-destructive" />
-        <AlertTitle className="text-destructive">Safety First</AlertTitle>
+        <AlertTitle className="text-destructive">{t("sections.safety.alertTitle")}</AlertTitle>
         <AlertDescription className="text-destructive/90">
-          All employees are expected to follow these safety protocols at all times.
-          Violations may result in disciplinary action up to and including termination.
+          {t("sections.safety.alertDescription")}
         </AlertDescription>
       </Alert>
 
@@ -122,9 +123,9 @@ const Safety = () => {
               <Shield className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="font-serif">Safety Protocols</CardTitle>
+              <CardTitle className="font-serif">{t("sections.safety.title")}</CardTitle>
               <CardDescription>
-                Guidelines to keep you and your coworkers safe on every job
+                {t("sections.safety.description")}
               </CardDescription>
             </div>
           </div>
@@ -133,7 +134,7 @@ const Safety = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search safety protocols by keyword..."
+              placeholder={t("sections.safety.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -143,7 +144,7 @@ const Safety = () => {
             <PolicySection items={filteredItems} />
           ) : (
             <p className="text-center text-muted-foreground py-8">
-              No safety protocols found matching "{searchQuery}"
+              {t("common.noResults")} "{searchQuery}"
             </p>
           )}
         </CardContent>
