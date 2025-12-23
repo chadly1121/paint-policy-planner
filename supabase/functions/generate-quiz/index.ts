@@ -12,7 +12,22 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { sectionKey, sectionContent, userId } = await req.json();
+    
+    if (!userId || !sectionKey || !sectionContent) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     console.log(`Generating quiz for section: ${sectionKey}, user: ${userId}`);
     
