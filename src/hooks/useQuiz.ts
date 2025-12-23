@@ -31,7 +31,12 @@ export const useQuiz = () => {
   const [quizComplete, setQuizComplete] = useState(false);
   const [lastAttempt, setLastAttempt] = useState<QuizAttempt | null>(null);
 
-  const generateQuiz = useCallback(async (sectionKey: string, sectionContent: string) => {
+  const generateQuiz = useCallback(async (
+    sectionKey: string, 
+    sectionContent: string,
+    quizType?: "mini" | "final",
+    sopKey?: string
+  ) => {
     if (!user) return;
 
     setLoading(true);
@@ -44,7 +49,13 @@ export const useQuiz = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-quiz", {
-        body: { sectionKey, sectionContent, userId: user.id },
+        body: { 
+          sectionKey, 
+          sectionContent, 
+          userId: user.id,
+          quizType,
+          sopKey,
+        },
       });
 
       if (error) throw error;
@@ -86,7 +97,11 @@ export const useQuiz = () => {
     }
   }, [currentQuestionIndex]);
 
-  const submitQuiz = useCallback(async (sectionKey: string) => {
+  const submitQuiz = useCallback(async (
+    sectionKey: string,
+    quizType?: "mini" | "final",
+    sopKey?: string
+  ) => {
     if (!user || questions.length === 0) return null;
 
     setLoading(true);
@@ -96,7 +111,9 @@ export const useQuiz = () => {
         body: { 
           sectionKey, 
           answers, 
-          userId: user.id 
+          userId: user.id,
+          quizType,
+          sopKey,
         },
       });
 

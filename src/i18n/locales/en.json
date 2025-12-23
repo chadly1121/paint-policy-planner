@@ -6,7 +6,23 @@
     "searchPlaceholder": "Search by keyword...",
     "lastUpdated": "Last updated",
     "noResults": "No results found matching",
-    "items": "items"
+    "items": "items",
+    "points": "points"
+  },
+  "quiz": {
+    "takeQuiz": "Take Quiz",
+    "questions": "questions"
+  },
+  "sops": {
+    "progress": "Progress",
+    "finalExam": "SOP Final Exam",
+    "finalExamReady": "All mini-quizzes complete! Take the final exam to unlock the next section.",
+    "finalExamLocked": "Complete all {{completed}}/{{total}} mini-quizzes to unlock",
+    "finalExamCompleted": "Final Exam Passed!",
+    "finalExamCompletedDesc": "You've mastered all Standard Operating Procedures",
+    "startFinalExam": "Start Final Exam",
+    "miniQuizzesCompleted": "Mini-quizzes completed",
+    "completeAllMiniQuizzes": "Complete all SOP mini-quizzes to unlock the final exam"
   },
   "nav": {
     "dashboard": "Dashboard",
