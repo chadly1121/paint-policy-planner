@@ -1,0 +1,26 @@
+{
+  "safety1": {
+    "title": "1. Equipo de Protección Personal (EPP)",
+    "content": "Todos los empleados deben usar el EPP apropiado:\n• Gafas de seguridad al lijar, raspar o pulverizar\n• Mascarillas antipolvo (N95 mínimo) al lijar o trabajar con materiales polvorientos\n• Respiradores al pulverizar o trabajar con productos a base de solventes\n• Guantes de trabajo al manipular materiales ásperos o químicos\n• Calzado antideslizante en todo momento en sitios de trabajo\n• Cascos cuando lo requieran las condiciones del sitio\n• Protección auditiva al usar equipo eléctrico\nNo usar el EPP requerido resultará en remoción inmediata del sitio de trabajo."
+  },
+  "safety2": {
+    "title": "2. Seguridad con Escaleras",
+    "content": "Siga estas reglas de seguridad de escaleras sin excepción:\n• Inspeccionar la escalera antes de cada uso - verificar daños, partes sueltas\n• Colocar la escalera solo en suelo firme y nivelado\n• Mantener tres puntos de contacto en todo momento\n• Nunca pararse en los dos últimos peldaños de una escalera de tijera\n• Las escaleras de extensión deben extenderse 3 pies sobre el punto de aterrizaje\n• Nunca apoyar una escalera contra una ventana o superficie no asegurada\n• No exceder la capacidad de peso (pintor + materiales)\n• Nunca mover una escalera mientras alguien está en ella\n• Usar estabilizadores de escalera para escaleras de extensión cuando estén disponibles"
+  },
+  "safety3": {
+    "title": "3. Seguridad Química y HAZCOM",
+    "content": "Maneje todos los químicos con cuidado:\n• Leer todas las etiquetas y Hojas de Datos de Seguridad antes de usar\n• Nunca mezclar químicos a menos que se indique específicamente\n• Usar productos solo en áreas bien ventiladas\n• Mantener los contenedores cerrados cuando no se esté vertiendo activamente\n• Almacenar químicos lejos de fuentes de calor e ignición\n• Desechar trapos y residuos correctamente - riesgo de combustión espontánea\n• Conocer la ubicación de las estaciones de lavado de ojos y botiquines\n• Reportar cualquier derrame químico al supervisor inmediatamente\n• Nunca comer, beber o fumar mientras se manejan químicos"
+  },
+  "safety4": {
+    "title": "4. Seguridad con Pintura de Plomo (Edificios Pre-1978)",
+    "content": "Al trabajar en edificios construidos antes de 1978:\n• Asumir que toda pintura contiene plomo hasta que se pruebe\n• Solo trabajadores certificados en RRP pueden alterar pintura de plomo\n• Contener el área de trabajo con láminas de plástico\n• Usar aspiradora HEPA y métodos húmedos para minimizar el polvo\n• Usar respirador apropiado (P100 mínimo)\n• No comer, beber o fumar en áreas de trabajo\n• Lavarse las manos y la cara antes de los descansos y comidas\n• Cambiarse de ropa antes de ir a casa\n• Desechar residuos según las regulaciones de la EPA"
+  },
+  "safety5": {
+    "title": "5. Seguridad con Andamios",
+    "content": "Al usar andamios:\n• Solo personas competentes pueden erigir, modificar o desmontar andamios\n• Inspeccionar el andamio antes de cada turno\n• Asegurar que todos los seguros y arriostres estén asegurados\n• Los tablones deben extenderse al menos 6 pulgadas más allá de los soportes\n• Se requieren barandillas cuando se trabaja a 10 pies o más de altura\n• Nunca trepar por los arriostres cruzados\n• Mantener las plataformas libres de escombros y derrames\n• Bloquear las ruedas antes de subir a andamios móviles\n• No exceder la capacidad de carga"
+  },
+  "safety6": {
+    "title": "6. Procedimientos de Emergencia",
+    "content": "En caso de emergencia:\n• Conocer la ubicación de todas las salidas, extintores y botiquines\n• Llamar al 911 para emergencias que amenacen la vida\n• Reportar todas las lesiones al supervisor inmediatamente, sin importar cuán menores sean\n• Para exposición química: enjuagar con agua por 15+ minutos, buscar atención médica\n• Para caídas: no mover a la persona lesionada a menos que esté en peligro inmediato\n• Para incendio: alertar a otros, evacuar, llamar al 911, usar extintor solo si es seguro\n• Documentar todos los incidentes en el formulario de reporte de incidentes de la empresa\n• Los botiquines deben reabastecerse después de cualquier uso"
+  }
+}

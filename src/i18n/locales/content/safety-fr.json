@@ -1,0 +1,26 @@
+{
+  "safety1": {
+    "title": "1. Équipement de protection individuelle (EPI)",
+    "content": "Tous les employés doivent porter l'EPI approprié :\n• Lunettes de sécurité lors du ponçage, grattage ou pulvérisation\n• Masques anti-poussière (N95 minimum) lors du ponçage ou travail avec des matériaux poussiéreux\n• Respirateurs lors de la pulvérisation ou travail avec des produits à base de solvant\n• Gants de travail lors de la manipulation de matériaux rugueux ou de produits chimiques\n• Chaussures antidérapantes en tout temps sur les chantiers\n• Casques de protection lorsque requis par les conditions du chantier\n• Protection auditive lors de l'utilisation d'équipement électrique\nLe non-port de l'EPI requis entraînera le retrait immédiat du chantier."
+  },
+  "safety2": {
+    "title": "2. Sécurité des échelles",
+    "content": "Suivez ces règles de sécurité des échelles sans exception :\n• Inspecter l'échelle avant chaque utilisation - vérifier les dommages, pièces desserrées\n• Placer l'échelle sur un sol ferme et nivelé uniquement\n• Maintenir trois points de contact en tout temps\n• Ne jamais se tenir sur les deux derniers barreaux d'un escabeau\n• Les échelles coulissantes doivent dépasser de 3 pieds le point d'atterrissage\n• Ne jamais appuyer une échelle contre une fenêtre ou surface non sécurisée\n• Ne pas dépasser la capacité de charge (peintre + matériaux)\n• Ne jamais déplacer une échelle pendant que quelqu'un est dessus\n• Utiliser des stabilisateurs d'échelle pour les échelles coulissantes si disponibles"
+  },
+  "safety3": {
+    "title": "3. Sécurité chimique et SIMDUT",
+    "content": "Manipuler tous les produits chimiques avec soin :\n• Lire toutes les étiquettes et fiches de données de sécurité avant utilisation\n• Ne jamais mélanger de produits chimiques sauf instruction spécifique\n• Utiliser les produits uniquement dans des zones bien ventilées\n• Garder les contenants fermés lorsqu'on ne verse pas activement\n• Stocker les produits chimiques loin des sources de chaleur et d'ignition\n• Éliminer les chiffons et déchets correctement - risque de combustion spontanée\n• Connaître l'emplacement des douches oculaires et trousses de premiers soins\n• Signaler tout déversement chimique au superviseur immédiatement\n• Ne jamais manger, boire ou fumer en manipulant des produits chimiques"
+  },
+  "safety4": {
+    "title": "4. Sécurité peinture au plomb (Bâtiments pré-1978)",
+    "content": "Lors du travail sur des bâtiments construits avant 1978 :\n• Supposer que toute peinture contient du plomb jusqu'à ce qu'elle soit testée\n• Seuls les travailleurs certifiés RRP peuvent perturber la peinture au plomb\n• Confiner la zone de travail avec des feuilles de plastique\n• Utiliser un aspirateur HEPA et des méthodes humides pour minimiser la poussière\n• Porter un respirateur approprié (P100 minimum)\n• Ne pas manger, boire ou fumer dans les zones de travail\n• Se laver les mains et le visage avant les pauses et repas\n• Changer de vêtements avant de rentrer chez soi\n• Éliminer les déchets selon les règlements de l'EPA"
+  },
+  "safety5": {
+    "title": "5. Sécurité des échafaudages",
+    "content": "Lors de l'utilisation d'échafaudages :\n• Seules les personnes compétentes peuvent ériger, modifier ou démonter les échafaudages\n• Inspecter l'échafaudage avant chaque quart\n• S'assurer que tous les verrous et contreventements sont sécurisés\n• Les planches doivent dépasser d'au moins 6 pouces les supports\n• Garde-corps requis lors du travail à 10 pieds ou plus\n• Ne jamais grimper sur les entretoises\n• Garder les plateformes libres de débris et déversements\n• Verrouiller les roulettes avant de monter sur les échafaudages mobiles\n• Ne pas dépasser la capacité de charge"
+  },
+  "safety6": {
+    "title": "6. Procédures d'urgence",
+    "content": "En cas d'urgence :\n• Connaître l'emplacement de toutes les sorties, extincteurs et trousses de premiers soins\n• Appeler le 911 pour les urgences mettant la vie en danger\n• Signaler toutes les blessures au superviseur immédiatement, peu importe leur gravité\n• Pour l'exposition chimique : rincer à l'eau pendant 15+ minutes, consulter un médecin\n• Pour les chutes : ne pas déplacer la personne blessée sauf si en danger immédiat\n• Pour un incendie : alerter les autres, évacuer, appeler le 911, utiliser l'extincteur seulement si c'est sûr\n• Documenter tous les incidents sur le formulaire de rapport d'incident de l'entreprise\n• Les trousses de premiers soins doivent être réapprovisionnées après toute utilisation"
+  }
+}

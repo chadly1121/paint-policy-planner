@@ -1,0 +1,42 @@
+{
+  "policy1": {
+    "title": "1. Asistencia y puntualidad",
+    "content": "La asistencia confiable es esencial:\n• Presentarse en el lugar de reunión designado o sitio de trabajo a la hora programada\n• Notificar al supervisor al menos 2 horas antes del turno si llegará tarde o estará ausente\n• La tardanza excesiva (3+ incidentes por mes) resultará en acción disciplinaria\n• La ausencia sin aviso resultará en acción disciplinaria inmediata\n• Las solicitudes de tiempo libre deben presentarse al menos 2 semanas antes\n• Las ausencias no justificadas pueden resultar en pérdida de horas o terminación"
+  },
+  "policy2": {
+    "title": "2. Código de vestimenta y apariencia",
+    "content": "Presentar una imagen profesional:\n• Usar la camisa de uniforme proporcionada por la empresa o ropa de trabajo aprobada\n• Los pantalones deben ser apropiados para el trabajo (sin shorts más cortos que la rodilla)\n• Botas de trabajo cerradas y antideslizantes requeridas en todo momento\n• Sin gráficos, logotipos o lenguaje ofensivo en la ropa\n• El cabello largo debe estar recogido por seguridad\n• Quitar o cubrir joyas que puedan engancharse en el equipo\n• Mantener buena higiene personal\n• Los uniformes deben estar limpios y en buenas condiciones"
+  },
+  "policy3": {
+    "title": "3. Política de vehículos y conducción",
+    "content": "Al conducir vehículos de la empresa o por negocios:\n• Se requiere licencia de conducir válida; debe permanecer en archivo\n• Reportar cualquier cambio en el estado de la licencia inmediatamente\n• Seguir todas las leyes de tránsito - las multas son responsabilidad del empleado\n• Sin uso de teléfono celular mientras conduce (incluyendo manos libres)\n• Sin pasajeros que no sean empleados sin aprobación del supervisor\n• Reportar cualquier accidente o daño inmediatamente\n• Mantener los vehículos limpios y con combustible\n• Completar la lista de verificación diaria del vehículo"
+  },
+  "policy4": {
+    "title": "4. Política de drogas y alcohol",
+    "content": "Política de tolerancia cero:\n• Los empleados deben estar libres de deterioro durante las horas de trabajo\n• Sin alcohol ni drogas ilegales en sitios de trabajo o vehículos de la empresa\n• Los medicamentos recetados que causen deterioro deben reportarse al supervisor\n• Se pueden realizar pruebas de drogas aleatorias\n• Las pruebas de drogas post-accidente son obligatorias\n• Un resultado positivo resultará en terminación inmediata\n• Los empleados deben reportar cualquier arresto o condena relacionada con drogas"
+  },
+  "policy5": {
+    "title": "5. Uso de teléfono celular y dispositivos personales",
+    "content": "Minimizar distracciones:\n• Las llamadas y mensajes personales deben limitarse solo a los tiempos de descanso\n• Los teléfonos deben estar en silencio/vibración durante las horas de trabajo\n• Tomar fotos o videos en sitios de trabajo requiere permiso del cliente\n• Se permite la comunicación relacionada con la empresa (programación, actualizaciones)\n• Nunca usar el teléfono en una escalera o al operar equipo\n• No se permiten auriculares durante las actividades de trabajo\n• El uso del teléfono durante el trabajo puede resultar en acción disciplinaria"
+  },
+  "policy6": {
+    "title": "6. Relaciones con clientes",
+    "content": "Mantener relaciones profesionales:\n• Saludar a los clientes educadamente y presentarse\n• Atender las preocupaciones de los clientes de manera rápida y profesional\n• Nunca discutir con los clientes - escalar problemas al supervisor\n• Respetar la propiedad y privacidad del cliente\n• No discutir negocios de la empresa u otros clientes\n• Aceptar propinas con gracia si se ofrecen, pero nunca solicitar\n• Reportar cualquier queja del cliente al supervisor inmediatamente\n• Dejar cada sitio de trabajo más limpio de lo que lo encontró"
+  },
+  "policy7": {
+    "title": "7. Confidencialidad",
+    "content": "Proteger información sensible:\n• La información del cliente es confidencial - no compartir externamente\n• No discutir precios, presupuestos o detalles de trabajo con competidores\n• La información financiera de la empresa es estrictamente confidencial\n• Las publicaciones en redes sociales sobre el trabajo requieren aprobación de la gerencia\n• No fotografiar la propiedad del cliente sin permiso\n• Las técnicas y fórmulas propietarias son secretos comerciales\n• Las obligaciones de confidencialidad continúan después de terminar el empleo"
+  },
+  "policy8": {
+    "title": "8. Anti-acoso y discriminación",
+    "content": "Mantenemos un lugar de trabajo respetuoso:\n• No se tolerará el acoso de ningún tipo\n• Se prohíbe la discriminación basada en características protegidas\n• Reportar cualquier preocupación al supervisor o RH inmediatamente\n• Se prohíben las represalias contra quienes reportan preocupaciones\n• Todas las quejas se investigarán prontamente\n• El acoso comprobado resultará en terminación\n• Estamos comprometidos con la igualdad de oportunidades de empleo"
+  },
+  "policy9": {
+    "title": "9. Política de herramientas y equipos",
+    "content": "Cuidar el equipo de la empresa:\n• Los empleados son responsables de las herramientas asignadas a ellos\n• Reportar herramientas perdidas, robadas o dañadas inmediatamente\n• Las herramientas personales pueden usarse con aprobación del supervisor\n• No prestar herramientas de la empresa a no empleados\n• Devolver toda propiedad de la empresa al terminar\n• El costo de herramientas dañadas/perdidas por negligencia puede deducirse del pago\n• Usar herramientas solo para su propósito previsto"
+  },
+  "policy10": {
+    "title": "10. Períodos de descanso y comida",
+    "content": "Los descansos se proporcionan de la siguiente manera:\n• Descanso pagado de 15 minutos para turnos de 4+ horas\n• Descanso de comida no pagado de 30 minutos para turnos de 6+ horas\n• Segundo descanso pagado de 15 minutos para turnos de 8+ horas\n• Los descansos deben tomarse en momentos apropiados (no durante tareas críticas)\n• No abandonar el sitio de trabajo durante los descansos sin aprobación del supervisor\n• Limpiar las áreas de comida después de las comidas\n• Fumar solo en áreas designadas, lejos de las zonas de trabajo"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "safety1": {
+    "title": "1. Personal Protective Equipment (PPE)",
+    "content": "All employees must wear appropriate PPE:\n• Safety glasses when sanding, scraping, or spraying\n• Dust masks (N95 minimum) when sanding or working with dusty materials\n• Respirators when spraying or working with solvent-based products\n• Work gloves when handling rough materials or chemicals\n• Non-slip footwear at all times on job sites\n• Hard hats when required by job site conditions\n• Hearing protection when using power equipment\nFailure to wear required PPE will result in immediate removal from job site."
+  },
+  "safety2": {
+    "title": "2. Ladder Safety",
+    "content": "Follow these ladder safety rules without exception:\n• Inspect ladder before each use - check for damage, loose parts\n• Set ladder on firm, level ground only\n• Maintain three points of contact at all times\n• Never stand on top two rungs of a stepladder\n• Extension ladders must extend 3 feet above landing point\n• Never lean a ladder against a window or unsecured surface\n• Do not exceed weight capacity (painter + materials)\n• Never move a ladder while someone is on it\n• Use ladder stabilizers for extension ladders when available"
+  },
+  "safety3": {
+    "title": "3. Chemical Safety & HAZCOM",
+    "content": "Handle all chemicals with care:\n• Read all product labels and Safety Data Sheets before use\n• Never mix chemicals unless specifically instructed\n• Use products only in well-ventilated areas\n• Keep containers closed when not actively pouring\n• Store chemicals away from heat sources and ignition\n• Dispose of rags and waste properly - spontaneous combustion risk\n• Know the location of eyewash stations and first aid kits\n• Report any chemical spills immediately to supervisor\n• Never eat, drink, or smoke while handling chemicals"
+  },
+  "safety4": {
+    "title": "4. Lead Paint Safety (Pre-1978 Buildings)",
+    "content": "When working on buildings constructed before 1978:\n• Assume all paint contains lead until tested\n• Only RRP-certified workers may disturb lead paint\n• Contain work area with plastic sheeting\n• Use HEPA vacuum and wet methods to minimize dust\n• Wear appropriate respirator (P100 minimum)\n• Do not eat, drink, or smoke in work areas\n• Wash hands and face before breaks and meals\n• Change clothes before going home\n• Dispose of waste according to EPA regulations"
+  },
+  "safety5": {
+    "title": "5. Scaffolding Safety",
+    "content": "When using scaffolding:\n• Only competent persons may erect, modify, or dismantle scaffolding\n• Inspect scaffolding before each shift\n• Ensure all locks and braces are secure\n• Planking must extend at least 6 inches past supports\n• Guardrails required when working 10 feet or higher\n• Never climb on cross braces\n• Keep platforms clear of debris and spills\n• Lock casters before mounting mobile scaffolds\n• Do not exceed load capacity"
+  },
+  "safety6": {
+    "title": "6. Emergency Procedures",
+    "content": "In case of emergency:\n• Know the location of all exits, fire extinguishers, and first aid kits\n• Call 911 for life-threatening emergencies\n• Report all injuries to supervisor immediately, no matter how minor\n• For chemical exposure: flush with water for 15+ minutes, seek medical attention\n• For falls: do not move injured person unless in immediate danger\n• For fire: alert others, evacuate, call 911, use extinguisher only if safe\n• Document all incidents on company incident report form\n• First aid kits must be restocked after any use"
+  }
+}
