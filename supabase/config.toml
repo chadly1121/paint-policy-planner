@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.submit-quiz]
 verify_jwt = true
+
+[functions.send-notification]
+verify_jwt = true

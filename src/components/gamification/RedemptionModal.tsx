@@ -62,6 +62,15 @@ const RedemptionModal = ({ open, onClose, availablePoints }: RedemptionModalProp
 
       if (error) throw error;
 
+      // Send email notification (fire and forget)
+      supabase.functions.invoke("send-notification", {
+        body: {
+          type: "redemption_requested",
+          userId: user.id,
+          data: { pointsRequested: points },
+        },
+      }).catch(console.error);
+
       toast({
         title: "Request submitted!",
         description: "Your redemption request has been sent for approval.",
