@@ -259,6 +259,96 @@ ENFORCEMENT
 • Operating vacuums without the proper bag and filter is prohibited.
 • Misuse, damage, or neglect will result in discipline and may require the employee to replace or repair equipment.`,
   },
+  {
+    id: "sop-010",
+    title: "SOP-010 – Orbital & Sheet Sander Use, Paper Selection, Cleaning & Storage",
+    content: `PURPOSE
+To ensure high-quality finishes, effective dust extraction, long tool life, and safe operation of orbital and sheet sanders. This SOP defines mandatory rules for sandpaper selection, use, maintenance, and storage.
+
+NON-NEGOTIABLES
+• Always use the correct brand of sandpaper with the matching sander.
+• Festool sandpaper is used ONLY on Festool sanders.
+• Generic sandpaper is used ONLY on generic sanders.
+• Sandpaper holes MUST align with the sander pad holes.
+• Sanders MUST be connected to a vacuum or dust collection system when required.
+• Sanders and all parts MUST be stored in their proper bag or box.
+• Never store used, worn, or dirty sandpaper in the sander storage container.
+• These rules are non-negotiable.
+
+SANDPAPER SELECTION
+• Use only sandpaper designed for the specific sander brand and model.
+• Hole patterns must line up exactly with the sanding pad.
+  – Misaligned holes prevent dust extraction.
+  – Poor dust extraction causes:
+    - Surface scratching
+    - Clogged paper
+    - Excess airborne dust
+    - Premature tool wear
+• Always use the correct grit for the task:
+  – Coarse grits for leveling and heavy material removal
+  – Medium grits for general prep
+  – Fine grits for finish sanding
+• If unsure which grit to use, STOP and contact Chad or a Foreman.
+
+PROPER SANDING PRACTICES
+• Always keep sandpaper clean and free of debris.
+• Stop immediately if paper becomes clogged or contaminated.
+• Never continue sanding with dirty paper — dirty paper WILL scratch the surface.
+• Do not press hard on the sander — let the tool and paper do the work.
+• Keep the sander flat on the surface at all times.
+• Lift the sander off the surface before stopping to avoid swirl marks.
+
+DUST CONTROL & SAFETY
+• Always connect orbital and sheet sanders to an appropriate vacuum or dust extractor when required.
+• Dust extraction is critical for:
+  – Surface quality
+  – Worker health
+  – Jobsite cleanliness
+• Fine dust (drywall, wood, coatings) is a respiratory hazard.
+• Wear appropriate PPE when sanding:
+  – Dust mask or respirator
+  – Eye protection
+• Never use compressed air to blow dust off sanders or surfaces.
+
+CLEANING & DAILY MAINTENANCE
+After each use:
+• Remove sandpaper and discard if worn or dirty.
+• Inspect sanding pad for damage or buildup.
+• Wipe down the sander body and vents.
+• Check power cord for cuts, wear, or strain.
+• Ensure dust ports are clear and unobstructed.
+
+Sandpaper:
+• Do not reuse sandpaper that is worn, clogged, torn, or contaminated.
+• Never place used sandpaper back into storage containers.
+
+INSPECTION & TOOL CARE
+• Inspect sanders regularly for:
+  – Loose pads
+  – Damaged cords
+  – Cracked housings
+  – Excessive vibration
+• Remove damaged sanders from service immediately.
+• Report issues to a Foreman or Chad.
+
+STORAGE (NON-NEGOTIABLE)
+• Every sander must be stored:
+  – In its designated bag or case
+  – With its power cord properly wrapped
+  – With accessories stored correctly
+• NEVER:
+  – Throw sanders loose into vans
+  – Store sanders without their case
+  – Store used or dirty sandpaper in the case
+• Storage containers must remain clean and professional at all times.
+
+ENFORCEMENT
+• Failure to follow this SOP will result in corrective action.
+• Damage caused by misuse, poor maintenance, or improper storage may result in:
+  – Loss of tool privileges
+  – Disciplinary action
+  – Responsibility for repair or replacement`,
+  },
 ];
 
 const SOPs = () => {
