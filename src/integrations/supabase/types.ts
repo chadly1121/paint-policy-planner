@@ -47,6 +47,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          preferred_language: string
           updated_at: string
           user_id: string
         }
@@ -55,6 +56,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          preferred_language?: string
           updated_at?: string
           user_id: string
         }
@@ -63,6 +65,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          preferred_language?: string
           updated_at?: string
           user_id?: string
         }

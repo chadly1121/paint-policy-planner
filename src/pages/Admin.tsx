@@ -18,6 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
@@ -29,14 +36,17 @@ import {
   Loader2,
   ShieldCheck,
   Trophy,
-  RefreshCw
+  RefreshCw,
+  Globe
 } from "lucide-react";
 import { z } from "zod";
+import { languages } from "@/components/LanguageSelector";
 
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
   fullName: z.string().trim().min(1, { message: "Full name is required" }).max(100),
+  preferredLanguage: z.string().min(1, { message: "Please select a language" }),
 });
 
 interface RedemptionRequest {
@@ -70,6 +80,7 @@ const Admin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState("en");
   const [creating, setCreating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -193,7 +204,7 @@ const Admin = () => {
     e.preventDefault();
     setErrors({});
 
-    const validation = employeeSchema.safeParse({ email, password, fullName });
+    const validation = employeeSchema.safeParse({ email, password, fullName, preferredLanguage });
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
       validation.error.errors.forEach(err => {
@@ -212,7 +223,10 @@ const Admin = () => {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
-          data: { full_name: fullName },
+          data: { 
+            full_name: fullName,
+            preferred_language: preferredLanguage
+          },
         },
       });
 
@@ -234,6 +248,7 @@ const Admin = () => {
         setEmail("");
         setPassword("");
         setFullName("");
+        setPreferredLanguage("en");
         // Refresh employee list after short delay to allow DB trigger to complete
         setTimeout(() => fetchEmployees(), 1000);
       }
@@ -393,17 +408,44 @@ const Admin = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Initial Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
-                  />
-                  {errors.password && (
-                    <p className="text-sm text-destructive">{errors.password}</p>
-                  )}
+                    <Label htmlFor="password">Initial Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                    />
+                    {errors.password && (
+                      <p className="text-sm text-destructive">{errors.password}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="preferredLanguage" className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Preferred Language
+                    </Label>
+                    <Select
+                      value={preferredLanguage}
+                      onValueChange={setPreferredLanguage}
+                    >
+                      <SelectTrigger id="preferredLanguage">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languages.map((lang) => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            <span className="flex items-center gap-2">
+                              <span>{lang.flag}</span>
+                              <span>{lang.name}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.preferredLanguage && (
+                      <p className="text-sm text-destructive">{errors.preferredLanguage}</p>
+                    )}
                 </div>
                 <Button type="submit" disabled={creating}>
                   {creating ? (

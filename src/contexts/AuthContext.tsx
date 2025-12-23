@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import i18n from "@/i18n";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, preferredLanguage?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -29,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setTimeout(() => {
             checkAdminStatus(session.user.id);
+            loadUserLanguagePreference(session.user.id);
           }, 0);
         } else {
           setIsAdmin(false);
@@ -41,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       if (session?.user) {
         checkAdminStatus(session.user.id);
+        loadUserLanguagePreference(session.user.id);
       }
       setLoading(false);
     });
@@ -59,19 +62,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAdmin(!!data);
   };
 
+  const loadUserLanguagePreference = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("preferred_language")
+      .eq("user_id", userId)
+      .single();
+    
+    if (data?.preferred_language) {
+      i18n.changeLanguage(data.preferred_language);
+    }
+  };
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error as Error | null };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, preferredLanguage: string = "en") => {
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { full_name: fullName },
+        data: { 
+          full_name: fullName,
+          preferred_language: preferredLanguage
+        },
       },
     });
     return { error: error as Error | null };
