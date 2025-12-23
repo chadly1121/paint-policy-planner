@@ -1,6 +1,8 @@
+import { useState, useMemo } from "react";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { GraduationCap, CheckCircle2, Search } from "lucide-react";
 
 const trainingItems = [
   {
@@ -87,6 +89,19 @@ const requiredCertifications = [
 ];
 
 const Training = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return trainingItems;
+    
+    const query = searchQuery.toLowerCase();
+    return trainingItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) ||
+        item.content.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
   return (
     <div className="space-y-6">
       {/* Quick Reference Card */}
@@ -124,8 +139,23 @@ const Training = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <PolicySection items={trainingItems} />
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search training requirements by keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {filteredItems.length > 0 ? (
+            <PolicySection items={filteredItems} />
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No training requirements found matching "{searchQuery}"
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
