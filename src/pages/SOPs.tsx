@@ -93,16 +93,86 @@ const sopItems = [
   },
   {
     id: "sop-8",
-    title: "8. Material Storage & Handling",
-    content: `Proper material handling prevents waste and accidents:
-1. Store paint in temperature-controlled environment (50-80°F)
-2. Keep all containers sealed when not in use
-3. Rotate stock - use oldest materials first
-4. Never pour unused paint back into original container
-5. Dispose of materials according to local regulations
-6. Keep SDS sheets accessible for all products
-7. Store flammable materials in approved cabinets
-8. Check expiration dates before use`,
+    title: "SOP-008 – Driving, Transportation, Travel Time & Vehicle Use Policy (Ontario)",
+    content: `PURPOSE
+To establish clear, enforceable rules for travel time, clocking in and out, transportation, and company vehicle use. This policy complies with the Ontario Employment Standards Act (ESA).
+
+1. LEGAL BASIS (ONTARIO ESA)
+• Normal commuting time (home to first job site and last job site to home) is unpaid.
+• Travel time is paid only when the employer directs or requires travel (job-to-job travel, shop visits, supply pickups).
+• Employer-provided vehicles or fuel do not automatically make commuting paid time.
+
+2. CORE RULES
+• You are paid only when you are working.
+• You clock in when you arrive at the job site.
+• You clock in to the correct customer job.
+• Nobody ever clocks in from home.
+• GPS and geofencing are used to verify clock-ins.
+
+3. CLOCK-IN PROCEDURES
+• Clock in upon arrival at the job site.
+• If working at the shop for a customer job: Clock in to the customer job and add note: "Working at shop"
+• Do not clock in under "shop" unless explicitly instructed.
+
+4. SHOP EXCEPTIONS (EMPLOYER-DIRECTED ONLY)
+• If management instructs you to go to the shop and you are the driver: You may clock in at the shop for the customer job; shop-to-job travel is paid.
+• Only the instructed driver clocks in.
+• No other employees clock in at the shop.
+
+5. PERSONAL CARPOOLING (UNPAID)
+• Carpooling is a personal choice.
+• Drivers do not get paid for driving coworkers.
+• Personal carpooling does not convert travel into paid time.
+
+6. RIDING WITH ANOTHER EMPLOYEE (UNPAID)
+• Riders do not clock in at the shop.
+• Riders do not load vehicles.
+• Riders do not perform work.
+• Receiving a ride is unpaid personal time.
+
+7. PICKUPS, SUPPLIES & JOB-TO-JOB TRAVEL (PAID)
+• If directed to go to the shop, paint store, pick up supplies, or pick up employees: Clock in at the first required work stop.
+• Employer-directed travel during the workday is paid at regular rate (minimum wage or higher).
+
+8. END OF DAY
+• Clock out when work is complete.
+• Travel home is unpaid.
+• Applies to everyone, including foremen.
+
+9. COMPANY VEHICLES (PERSONAL USE)
+• Personal use is a privilege, not a right.
+• Driving a company vehicle to the shop or job site is unpaid.
+• Company-paid fuel for personal use is a bonus.
+• If you disagree, the vehicle will be parked at the shop.
+
+10. LIVING TOGETHER / ROOMMATE SITUATIONS
+• Living together does not qualify for paid travel.
+• Transporting roommates is not employer-directed work.
+• Disputes will require employees to arrange their own transportation.
+
+11. FOREMAN TRANSPORTATION & RIDE POLICY
+• Foremen are not chauffeurs.
+• The company will not pay for extra trips done for employee convenience.
+• If a foreman is directed to go to the shop or supplier: He goes shop → job site. He does NOT return home to pick up coworkers.
+• Roommates must be ready first thing or arrange their own transportation.
+
+12. NO SMOKING OR VAPING IN COMPANY VEHICLES
+• Smoking and vaping are strictly prohibited in all company vehicles.
+• Includes cigarettes, cigars, vapes, and cannabis.
+• Applies at all times, including personal use.
+• Violations may result in: Loss of vehicle privileges, cleaning/detailing costs charged, disciplinary action up to termination.
+
+13. COMPLIANCE & ENFORCEMENT
+• GPS and geofence data verify clock-ins.
+• Time theft, unauthorized detours, or manipulation will be corrected.
+• Repeated abuse may result in loss of vehicle or ride privileges.
+
+14. EMPLOYEE ACKNOWLEDGMENT
+I acknowledge that I have read, understand, and agree to comply with this policy.
+Employee Name: ____________________________
+Signature: ________________________________
+Date: ___________________
+Supervisor Signature: _______________________`,
   },
 ];
 
