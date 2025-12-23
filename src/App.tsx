@@ -13,6 +13,7 @@ import Training from "./pages/Training";
 import Disciplinary from "./pages/Disciplinary";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/policies" element={<Policies />} />
               <Route path="/training" element={<Training />} />
               <Route path="/disciplinary" element={<Disciplinary />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/admin" element={<Admin />} />
             </Route>
             <Route path="*" element={<NotFound />} />
