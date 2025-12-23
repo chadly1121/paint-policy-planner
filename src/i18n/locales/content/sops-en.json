@@ -106,5 +106,25 @@
   "sop027": {
     "title": "SOP-027 – Safety Orientation & Jobsite Safety",
     "content": "PURPOSE\nTo ensure all employees understand basic safety expectations.\n\nREQUIREMENTS\n• Attend safety orientation.\n• Understand site-specific hazards.\n• Wear required PPE.\n• Follow all safety SOPs.\n\nGENERAL SAFETY\n• Keep walkways clear.\n• Report hazards immediately.\n• Use tools only as trained.\n\nRIGHT TO REFUSE\n• Employees may refuse unsafe work.\n• Report concerns to foreman or management.\n\nSafety violations may result in immediate removal from site."
+  },
+  "sop028": {
+    "title": "SOP-028 – Employee Onboarding & Probation",
+    "content": "PURPOSE\nTo ensure new hires are trained, compliant, and evaluated before full integration.\n\nONBOARDING REQUIREMENTS\n• Review all SOPs\n• Sign acknowledgments\n• Safety orientation completed\n• Tool, vehicle, and conduct expectations reviewed\n\nPROBATION PERIOD\n• First 30–90 days are probationary\n• Performance, attitude, punctuality, and SOP compliance evaluated\n• Probation may be extended or employment terminated at management discretion\n\nFailure to follow SOPs during probation may result in immediate termination."
+  },
+  "sop029": {
+    "title": "SOP-029 – Foreman Daily Report & Photo Standards",
+    "content": "PURPOSE\nTo document progress, issues, and quality daily.\n\nDAILY REPORT MUST INCLUDE\n• Job name and date\n• Crew on site\n• Work completed\n• Issues or delays\n• Materials used\n• Safety or damage incidents\n\nPHOTO STANDARDS\n• Start-of-day photos\n• Mid-day progress photos\n• End-of-day photos\n• Photos must be clear and labeled\n\nReports must be completed daily before clock-out."
+  },
+  "sop030": {
+    "title": "SOP-030 – Warranty & Touch-Up Work",
+    "content": "PURPOSE\nTo manage warranty claims and touch-up work professionally and efficiently.\n\nRULES\n• Warranty work must be approved by management.\n• No unauthorized touch-ups.\n• Document issue with photos and notes.\n\nPROCESS\n1. Receive warranty request.\n2. Inspect and document.\n3. Management approval.\n4. Schedule repair.\n5. Complete and document repair.\n\nWarranty work is not free unless approved."
+  },
+  "sop031": {
+    "title": "SOP-031 – Weather & Environmental Conditions",
+    "content": "PURPOSE\nTo ensure coatings perform correctly under proper conditions.\n\nRULES\n• Follow manufacturer temperature and humidity limits.\n• No exterior painting in rain, snow, or freezing conditions.\n• Monitor weather daily.\n\nINDOOR CONDITIONS\n• Ensure proper ventilation.\n• Control dust and airflow.\n\nForemen may stop work if conditions are unsuitable."
+  },
+  "sop032": {
+    "title": "SOP-032 – Production Rates & Efficiency",
+    "content": "PURPOSE\nTo maintain productivity and profitability.\n\nEXPECTATIONS\n• Employees are expected to meet reasonable production rates.\n• Work steadily and efficiently.\n• Excessive downtime is not acceptable.\n\nMONITORING\n• Foremen track progress daily.\n• Repeated inefficiency will be addressed.\n\nQuality is never sacrificed for speed."
   }
 }
