@@ -475,6 +475,128 @@ SAFETY
 • Dust buildup increases respiratory risk.
 • Proper maintenance is a safety requirement, not optional.`,
   },
+  {
+    id: "sop-012",
+    title: "SOP-012 – Paint Sprayer Use, Cleaning, Maintenance & Tip Management",
+    content: `PURPOSE
+To ensure all paint sprayers are used correctly, cleaned thoroughly, maintained properly, and stored safely. Proper sprayer care prevents failures, protects finish quality, reduces costly repairs, and ensures readiness for the next job.
+
+This SOP applies to:
+• Airless sprayers
+• Pumps
+• Spray guns
+• Hoses
+• Tips, guards, and filters
+
+CORE RULES (NON-NEGOTIABLE)
+• Sprayers must be cleaned after EVERY use.
+• No sprayer is left dirty overnight.
+• Tips, filters, and guns must be cleaned immediately.
+• Sprayers must be flushed properly before storage.
+• Damage caused by improper cleaning or neglect is not acceptable.
+
+PRE-USE INSPECTION (BEFORE EVERY USE)
+Inspect the following before spraying:
+
+Sprayer Unit:
+• No leaks
+• No abnormal noises
+• Proper pressure response
+• Clean intake screen
+
+Hoses:
+• No cuts, bubbles, kinks, or soft spots
+• Proper fittings, tight connections
+
+Gun & Guard:
+• Trigger functions properly
+• Guard installed correctly
+• No paint buildup affecting spray pattern
+
+Filters:
+• Correct filter installed for material
+• Clean and undamaged
+
+If any issue is found:
+• DO NOT USE the sprayer
+• Notify a Foreman or Chad immediately
+
+TIP SELECTION & USE
+• Use the correct tip size for:
+  – Material type
+  – Viscosity
+  – Surface being sprayed
+• Never force material through an incorrect tip.
+• Do not spray with a worn or damaged tip.
+
+Rules:
+• Tips are consumables.
+• If a tip sprays unevenly or tails, replace it.
+• Tips must be cleaned after every use.
+
+DURING SPRAYING
+• Maintain consistent distance and speed.
+• Do not over-pressurize to compensate for clogs.
+• Stop immediately if pattern degrades.
+• Do not let material sit in the gun during breaks.
+
+CLEANING PROCEDURE (MANDATORY)
+Immediately after use:
+
+Step 1 – Empty Material:
+• Remove remaining paint from hopper or bucket.
+• Return usable paint to labeled container.
+
+Step 2 – Flush System:
+• Flush with appropriate cleaner:
+  – Water for water-based coatings
+  – Solvent for solvent-based coatings
+• Flush until fluid runs completely clear.
+
+Step 3 – Gun, Tip & Filter Cleaning:
+• Remove spray tip and guard.
+• Clean thoroughly with brush and cleaner.
+• Remove and clean gun filter.
+• Remove and clean pump filter and intake screen.
+
+Step 4 – Final Flush:
+• Reassemble gun without tip.
+• Flush clean fluid through system.
+• Relieve pressure properly.
+
+STORAGE (NON-NEGOTIABLE)
+• Store sprayers clean and dry.
+• Use pump protectant or storage fluid as required.
+• Coil hoses properly—no kinks.
+• Store tips, filters, and guards in labeled containers.
+• Never store sprayers with paint inside.
+
+COLD WEATHER PROTECTION
+• Sprayers must be winterized in cold conditions.
+• Never allow water to freeze inside pumps or hoses.
+• Damage from freezing is preventable and unacceptable.
+
+TRANSPORTATION
+• Secure sprayers upright during transport.
+• Do not stack heavy items on sprayers.
+• Protect controls, gauges, and fittings.
+
+ACCOUNTABILITY
+• The last person to use the sprayer is responsible for cleaning it.
+• Sprayers returned dirty or damaged due to neglect will result in:
+  – Loss of sprayer privileges
+  – Disciplinary action
+  – Possible responsibility for repair costs
+
+SAFETY
+• High-pressure spray can inject paint into skin (medical emergency).
+• Never point gun at people.
+• Always engage trigger lock when not spraying.
+• Wear appropriate PPE:
+  – Eye protection
+  – Gloves
+  – Respirator when required`,
+  },
 ];
 
 const SOPs = () => {
