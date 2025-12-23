@@ -6,77 +6,19 @@ import { Input } from "@/components/ui/input";
 import { AlertTriangle, Info, Search } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const disciplinaryItems = [
-  {
-    id: "disc-1",
-    title: "1. Progressive Discipline Policy",
-    content: `We follow a progressive discipline approach:
-Step 1 - Verbal Warning:
-• Documented conversation with supervisor
-• Clear explanation of issue and expectations
-• Employee acknowledgment
-Step 2 - Written Warning:
-• Formal written documentation
-• Specific improvement requirements
-• Timeline for improvement
-• Employee signature required
-Step 3 - Final Written Warning:
-• Last chance notice
-• Suspension may be included
-• Clear statement that next violation leads to termination
-Step 4 - Termination:
-• Employment ends
-• Final paycheck issued per state law
-Note: Severity of offense may warrant skipping steps.`,
-  },
-  {
-    id: "disc-2",
-    title: "2. Immediate Termination Offenses",
-    content: `The following will result in immediate termination:
-• Theft or dishonesty
-• Violence or threats of violence
-• Possession of weapons on job sites
-• Possession or use of drugs/alcohol at work
-• Gross negligence resulting in injury or significant property damage
-• Sexual harassment or assault
-• Abandonment of job (3 consecutive no-call/no-show days)
-• Falsification of time records or company documents
-• Insubordination (refusal to follow reasonable work instructions)
-• Serious safety violations that endanger others`,
-  },
-  {
-    id: "disc-3",
-    title: "3. Documentation Requirements",
-    content: `All disciplinary actions must be documented:
-• Date, time, and location of incident
-• Description of the violation
-• Previous related warnings (if applicable)
-• Corrective action or expectations
-• Timeline for improvement
-• Consequences of continued violations
-• Signatures of supervisor and employee
-• Employee may add written comments
-• Copy provided to employee; original in personnel file
-All documentation is confidential.`,
-  },
-  {
-    id: "disc-4",
-    title: "4. Appeal Process",
-    content: `Employees may appeal disciplinary actions:
-• Appeals must be submitted in writing within 5 business days
-• Address appeal to company owner/HR manager
-• Include specific reasons why action was unfair
-• Relevant documentation may be attached
-• Decision will be made within 10 business days
-• Appeal decision is final
-• Employee may continue working during appeal process (unless suspended)
-• No retaliation for filing an appeal`,
-  },
-];
+const disciplinaryKeys = ["disc1", "disc2", "disc3", "disc4"];
 
 const Disciplinary = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const disciplinaryItems = useMemo(() => {
+    return disciplinaryKeys.map((key, index) => ({
+      id: `disc-${index + 1}`,
+      title: t(`disciplinary.${key}.title`),
+      content: t(`disciplinary.${key}.content`),
+    }));
+  }, [t]);
 
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return disciplinaryItems;
@@ -87,7 +29,7 @@ const Disciplinary = () => {
         item.title.toLowerCase().includes(query) ||
         item.content.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [searchQuery, disciplinaryItems]);
 
   return (
     <div className="space-y-6">
