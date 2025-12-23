@@ -1,0 +1,78 @@
+{
+  "common": {
+    "companyName": "Roll On Painting",
+    "employeeManual": "Manual del Empleado",
+    "searchSections": "Buscar secciones...",
+    "searchPlaceholder": "Buscar por palabra clave...",
+    "lastUpdated": "Última actualización",
+    "noResults": "No se encontraron resultados para",
+    "items": "elementos"
+  },
+  "nav": {
+    "dashboard": "Panel de control",
+    "sops": "POEs",
+    "safetyProtocols": "Protocolos de Seguridad",
+    "companyPolicies": "Políticas de la Empresa",
+    "trainingRequirements": "Requisitos de Capacitación",
+    "disciplinaryProcedures": "Procedimientos Disciplinarios"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido al Manual del Empleado",
+    "welcomeDescription": "Este manual contiene toda la información esencial que necesita como miembro del equipo. Navegue por las secciones a continuación para encontrar políticas, procedimientos y pautas para su rol. Si tiene preguntas, hable con su supervisor.",
+    "totalPolicies": "Total de Políticas",
+    "sections": "Secciones",
+    "sopsCount": "POEs",
+    "safetyRules": "Reglas de Seguridad",
+    "manualSections": "Secciones del Manual"
+  },
+  "sections": {
+    "sops": {
+      "title": "Procedimientos Operativos Estándar",
+      "description": "Guías paso a paso para tareas de pintura y procesos de trabajo",
+      "searchPlaceholder": "Buscar POEs por palabra clave..."
+    },
+    "safety": {
+      "title": "Protocolos de Seguridad",
+      "description": "Pautas para mantenerlo a usted y a sus compañeros seguros en cada trabajo",
+      "searchPlaceholder": "Buscar protocolos de seguridad por palabra clave...",
+      "alertTitle": "La Seguridad Primero",
+      "alertDescription": "Se espera que todos los empleados sigan estos protocolos de seguridad en todo momento. Las violaciones pueden resultar en acciones disciplinarias hasta e incluyendo el despido."
+    },
+    "policies": {
+      "title": "Políticas de la Empresa",
+      "description": "Reglas y expectativas del lugar de trabajo para todos los miembros del equipo",
+      "searchPlaceholder": "Buscar políticas por palabra clave..."
+    },
+    "training": {
+      "title": "Requisitos de Capacitación",
+      "description": "Certificaciones requeridas y educación continua para los miembros del equipo",
+      "searchPlaceholder": "Buscar requisitos de capacitación por palabra clave...",
+      "checklistTitle": "Lista de Certificaciones Requeridas"
+    },
+    "disciplinary": {
+      "title": "Procedimientos Disciplinarios",
+      "description": "Disciplina progresiva y políticas de acción correctiva",
+      "searchPlaceholder": "Buscar procedimientos disciplinarios por palabra clave...",
+      "alertTitle": "Proceso Justo",
+      "alertDescription": "Nuestro objetivo es siempre ayudar a los empleados a mejorar. La acción disciplinaria es un último recurso. Fomentamos la comunicación abierta con los supervisores para abordar los problemas antes de que escalen.",
+      "acknowledgment": "Al continuar su empleo con la empresa, usted reconoce que ha leído y entiende estos procedimientos disciplinarios. Si tiene preguntas sobre alguna política, hable con su supervisor o Recursos Humanos."
+    }
+  },
+  "certifications": {
+    "epaRrp": "Certificación EPA RRP",
+    "osha10": "OSHA 10 Horas Construcción",
+    "safetyOrientation": "Orientación de Seguridad de la Empresa",
+    "customerService": "Capacitación de Servicio al Cliente",
+    "within90Days": "Dentro de 90 días",
+    "within6Months": "Dentro de 6 meses",
+    "firstWeek": "Primera semana",
+    "within30Days": "Dentro de 30 días"
+  },
+  "language": {
+    "select": "Idioma",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tl": "Tagalog"
+  }
+}

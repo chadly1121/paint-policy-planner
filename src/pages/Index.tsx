@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   ClipboardList,
   Shield,
@@ -9,45 +10,47 @@ import {
 import SectionCard from "@/components/manual/SectionCard";
 import { Card, CardContent } from "@/components/ui/card";
 
-const sections = [
-  {
-    title: "Standard Operating Procedures",
-    description: "Step-by-step guides for painting tasks and job processes",
-    icon: ClipboardList,
-    path: "/sops",
-    itemCount: 8,
-  },
-  {
-    title: "Safety Protocols",
-    description: "Safety guidelines, equipment usage, and hazard prevention",
-    icon: Shield,
-    path: "/safety",
-    itemCount: 6,
-  },
-  {
-    title: "Company Policies",
-    description: "Attendance, conduct, dress code, and workplace rules",
-    icon: FileText,
-    path: "/policies",
-    itemCount: 10,
-  },
-  {
-    title: "Training Requirements",
-    description: "Required certifications and ongoing education",
-    icon: GraduationCap,
-    path: "/training",
-    itemCount: 5,
-  },
-  {
-    title: "Disciplinary Procedures",
-    description: "Progressive discipline and corrective action policies",
-    icon: AlertTriangle,
-    path: "/disciplinary",
-    itemCount: 4,
-  },
-];
-
 const Index = () => {
+  const { t } = useTranslation();
+
+  const sections = [
+    {
+      title: t("sections.sops.title"),
+      description: t("sections.sops.description"),
+      icon: ClipboardList,
+      path: "/sops",
+      itemCount: 12,
+    },
+    {
+      title: t("sections.safety.title"),
+      description: t("sections.safety.description"),
+      icon: Shield,
+      path: "/safety",
+      itemCount: 6,
+    },
+    {
+      title: t("sections.policies.title"),
+      description: t("sections.policies.description"),
+      icon: FileText,
+      path: "/policies",
+      itemCount: 10,
+    },
+    {
+      title: t("sections.training.title"),
+      description: t("sections.training.description"),
+      icon: GraduationCap,
+      path: "/training",
+      itemCount: 5,
+    },
+    {
+      title: t("sections.disciplinary.title"),
+      description: t("sections.disciplinary.description"),
+      icon: AlertTriangle,
+      path: "/disciplinary",
+      itemCount: 4,
+    },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Welcome Card */}
@@ -58,12 +61,10 @@ const Index = () => {
           </div>
           <div>
             <h2 className="font-serif text-2xl font-bold text-foreground">
-              Welcome to the Employee Handbook
+              {t("dashboard.welcome")}
             </h2>
             <p className="mt-2 text-muted-foreground">
-              This manual contains all the essential information you need as a team member.
-              Browse through the sections below to find policies, procedures, and guidelines
-              for your role. If you have questions, please speak with your supervisor.
+              {t("dashboard.welcomeDescription")}
             </p>
           </div>
         </CardContent>
@@ -72,27 +73,27 @@ const Index = () => {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-lg border border-border bg-card p-4 text-center">
-          <p className="text-2xl font-bold text-primary">33</p>
-          <p className="text-sm text-muted-foreground">Total Policies</p>
+          <p className="text-2xl font-bold text-primary">37</p>
+          <p className="text-sm text-muted-foreground">{t("dashboard.totalPolicies")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 text-center">
           <p className="text-2xl font-bold text-primary">5</p>
-          <p className="text-sm text-muted-foreground">Sections</p>
+          <p className="text-sm text-muted-foreground">{t("dashboard.sections")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 text-center">
-          <p className="text-2xl font-bold text-primary">8</p>
-          <p className="text-sm text-muted-foreground">SOPs</p>
+          <p className="text-2xl font-bold text-primary">12</p>
+          <p className="text-sm text-muted-foreground">{t("dashboard.sopsCount")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 text-center">
           <p className="text-2xl font-bold text-primary">6</p>
-          <p className="text-sm text-muted-foreground">Safety Rules</p>
+          <p className="text-sm text-muted-foreground">{t("dashboard.safetyRules")}</p>
         </div>
       </div>
 
       {/* Section Cards */}
       <div>
         <h3 className="mb-4 font-serif text-lg font-semibold text-foreground">
-          Manual Sections
+          {t("dashboard.manualSections")}
         </h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sections.map((section) => (

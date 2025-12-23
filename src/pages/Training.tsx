@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -81,15 +82,16 @@ Submit training completion forms to supervisor within 48 hours.`,
   },
 ];
 
-const requiredCertifications = [
-  { name: "EPA RRP Certification", timeline: "Within 90 days" },
-  { name: "OSHA 10-Hour Construction", timeline: "Within 6 months" },
-  { name: "Company Safety Orientation", timeline: "First week" },
-  { name: "Customer Service Training", timeline: "Within 30 days" },
-];
-
 const Training = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const requiredCertifications = [
+    { name: t("certifications.epaRrp"), timeline: t("certifications.within90Days") },
+    { name: t("certifications.osha10"), timeline: t("certifications.within6Months") },
+    { name: t("certifications.safetyOrientation"), timeline: t("certifications.firstWeek") },
+    { name: t("certifications.customerService"), timeline: t("certifications.within30Days") },
+  ];
 
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return trainingItems;
@@ -109,7 +111,7 @@ const Training = () => {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 font-serif text-lg">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
-            Required Certifications Checklist
+            {t("sections.training.checklistTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -132,9 +134,9 @@ const Training = () => {
               <GraduationCap className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="font-serif">Training Requirements</CardTitle>
+              <CardTitle className="font-serif">{t("sections.training.title")}</CardTitle>
               <CardDescription>
-                Required certifications and ongoing education for team members
+                {t("sections.training.description")}
               </CardDescription>
             </div>
           </div>
@@ -143,7 +145,7 @@ const Training = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search training requirements by keyword..."
+              placeholder={t("sections.training.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -153,7 +155,7 @@ const Training = () => {
             <PolicySection items={filteredItems} />
           ) : (
             <p className="text-center text-muted-foreground py-8">
-              No training requirements found matching "{searchQuery}"
+              {t("common.noResults")} "{searchQuery}"
             </p>
           )}
         </CardContent>

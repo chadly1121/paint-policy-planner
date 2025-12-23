@@ -1,0 +1,78 @@
+{
+  "common": {
+    "companyName": "Roll On Painting",
+    "employeeManual": "Manuel de l'employé",
+    "searchSections": "Rechercher des sections...",
+    "searchPlaceholder": "Rechercher par mot-clé...",
+    "lastUpdated": "Dernière mise à jour",
+    "noResults": "Aucun résultat trouvé pour",
+    "items": "éléments"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "sops": "PON",
+    "safetyProtocols": "Protocoles de sécurité",
+    "companyPolicies": "Politiques de l'entreprise",
+    "trainingRequirements": "Exigences de formation",
+    "disciplinaryProcedures": "Procédures disciplinaires"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue dans le Manuel de l'employé",
+    "welcomeDescription": "Ce manuel contient toutes les informations essentielles dont vous avez besoin en tant que membre de l'équipe. Parcourez les sections ci-dessous pour trouver les politiques, procédures et directives pour votre rôle. Si vous avez des questions, veuillez en parler à votre superviseur.",
+    "totalPolicies": "Total des politiques",
+    "sections": "Sections",
+    "sopsCount": "PON",
+    "safetyRules": "Règles de sécurité",
+    "manualSections": "Sections du manuel"
+  },
+  "sections": {
+    "sops": {
+      "title": "Procédures opérationnelles normalisées",
+      "description": "Guides étape par étape pour les tâches de peinture et les processus de travail",
+      "searchPlaceholder": "Rechercher des PON par mot-clé..."
+    },
+    "safety": {
+      "title": "Protocoles de sécurité",
+      "description": "Directives pour assurer votre sécurité et celle de vos collègues sur chaque chantier",
+      "searchPlaceholder": "Rechercher des protocoles de sécurité par mot-clé...",
+      "alertTitle": "La sécurité d'abord",
+      "alertDescription": "Tous les employés doivent suivre ces protocoles de sécurité en tout temps. Les violations peuvent entraîner des mesures disciplinaires pouvant aller jusqu'au licenciement."
+    },
+    "policies": {
+      "title": "Politiques de l'entreprise",
+      "description": "Règles et attentes du lieu de travail pour tous les membres de l'équipe",
+      "searchPlaceholder": "Rechercher des politiques par mot-clé..."
+    },
+    "training": {
+      "title": "Exigences de formation",
+      "description": "Certifications requises et formation continue pour les membres de l'équipe",
+      "searchPlaceholder": "Rechercher des exigences de formation par mot-clé...",
+      "checklistTitle": "Liste des certifications requises"
+    },
+    "disciplinary": {
+      "title": "Procédures disciplinaires",
+      "description": "Discipline progressive et politiques d'action corrective",
+      "searchPlaceholder": "Rechercher des procédures disciplinaires par mot-clé...",
+      "alertTitle": "Processus équitable",
+      "alertDescription": "Notre objectif est toujours d'aider les employés à s'améliorer. L'action disciplinaire est un dernier recours. Nous encourageons la communication ouverte avec les superviseurs pour résoudre les problèmes avant qu'ils ne s'aggravent.",
+      "acknowledgment": "En continuant votre emploi avec l'entreprise, vous reconnaissez avoir lu et compris ces procédures disciplinaires. Si vous avez des questions sur une politique, veuillez en parler à votre superviseur ou aux RH."
+    }
+  },
+  "certifications": {
+    "epaRrp": "Certification EPA RRP",
+    "osha10": "OSHA 10 heures Construction",
+    "safetyOrientation": "Orientation sécurité de l'entreprise",
+    "customerService": "Formation service client",
+    "within90Days": "Dans les 90 jours",
+    "within6Months": "Dans les 6 mois",
+    "firstWeek": "Première semaine",
+    "within30Days": "Dans les 30 jours"
+  },
+  "language": {
+    "select": "Langue",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tl": "Tagalog"
+  }
+}
