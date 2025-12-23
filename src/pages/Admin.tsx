@@ -9,6 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
@@ -18,7 +27,9 @@ import {
   X, 
   Clock,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  Trophy,
+  RefreshCw
 } from "lucide-react";
 import { z } from "zod";
 
@@ -38,6 +49,18 @@ interface RedemptionRequest {
   profiles?: { full_name: string; email: string };
 }
 
+interface EmployeeData {
+  user_id: string;
+  full_name: string;
+  email: string;
+  total_points: number;
+  available_points: number;
+  sections_completed: number;
+  created_at: string;
+}
+
+const TOTAL_SECTIONS = 5;
+
 const Admin = () => {
   const { t } = useTranslation();
   const { isAdmin, loading: authLoading } = useAuth();
@@ -54,6 +77,9 @@ const Admin = () => {
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
+
   useEffect(() => {
     if (!authLoading && !isAdmin) {
       navigate("/");
@@ -63,13 +89,73 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchRedemptionRequests();
+      fetchEmployees();
     }
   }, [isAdmin]);
+
+  const fetchEmployees = async () => {
+    setLoadingEmployees(true);
+    try {
+      // Fetch all profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (profilesError) throw profilesError;
+
+      if (profiles && profiles.length > 0) {
+        const userIds = profiles.map(p => p.user_id);
+
+        // Fetch points balances
+        const { data: balances } = await supabase
+          .from("points_balance")
+          .select("*")
+          .in("user_id", userIds);
+
+        // Fetch section progress
+        const { data: progressData } = await supabase
+          .from("section_progress")
+          .select("user_id, completed")
+          .in("user_id", userIds)
+          .eq("completed", true);
+
+        // Count completed sections per user
+        const progressMap = new Map<string, number>();
+        progressData?.forEach(p => {
+          const count = progressMap.get(p.user_id) || 0;
+          progressMap.set(p.user_id, count + 1);
+        });
+
+        const balanceMap = new Map(balances?.map(b => [b.user_id, b]) || []);
+
+        const employeeData: EmployeeData[] = profiles.map(profile => {
+          const balance = balanceMap.get(profile.user_id);
+          return {
+            user_id: profile.user_id,
+            full_name: profile.full_name,
+            email: profile.email,
+            total_points: balance?.total_points || 0,
+            available_points: balance?.available_points ?? balance?.total_points ?? 0,
+            sections_completed: progressMap.get(profile.user_id) || 0,
+            created_at: profile.created_at,
+          };
+        });
+
+        setEmployees(employeeData);
+      } else {
+        setEmployees([]);
+      }
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
 
   const fetchRedemptionRequests = async () => {
     setLoadingRequests(true);
     try {
-      // Fetch requests
       const { data: requestsData, error } = await supabase
         .from("redemption_requests")
         .select("*")
@@ -78,10 +164,8 @@ const Admin = () => {
       if (error) throw error;
 
       if (requestsData && requestsData.length > 0) {
-        // Get unique user IDs
         const userIds = [...new Set(requestsData.map(r => r.user_id))];
         
-        // Fetch profiles for these users
         const { data: profiles } = await supabase
           .from("profiles")
           .select("user_id, full_name, email")
@@ -150,6 +234,8 @@ const Admin = () => {
         setEmail("");
         setPassword("");
         setFullName("");
+        // Refresh employee list after short delay to allow DB trigger to complete
+        setTimeout(() => fetchEmployees(), 1000);
       }
     } catch (error) {
       console.error("Error creating employee:", error);
@@ -169,7 +255,6 @@ const Admin = () => {
       const request = requests.find(r => r.id === requestId);
       if (!request) return;
 
-      // Update request status
       const { error: updateError } = await supabase
         .from("redemption_requests")
         .update({
@@ -180,7 +265,6 @@ const Admin = () => {
 
       if (updateError) throw updateError;
 
-      // If approved, update points balance
       if (approve) {
         const { data: balance } = await supabase
           .from("points_balance")
@@ -210,6 +294,7 @@ const Admin = () => {
       });
 
       fetchRedemptionRequests();
+      fetchEmployees();
     } catch (error) {
       console.error("Error processing request:", error);
       toast({
@@ -267,6 +352,7 @@ const Admin = () => {
         </TabsList>
 
         <TabsContent value="employees" className="space-y-6">
+          {/* Create Employee Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -333,6 +419,102 @@ const Admin = () => {
                   )}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Employee Table */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    All Employees
+                    <Badge variant="secondary">{employees.length}</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    View all employees, their progress, and points
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchEmployees()}
+                  disabled={loadingEmployees}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loadingEmployees ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingEmployees ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : employees.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  No employees found
+                </p>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Progress</TableHead>
+                        <TableHead className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <Trophy className="h-4 w-4" />
+                            Points
+                          </div>
+                        </TableHead>
+                        <TableHead className="text-center">Available</TableHead>
+                        <TableHead>Joined</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {employees.map((employee) => (
+                        <TableRow key={employee.user_id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{employee.full_name}</p>
+                              <p className="text-sm text-muted-foreground">{employee.email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1 min-w-[120px]">
+                              <div className="flex items-center justify-between text-sm">
+                                <span>{employee.sections_completed}/{TOTAL_SECTIONS}</span>
+                                <span className="text-muted-foreground">
+                                  {Math.round((employee.sections_completed / TOTAL_SECTIONS) * 100)}%
+                                </span>
+                              </div>
+                              <Progress 
+                                value={(employee.sections_completed / TOTAL_SECTIONS) * 100} 
+                                className="h-2"
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary" className="font-mono">
+                              {employee.total_points}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className="font-mono">
+                              {employee.available_points}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {new Date(employee.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
