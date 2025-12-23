@@ -20,12 +20,12 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, answers, userId, quizType, sopKey } = await req.json();
+    const { sectionKey, answers, userId, quizType, itemKey } = await req.json();
 
-    // quizType can be: "mini" (SOP mini-quiz), "final" (SOP final exam), or undefined (legacy)
+    // quizType can be: "mini" (item mini-quiz), "final" (section final exam), or undefined (legacy)
     const isMiniQuiz = quizType === "mini";
     const isFinalExam = quizType === "final";
-    const quizKey = isMiniQuiz ? sopKey : sectionKey;
+    const quizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
 
     console.log(`Processing ${quizType || 'standard'} quiz submission for: ${quizKey}, user: ${userId}`);
 
@@ -101,31 +101,33 @@ serve(async (req) => {
     
     // If passed, update progress and points
     if (passed) {
-      if (isMiniQuiz) {
-        // Check if SOP already completed
+      if (isMiniQuiz && itemKey) {
+        // Check if item already completed in section_item_progress
         const { data: existingProgress } = await supabase
-          .from("sop_quiz_progress")
+          .from("section_item_progress")
           .select("completed")
           .eq("user_id", userId)
-          .eq("sop_key", sopKey)
-          .single();
+          .eq("section_key", sectionKey)
+          .eq("item_key", itemKey)
+          .maybeSingle();
 
         alreadyCompleted = existingProgress?.completed === true;
 
         if (!alreadyCompleted) {
-          // Update SOP progress
-          const { error: sopProgressError } = await supabase
-            .from("sop_quiz_progress")
+          // Update section item progress
+          const { error: itemProgressError } = await supabase
+            .from("section_item_progress")
             .upsert({
               user_id: userId,
-              sop_key: sopKey,
+              section_key: sectionKey,
+              item_key: itemKey,
               completed: true,
               completed_at: new Date().toISOString(),
               points_earned: pointsEarned,
-            }, { onConflict: "user_id,sop_key" });
+            }, { onConflict: "user_id,section_key,item_key" });
 
-          if (sopProgressError) {
-            console.error("SOP progress update error:", sopProgressError);
+          if (itemProgressError) {
+            console.error("Section item progress update error:", itemProgressError);
           }
         }
       } else {

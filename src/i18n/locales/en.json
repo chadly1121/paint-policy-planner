@@ -24,6 +24,17 @@
     "miniQuizzesCompleted": "Mini-quizzes completed",
     "completeAllMiniQuizzes": "Complete all SOP mini-quizzes to unlock the final exam"
   },
+  "section": {
+    "progress": "Progress",
+    "finalExam": "Final Exam",
+    "finalExamReady": "All mini-quizzes complete! Take the final exam to unlock the next section.",
+    "finalExamLocked": "Complete all {{completed}}/{{total}} mini-quizzes to unlock",
+    "finalExamCompleted": "Final Exam Passed!",
+    "finalExamCompletedDesc": "You've mastered all {{section}} content",
+    "startFinalExam": "Start Final Exam",
+    "miniQuizzesCompleted": "Mini-quizzes completed",
+    "completeAllMiniQuizzes": "Complete all mini-quizzes to unlock the final exam"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "sops": "SOPs",

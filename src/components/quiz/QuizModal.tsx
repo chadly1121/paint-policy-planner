@@ -20,7 +20,7 @@ interface QuizModalProps {
   sectionContent: string;
   onComplete: (passed: boolean) => void;
   quizType?: "mini" | "final";
-  sopKey?: string;
+  itemKey?: string;
 }
 
 const QuizModal = ({
@@ -31,7 +31,7 @@ const QuizModal = ({
   sectionContent,
   onComplete,
   quizType,
-  sopKey,
+  itemKey,
 }: QuizModalProps) => {
   const {
     loading,
@@ -51,9 +51,9 @@ const QuizModal = ({
 
   useEffect(() => {
     if (open && questions.length === 0) {
-      generateQuiz(sectionKey, sectionContent, quizType, sopKey);
+      generateQuiz(sectionKey, sectionContent, quizType, itemKey);
     }
-  }, [open, sectionKey, sectionContent, generateQuiz, questions.length, quizType, sopKey]);
+  }, [open, sectionKey, sectionContent, generateQuiz, questions.length, quizType, itemKey]);
 
   const handleClose = () => {
     resetQuiz();
@@ -61,7 +61,7 @@ const QuizModal = ({
   };
 
   const handleSubmit = async () => {
-    const result = await submitQuiz(sectionKey, quizType, sopKey);
+    const result = await submitQuiz(sectionKey, quizType, itemKey);
     if (result) {
       onComplete(result.passed);
     }
@@ -69,7 +69,7 @@ const QuizModal = ({
 
   const handleRetry = () => {
     resetQuiz();
-    generateQuiz(sectionKey, sectionContent, quizType, sopKey);
+    generateQuiz(sectionKey, sectionContent, quizType, itemKey);
   };
 
   const questionCount = quizType === "mini" ? 2 : quizType === "final" ? 10 : 5;
