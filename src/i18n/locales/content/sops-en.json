@@ -166,5 +166,25 @@
   "sop042": {
     "title": "SOP-042 – Annual Training, Review & Certification",
     "content": "PURPOSE\nTo ensure ongoing compliance and skill development.\n\nREQUIREMENTS\n• Annual review of SOPs.\n• Annual safety training.\n• Tool and equipment refresher training.\n• Documentation of completed training.\n\nFAILURE\n• Failure to complete training may result in removal from site or discipline."
+  },
+  "sop043": {
+    "title": "SOP-043 – Lead Paint & Renovation Awareness",
+    "content": "PURPOSE\nTo protect workers and occupants from exposure to lead-containing materials during renovation and repainting.\n\nRULES\n• Assume pre-1990 buildings may contain lead paint.\n• Do not disturb suspected lead paint without approval.\n• No dry sanding, grinding, or scraping of suspect materials.\n• Use containment and dust control at all times.\n\nIF LEAD IS SUSPECTED\n• Stop work immediately.\n• Notify foreman and management.\n• Do not resume until cleared.\n\nOnly trained personnel may perform lead-related work."
+  },
+  "sop044": {
+    "title": "SOP-044 – Respirator Use, Fit & Care",
+    "content": "PURPOSE\nTo ensure respirators are used correctly to protect employee health.\n\nRULES\n• Use respirators when required by task or SDS.\n• Employees must be fit-tested.\n• Facial hair that interferes with seal is prohibited.\n\nCARE\n• Clean respirators after each use.\n• Store in sealed, clean containers.\n• Inspect before each use.\n\nDamaged or poorly fitting respirators must not be used."
+  },
+  "sop045": {
+    "title": "SOP-045 – Personal Protective Equipment (PPE)",
+    "content": "PURPOSE\nTo establish minimum PPE standards.\n\nREQUIRED PPE (AS APPLICABLE)\n• Safety glasses\n• Gloves\n• Respirators\n• Hearing protection\n• Protective clothing\n\nRULES\n• PPE must be worn when required.\n• PPE must be clean and in good condition.\n• Do not modify PPE.\n\nFailure to wear PPE is a safety violation."
+  },
+  "sop046": {
+    "title": "SOP-046 – Jobsite Signage & Barricading",
+    "content": "PURPOSE\nTo protect workers, customers, and the public.\n\nRULES\n• Use signage to identify hazards.\n• Barricade sanding or spraying areas.\n• Restrict access to work zones.\n• Remove signage only when hazards are cleared.\n\nDo not rely on verbal warnings alone."
+  },
+  "sop047": {
+    "title": "SOP-047 – Subcontractor Management",
+    "content": "PURPOSE\nTo ensure subcontractors meet company standards.\n\nREQUIREMENTS\n• Subcontractors must follow all SOPs.\n• Provide proof of insurance and safety compliance.\n• Work must be inspected by foreman.\n\nVIOLATIONS\n• Unsafe or unprofessional conduct may result in removal from site.\n• Subcontractors do not override company SOPs."
   }
 }
