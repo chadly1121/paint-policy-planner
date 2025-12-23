@@ -66,5 +66,25 @@
   "sop017": {
     "title": "POE-017 – Prevención de daños y protección de propiedad",
     "content": "PROPÓSITO\nPrevenir daños a la propiedad del cliente, acabados, accesorios y áreas circundantes.\n\nREGLAS\n• Tratar cada hogar como ocupado y terminado.\n• Nunca apoyar herramientas contra paredes o muebles.\n• Nunca arrastrar herramientas o mangueras sobre superficies terminadas.\n• Nunca colocar herramientas sobre encimeras o muebles.\n\nESCALERAS Y EQUIPO\n• Acolchar puntos de contacto de escaleras.\n• Usar lonas bajo las escaleras.\n• No apoyar escaleras en molduras terminadas o gabinetes.\n\nINCIDENTES\n• Cualquier daño debe reportarse inmediatamente.\n• No ocultar o ignorar daños.\n• Completar reporte de incidente el mismo día.\n\nNo reportar daños es una violación grave."
+  },
+  "sop018": {
+    "title": "POE-018 – Autoridad y toma de decisiones del capataz",
+    "content": "PROPÓSITO\nDefinir claramente la autoridad, responsabilidad y poder de decisión de los capataces en los sitios de trabajo para prevenir retrasos, confusión y expansión del alcance.\n\nAUTORIDAD\n• El capataz es la máxima autoridad en el sitio a menos que se indique lo contrario.\n• Todos los miembros del equipo deben seguir las instrucciones del capataz.\n• Los capataces hacen cumplir todos los POE sin excepción.\n\nREGLAS DE DECISIÓN\nLos capataces PUEDEN decidir:\n• Secuenciación diaria del trabajo\n• Uso de herramientas y materiales\n• Ajustes menores del flujo de trabajo\n• Correcciones de calidad\n• Paradas de seguridad\n\nLos capataces NO PUEDEN decidir:\n• Cambios de precio\n• Cambios de alcance\n• Extras gratis para clientes\n• Desviaciones de los POE escritos\n• Ignorar daños o incidentes\n\nESCALAMIENTO\n• Cualquier solicitud de alcance, costo o cliente fuera del contrato debe escalarse a Chad o a la gerencia inmediatamente.\n• En caso de duda: DETÉNGASE y PREGUNTE.\n\nNo seguir las instrucciones del capataz es insubordinación."
+  },
+  "sop019": {
+    "title": "POE-019 – Interacción y comunicación con clientes",
+    "content": "PROPÓSITO\nAsegurar una comunicación profesional, consistente y controlada con los clientes.\n\nREGLAS GENERALES\n• Ser cortés, profesional y breve.\n• No compartir demasiada información.\n• No especular o adivinar.\n• No prometer nada.\n\nLO QUE LOS EMPLEADOS PUEDEN DECIR\n• Qué trabajo está programado para hoy\n• Actualizaciones generales de progreso\n• Que las preguntas serán pasadas a la gerencia\n\nLO QUE LOS EMPLEADOS NO PUEDEN DECIR\n• Precios o descuentos\n• Garantías de calendario\n• Opiniones sobre otros oficios\n• Críticas del hogar o trabajo anterior\n• Autorización para trabajo extra\n\nSOLICITUDES DE CLIENTES\n• Todas las solicitudes de cambio deben dirigirse al capataz.\n• El capataz escala a la gerencia.\n• Sin aprobaciones verbales."
+  },
+  "sop020": {
+    "title": "POE-020 – Órdenes de cambio",
+    "content": "PROPÓSITO\nControlar el alcance, precios y aprobación de trabajo fuera del acuerdo original.\n\nREGLAS\n• No se realiza trabajo extra sin una orden de cambio escrita.\n• Las aprobaciones verbales son inválidas.\n• El trabajo \"ya que está aquí\" no está permitido.\n\nPROCESO\n1. El cliente solicita el cambio.\n2. El capataz documenta la solicitud.\n3. La gerencia establece el precio.\n4. El cliente firma la aprobación.\n5. El trabajo se programa y completa.\n\nEl trabajo no autorizado no será pagado."
+  },
+  "sop021": {
+    "title": "POE-021 – Seguridad en alturas y uso de escaleras",
+    "content": "PROPÓSITO\nPrevenir caídas y lesiones al trabajar en altura.\n\nREGLAS\n• Inspeccionar escaleras diariamente.\n• Usar la escalera correcta para la tarea.\n• Nunca pararse en el escalón superior.\n• Mantener tres puntos de contacto.\n• No estirarse demasiado.\n\nINSTALACIÓN\n• Colocar escaleras en suelo estable.\n• Usar pies de escalera o niveladores.\n• Asegurar escaleras donde sea requerido.\n\nPROHIBIDO\n• Escaleras rotas o dañadas\n• Pararse en cubetas, cajas o plataformas improvisadas\n• Cargar objetos pesados mientras sube\n\nLas violaciones pueden resultar en remoción del sitio."
+  },
+  "sop022": {
+    "title": "POE-022 – Matriz disciplinaria y aplicación",
+    "content": "PROPÓSITO\nAsegurar una aplicación consistente y justa de todos los POE.\n\nNIVELES DE DISCIPLINA\n\nNivel 1 – Advertencia verbal\n• Violaciones menores de POE\n• Primeras ofensas\n\nNivel 2 – Advertencia escrita\n• Violaciones repetidas\n• Problemas de seguridad\n• Negligencia de herramientas\n\nNivel 3 – Suspensión\n• Violaciones graves\n• Ocultamiento de daños\n• Robo de tiempo\n\nNivel 4 – Terminación\n• Violaciones de seguridad intencionales\n• Deshonestidad\n• Insubordinación repetida\n\nNOTAS\n• La disciplina puede saltar niveles dependiendo de la gravedad.\n• Todos los incidentes se documentan.\n• La ignorancia de los POE no es excusa."
   }
 }

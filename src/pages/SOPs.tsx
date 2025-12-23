@@ -27,6 +27,11 @@ const SOPs = () => {
     { id: "sop-015", title: t("sops.sop015.title"), content: t("sops.sop015.content") },
     { id: "sop-016", title: t("sops.sop016.title"), content: t("sops.sop016.content") },
     { id: "sop-017", title: t("sops.sop017.title"), content: t("sops.sop017.content") },
+    { id: "sop-018", title: t("sops.sop018.title"), content: t("sops.sop018.content") },
+    { id: "sop-019", title: t("sops.sop019.title"), content: t("sops.sop019.content") },
+    { id: "sop-020", title: t("sops.sop020.title"), content: t("sops.sop020.content") },
+    { id: "sop-021", title: t("sops.sop021.title"), content: t("sops.sop021.content") },
+    { id: "sop-022", title: t("sops.sop022.title"), content: t("sops.sop022.content") },
   ], [t]);
 
   const filteredItems = useMemo(() => {
