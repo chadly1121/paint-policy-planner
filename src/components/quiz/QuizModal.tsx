@@ -32,6 +32,7 @@ const QuizModal = ({
   const {
     loading,
     questions,
+    reviewQuestions,
     currentQuestionIndex,
     answers,
     quizComplete,
@@ -221,7 +222,7 @@ const QuizModal = ({
                 <div className="space-y-4">
                   <h4 className="font-medium">Review your answers:</h4>
                   <div className="space-y-2 text-left max-h-48 overflow-y-auto">
-                    {questions.map((q, idx) => (
+                    {reviewQuestions.map((q, idx) => (
                       <div
                         key={q.id}
                         className={cn(

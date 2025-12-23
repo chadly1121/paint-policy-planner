@@ -59,7 +59,7 @@ export const useProgress = () => {
         setPoints({
           total_points: data.total_points,
           redeemed_points: data.redeemed_points,
-          available_points: data.available_points,
+          available_points: data.available_points ?? (data.total_points - data.redeemed_points),
         });
       }
     } catch (error) {
@@ -69,8 +69,19 @@ export const useProgress = () => {
 
   const fetchLeaderboard = useCallback(async () => {
     try {
-      const { data } = await supabase.rpc("get_leaderboard");
-      setLeaderboard(data || []);
+      // Use the secure leaderboard view that doesn't expose emails
+      const { data, error } = await supabase
+        .from("leaderboard_view")
+        .select("*");
+
+      if (error) {
+        // Fallback to the RPC function if view fails
+        console.log("Falling back to RPC for leaderboard");
+        const { data: rpcData } = await supabase.rpc("get_leaderboard");
+        setLeaderboard(rpcData || []);
+      } else {
+        setLeaderboard(data || []);
+      }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
     }

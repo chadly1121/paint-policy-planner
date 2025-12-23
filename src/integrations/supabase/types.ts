@@ -214,7 +214,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_view: {
+        Row: {
+          available_points: number | null
+          full_name: string | null
+          sections_completed: number | null
+          total_points: number | null
+        }
+        Relationships: []
+      }
+      quiz_questions_safe: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          options: Json | null
+          question: string | null
+          section_key: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          options?: Json | null
+          question?: string | null
+          section_key?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          options?: Json | null
+          question?: string | null
+          section_key?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_leaderboard: {
