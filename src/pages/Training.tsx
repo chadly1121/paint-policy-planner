@@ -5,86 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { GraduationCap, CheckCircle2, Search } from "lucide-react";
 
-const trainingItems = [
-  {
-    id: "training-1",
-    title: "1. New Employee Orientation",
-    content: `All new employees must complete:
-• Company policies and procedures review (this manual)
-• Safety orientation and PPE training
-• Equipment and tool familiarization
-• Customer service expectations
-• Shadowing experienced painter for minimum 2 shifts
-• Orientation quiz with minimum 80% score required
-• Sign acknowledgment of receipt for employee handbook
-Orientation must be completed within first 5 working days.`,
-  },
-  {
-    id: "training-2",
-    title: "2. Required Certifications",
-    content: `The following certifications are required:
-EPA RRP (Renovation, Repair & Painting) Certification:
-• Required for all painters within 90 days of hire
-• Renewal required every 5 years
-• Company will pay for initial certification
-OSHA 10-Hour Construction Safety:
-• Required for all employees within 6 months of hire
-• Recommended OSHA 30-Hour for leads and supervisors
-CPR/First Aid (for supervisors):
-• Crew leads must maintain current certification
-• Renewal every 2 years`,
-  },
-  {
-    id: "training-3",
-    title: "3. Ongoing Training Requirements",
-    content: `Continuous improvement is expected:
-• Monthly safety toolbox talks (mandatory attendance)
-• Quarterly skills workshops
-• Annual safety refresher training
-• Product training when new materials are introduced
-• Customer service training annually
-• Training hours count toward regular pay
-• Employees may request additional training opportunities
-Document all training in employee file.`,
-  },
-  {
-    id: "training-4",
-    title: "4. Skill Development Levels",
-    content: `Career progression path:
-Apprentice Painter (0-6 months):
-• Basic prep work and cleanup
-• Learning proper painting techniques
-• Shadowing experienced painters
-Painter (6 months - 2 years):
-• Independent work on standard projects
-• Customer interaction
-• Quality control awareness
-Senior Painter (2-5 years):
-• Complex projects and specialty finishes
-• Mentoring apprentices
-• Estimating assistance
-Crew Lead (5+ years):
-• Team management
-• Customer relations
-• Quality assurance`,
-  },
-  {
-    id: "training-5",
-    title: "5. Training Documentation",
-    content: `Keep accurate training records:
-• All training must be documented with date and trainer signature
-• Certification copies maintained in employee file
-• Training log reviewed during performance evaluations
-• Employees responsible for tracking certification renewals
-• Expired certifications may result in temporary reassignment
-• Training records available for employee review upon request
-Submit training completion forms to supervisor within 48 hours.`,
-  },
-];
+const trainingKeys = ["training1", "training2", "training3", "training4", "training5"];
 
 const Training = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const trainingItems = useMemo(() => {
+    return trainingKeys.map((key, index) => ({
+      id: `training-${index + 1}`,
+      title: t(`training.${key}.title`),
+      content: t(`training.${key}.content`),
+    }));
+  }, [t]);
 
   const requiredCertifications = [
     { name: t("certifications.epaRrp"), timeline: t("certifications.within90Days") },
@@ -102,7 +35,7 @@ const Training = () => {
         item.title.toLowerCase().includes(query) ||
         item.content.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [searchQuery, trainingItems]);
 
   return (
     <div className="space-y-6">
