@@ -69,16 +69,12 @@ export const useProgress = () => {
 
   const fetchLeaderboard = useCallback(async () => {
     try {
-      // Use the secure leaderboard view that doesn't expose emails
-      const { data, error } = await supabase
-        .from("leaderboard_view")
-        .select("*");
+      // Use the secure leaderboard function that only authenticated users can access
+      const { data, error } = await supabase.rpc("get_secure_leaderboard");
 
       if (error) {
-        // Fallback to the RPC function if view fails
-        console.log("Falling back to RPC for leaderboard");
-        const { data: rpcData } = await supabase.rpc("get_leaderboard");
-        setLeaderboard(rpcData || []);
+        console.error("Error fetching leaderboard:", error);
+        setLeaderboard([]);
       } else {
         setLeaderboard(data || []);
       }
