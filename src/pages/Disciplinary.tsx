@@ -1,6 +1,8 @@
+import { useState, useMemo } from "react";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertTriangle, Info, Search } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const disciplinaryItems = [
@@ -72,6 +74,19 @@ All documentation is confidential.`,
 ];
 
 const Disciplinary = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return disciplinaryItems;
+    
+    const query = searchQuery.toLowerCase();
+    return disciplinaryItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) ||
+        item.content.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
   return (
     <div className="space-y-6">
       <Alert className="border-amber-500/50 bg-amber-500/10">
@@ -97,8 +112,23 @@ const Disciplinary = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <PolicySection items={disciplinaryItems} />
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search disciplinary procedures by keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {filteredItems.length > 0 ? (
+            <PolicySection items={filteredItems} />
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No procedures found matching "{searchQuery}"
+            </p>
+          )}
         </CardContent>
       </Card>
 

@@ -1,6 +1,8 @@
+import { useState, useMemo } from "react";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Shield, AlertCircle, Search } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const safetyItems = [
@@ -89,6 +91,19 @@ Failure to wear required PPE will result in immediate removal from job site.`,
 ];
 
 const Safety = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return safetyItems;
+    
+    const query = searchQuery.toLowerCase();
+    return safetyItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) ||
+        item.content.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
   return (
     <div className="space-y-6">
       <Alert className="border-destructive/50 bg-destructive/10">
@@ -114,8 +129,23 @@ const Safety = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <PolicySection items={safetyItems} />
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search safety protocols by keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {filteredItems.length > 0 ? (
+            <PolicySection items={filteredItems} />
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No safety protocols found matching "{searchQuery}"
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
