@@ -11,6 +11,7 @@ import Safety from "./pages/Safety";
 import Policies from "./pages/Policies";
 import Training from "./pages/Training";
 import Disciplinary from "./pages/Disciplinary";
+import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/policies" element={<Policies />} />
               <Route path="/training" element={<Training />} />
               <Route path="/disciplinary" element={<Disciplinary />} />
+              <Route path="/admin" element={<Admin />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
