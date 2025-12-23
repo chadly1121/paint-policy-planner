@@ -48,9 +48,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </div>
           <div>
             <h1 className="font-serif text-lg font-bold text-sidebar-foreground">
-              Company Manual
+              Roll On Painting
             </h1>
-            <p className="text-xs text-sidebar-foreground/60">Painting Excellence</p>
+            <p className="text-xs text-sidebar-foreground/60">Employee Manual</p>
           </div>
         </div>
 
