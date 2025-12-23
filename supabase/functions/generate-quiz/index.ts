@@ -73,6 +73,7 @@ serve(async (req) => {
 Generate exactly ${questionCount} multiple choice questions based on the provided content.
 Each question should test understanding of key concepts, procedures, or rules.
 Make questions clear and unambiguous with exactly one correct answer.
+IMPORTANT: Generate questions and answers in the SAME LANGUAGE as the provided content.
 ${isMiniQuiz ? 'Focus on the most important points from this specific procedure.' : 'Vary the difficulty - some straightforward, some requiring deeper understanding.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
