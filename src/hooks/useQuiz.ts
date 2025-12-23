@@ -7,6 +7,9 @@ interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
+}
+
+interface QuizQuestionWithAnswer extends QuizQuestion {
   correct_answer: number;
 }
 
@@ -22,6 +25,7 @@ export const useQuiz = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [reviewQuestions, setReviewQuestions] = useState<QuizQuestionWithAnswer[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [quizComplete, setQuizComplete] = useState(false);
@@ -32,6 +36,7 @@ export const useQuiz = () => {
 
     setLoading(true);
     setQuestions([]);
+    setReviewQuestions([]);
     setCurrentQuestionIndex(0);
     setAnswers({});
     setQuizComplete(false);
@@ -45,7 +50,13 @@ export const useQuiz = () => {
       if (error) throw error;
 
       if (data?.questions) {
-        setQuestions(data.questions);
+        // Map questions to remove correct_answer from client state (extra safety)
+        const safeQuestions = data.questions.map((q: any) => ({
+          id: q.id,
+          question: q.question,
+          options: q.options,
+        }));
+        setQuestions(safeQuestions);
       }
     } catch (error) {
       console.error("Error generating quiz:", error);
@@ -80,82 +91,44 @@ export const useQuiz = () => {
 
     setLoading(true);
     try {
-      let score = 0;
-      questions.forEach((q, idx) => {
-        if (answers[idx] === q.correct_answer) {
-          score++;
-        }
+      // Submit answers to server for secure validation
+      const { data, error } = await supabase.functions.invoke("submit-quiz", {
+        body: { 
+          sectionKey, 
+          answers, 
+          userId: user.id 
+        },
       });
 
-      const passed = score === questions.length;
-      const pointsEarned = passed ? 100 : 0; // 100 points for perfect score
+      if (error) throw error;
 
-      // Record attempt
-      const { error: attemptError } = await supabase
-        .from("quiz_attempts")
-        .insert({
-          user_id: user.id,
-          section_key: sectionKey,
-          score,
-          total_questions: questions.length,
-          passed,
-          points_earned: pointsEarned,
-        });
-
-      if (attemptError) throw attemptError;
-
-      // If passed, update section progress and points
-      if (passed) {
-        // Update section progress
-        const { error: progressError } = await supabase
-          .from("section_progress")
-          .upsert({
-            user_id: user.id,
-            section_key: sectionKey,
-            completed: true,
-            completed_at: new Date().toISOString(),
-          }, { onConflict: "user_id,section_key" });
-
-        if (progressError) console.error("Progress update error:", progressError);
-
-        // Update points balance
-        const { data: currentBalance } = await supabase
-          .from("points_balance")
-          .select("total_points")
-          .eq("user_id", user.id)
-          .single();
-
-        const newTotal = (currentBalance?.total_points || 0) + pointsEarned;
-
-        await supabase
-          .from("points_balance")
-          .upsert({
-            user_id: user.id,
-            total_points: newTotal,
-            redeemed_points: 0,
-          }, { onConflict: "user_id" });
+      // Store questions with answers for review (only available after submission)
+      if (data.questions) {
+        setReviewQuestions(data.questions);
       }
 
       const attempt: QuizAttempt = {
-        score,
-        total: questions.length,
-        passed,
-        pointsEarned,
+        score: data.score,
+        total: data.total,
+        passed: data.passed,
+        pointsEarned: data.pointsEarned,
       };
 
       setLastAttempt(attempt);
       setQuizComplete(true);
 
-      if (passed) {
+      if (data.passed) {
         toast({
           title: "Congratulations! 🎉",
-          description: `Perfect score! You earned ${pointsEarned} points.`,
+          description: data.pointsEarned > 0 
+            ? `Perfect score! You earned ${data.pointsEarned} points.`
+            : `Perfect score! (Section already completed)`,
         });
       } else {
         toast({
           variant: "destructive",
           title: "Not quite!",
-          description: `You got ${score}/${questions.length}. You need 5/5 to pass. Try again!`,
+          description: `You got ${data.score}/${data.total}. You need ${data.total}/${data.total} to pass. Try again!`,
         });
       }
 
@@ -178,11 +151,13 @@ export const useQuiz = () => {
     setAnswers({});
     setQuizComplete(false);
     setLastAttempt(null);
+    setReviewQuestions([]);
   }, []);
 
   return {
     loading,
     questions,
+    reviewQuestions,
     currentQuestionIndex,
     answers,
     quizComplete,
