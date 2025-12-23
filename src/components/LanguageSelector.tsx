@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-const languages = [
-  { code: "en", name: "English", flag: "🇺🇸" },
+export const languages = [
+  { code: "en", name: "English", flag: "🇨🇦" },
   { code: "fr", name: "Français", flag: "🇫🇷" },
   { code: "es", name: "Español", flag: "🇪🇸" },
   { code: "tl", name: "Tagalog", flag: "🇵🇭" },

@@ -7,8 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Paintbrush, Loader2 } from "lucide-react";
+import { Paintbrush, Loader2, Globe } from "lucide-react";
 import { z } from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { languages } from "@/components/LanguageSelector";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -17,10 +25,11 @@ const loginSchema = z.object({
 
 const signupSchema = loginSchema.extend({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  preferredLanguage: z.string().min(1, "Please select a language"),
 });
 
 const Auth = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,6 +38,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState("en");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -42,7 +52,7 @@ const Auth = () => {
       if (isLogin) {
         loginSchema.parse({ email, password });
       } else {
-        signupSchema.parse({ email, password, fullName });
+        signupSchema.parse({ email, password, fullName, preferredLanguage });
       }
       setErrors({});
       return true;
@@ -78,7 +88,7 @@ const Auth = () => {
           });
         }
       } else {
-        const { error } = await signUp(email, password, fullName);
+        const { error } = await signUp(email, password, fullName, preferredLanguage);
         if (error) {
           toast({
             variant: "destructive",
@@ -88,6 +98,8 @@ const Auth = () => {
               : error.message,
           });
         } else {
+          // Set language immediately after signup
+          i18n.changeLanguage(preferredLanguage);
           toast({
             title: "Account created!",
             description: "You can now sign in with your credentials.",
@@ -117,20 +129,50 @@ const Auth = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Smith"
-                  disabled={loading}
-                />
-                {errors.fullName && (
-                  <p className="text-sm text-destructive">{errors.fullName}</p>
-                )}
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="John Smith"
+                    disabled={loading}
+                  />
+                  {errors.fullName && (
+                    <p className="text-sm text-destructive">{errors.fullName}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="preferredLanguage" className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    Preferred Language
+                  </Label>
+                  <Select
+                    value={preferredLanguage}
+                    onValueChange={setPreferredLanguage}
+                    disabled={loading}
+                  >
+                    <SelectTrigger id="preferredLanguage">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang.code} value={lang.code}>
+                          <span className="flex items-center gap-2">
+                            <span>{lang.flag}</span>
+                            <span>{lang.name}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.preferredLanguage && (
+                    <p className="text-sm text-destructive">{errors.preferredLanguage}</p>
+                  )}
+                </div>
+              </>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
