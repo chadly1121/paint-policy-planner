@@ -14,7 +14,9 @@
     "safetyProtocols": "Safety Protocols",
     "companyPolicies": "Company Policies",
     "trainingRequirements": "Training Requirements",
-    "disciplinaryProcedures": "Disciplinary Procedures"
+    "disciplinaryProcedures": "Disciplinary Procedures",
+    "settings": "Settings",
+    "admin": "Admin"
   },
   "dashboard": {
     "welcome": "Welcome to the Employee Handbook",

@@ -14,6 +14,7 @@ import SectionCard from "@/components/manual/SectionCard";
 import { Card, CardContent } from "@/components/ui/card";
 import PointsDisplay from "@/components/gamification/PointsDisplay";
 import Leaderboard from "@/components/gamification/Leaderboard";
+import CertificateGenerator from "@/components/gamification/CertificateGenerator";
 import { useProgress } from "@/hooks/useProgress";
 
 const Index = () => {
@@ -74,7 +75,10 @@ const Index = () => {
   return (
     <div className="space-y-8">
       {/* Points Display */}
-      <PointsDisplay />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <PointsDisplay />
+        <CertificateGenerator completedSections={completedCount} totalSections={5} />
+      </div>
 
       {/* Welcome Card */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
