@@ -20,16 +20,24 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, sectionContent, userId } = await req.json();
+    const { sectionKey, sectionContent, userId, quizType, sopKey } = await req.json();
     
-    if (!userId || !sectionKey || !sectionContent) {
+    // quizType can be: "mini" (2 questions for single SOP), "final" (10 questions for all SOPs), or undefined (legacy 5 questions)
+    const isMiniQuiz = quizType === "mini";
+    const isFinalExam = quizType === "final";
+    const questionCount = isMiniQuiz ? 2 : isFinalExam ? 10 : 5;
+    
+    // For mini quizzes, we use sopKey, otherwise sectionKey
+    const quizKey = isMiniQuiz ? sopKey : sectionKey;
+    
+    if (!quizKey || !sectionContent || !userId) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     
-    console.log(`Generating quiz for section: ${sectionKey}, user: ${userId}`);
+    console.log(`Generating ${quizType || 'standard'} quiz for: ${quizKey}, user: ${userId}, questions: ${questionCount}`);
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -40,21 +48,21 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if user already has questions for this section
+    // Check if user already has questions for this quiz
     const { data: existingQuestions } = await supabase
       .from("quiz_questions")
       .select("id")
       .eq("user_id", userId)
-      .eq("section_key", sectionKey);
+      .eq("section_key", quizKey);
 
-    if (existingQuestions && existingQuestions.length >= 5) {
-      console.log("User already has questions for this section");
+    if (existingQuestions && existingQuestions.length >= questionCount) {
+      console.log("User already has questions for this quiz");
       const { data: questions } = await supabase
         .from("quiz_questions")
         .select("*")
         .eq("user_id", userId)
-        .eq("section_key", sectionKey)
-        .limit(5);
+        .eq("section_key", quizKey)
+        .limit(questionCount);
       
       return new Response(JSON.stringify({ questions }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -62,13 +70,13 @@ serve(async (req) => {
     }
 
     const systemPrompt = `You are a quiz generator for an employee training manual. 
-Generate exactly 5 multiple choice questions based on the provided content.
+Generate exactly ${questionCount} multiple choice questions based on the provided content.
 Each question should test understanding of key concepts, procedures, or rules.
 Make questions clear and unambiguous with exactly one correct answer.
-Vary the difficulty slightly - some straightforward, some requiring deeper understanding.
+${isMiniQuiz ? 'Focus on the most important points from this specific procedure.' : 'Vary the difficulty - some straightforward, some requiring deeper understanding.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
-    const userPrompt = `Generate 5 multiple choice questions for this section of the employee manual:
+    const userPrompt = `Generate ${questionCount} multiple choice questions for this ${isMiniQuiz ? 'standard operating procedure' : 'section of the employee manual'}:
 
 ${sectionContent}
 
@@ -94,7 +102,7 @@ For each question, provide:
             type: "function",
             function: {
               name: "create_quiz_questions",
-              description: "Create 5 multiple choice quiz questions",
+              description: `Create ${questionCount} multiple choice quiz questions`,
               parameters: {
                 type: "object",
                 properties: {
@@ -114,8 +122,8 @@ For each question, provide:
                       },
                       required: ["question", "options", "correct_answer"],
                     },
-                    minItems: 5,
-                    maxItems: 5,
+                    minItems: questionCount,
+                    maxItems: questionCount,
                   },
                 },
                 required: ["questions"],
@@ -156,17 +164,17 @@ For each question, provide:
     const quizData = JSON.parse(toolCall.function.arguments);
     const generatedQuestions = quizData.questions;
 
-    // Delete any existing questions for this user/section
+    // Delete any existing questions for this user/quiz
     await supabase
       .from("quiz_questions")
       .delete()
       .eq("user_id", userId)
-      .eq("section_key", sectionKey);
+      .eq("section_key", quizKey);
 
     // Insert new questions
     const questionsToInsert = generatedQuestions.map((q: any) => ({
       user_id: userId,
-      section_key: sectionKey,
+      section_key: quizKey,
       question: q.question,
       options: q.options,
       correct_answer: q.correct_answer,

@@ -19,6 +19,8 @@ interface QuizModalProps {
   sectionTitle: string;
   sectionContent: string;
   onComplete: (passed: boolean) => void;
+  quizType?: "mini" | "final";
+  sopKey?: string;
 }
 
 const QuizModal = ({
@@ -28,6 +30,8 @@ const QuizModal = ({
   sectionTitle,
   sectionContent,
   onComplete,
+  quizType,
+  sopKey,
 }: QuizModalProps) => {
   const {
     loading,
@@ -47,9 +51,9 @@ const QuizModal = ({
 
   useEffect(() => {
     if (open && questions.length === 0) {
-      generateQuiz(sectionKey, sectionContent);
+      generateQuiz(sectionKey, sectionContent, quizType, sopKey);
     }
-  }, [open, sectionKey, sectionContent, generateQuiz, questions.length]);
+  }, [open, sectionKey, sectionContent, generateQuiz, questions.length, quizType, sopKey]);
 
   const handleClose = () => {
     resetQuiz();
@@ -57,7 +61,7 @@ const QuizModal = ({
   };
 
   const handleSubmit = async () => {
-    const result = await submitQuiz(sectionKey);
+    const result = await submitQuiz(sectionKey, quizType, sopKey);
     if (result) {
       onComplete(result.passed);
     }
@@ -65,8 +69,11 @@ const QuizModal = ({
 
   const handleRetry = () => {
     resetQuiz();
-    generateQuiz(sectionKey, sectionContent);
+    generateQuiz(sectionKey, sectionContent, quizType, sopKey);
   };
+
+  const questionCount = quizType === "mini" ? 2 : quizType === "final" ? 10 : 5;
+  const pointsValue = quizType === "mini" ? 10 : 100;
 
   const currentQuestion = questions[currentQuestionIndex];
   const allAnswered = questions.length > 0 && Object.keys(answers).length === questions.length;
@@ -84,7 +91,7 @@ const QuizModal = ({
           <DialogDescription>
             {quizComplete
               ? "See how you did on the quiz"
-              : "Answer all 5 questions correctly to unlock the next section"}
+              : `Answer all ${questionCount} questions correctly to ${quizType === 'mini' ? 'complete this SOP' : 'unlock the next section'}`}
           </DialogDescription>
         </DialogHeader>
 
