@@ -86,5 +86,25 @@
   "sop022": {
     "title": "SOP-022 – Disciplinary Matrix & Enforcement",
     "content": "PURPOSE\nTo ensure consistent, fair enforcement of all SOPs.\n\nDISCIPLINE LEVELS\n\nLevel 1 – Verbal Warning\n• Minor SOP violations\n• First-time offenses\n\nLevel 2 – Written Warning\n• Repeat violations\n• Safety issues\n• Tool neglect\n\nLevel 3 – Suspension\n• Serious violations\n• Damage concealment\n• Time theft\n\nLevel 4 – Termination\n• Willful safety violations\n• Dishonesty\n• Repeated insubordination\n\nNOTES\n• Discipline may skip levels depending on severity.\n• All incidents are documented.\n• Ignorance of SOPs is not an excuse."
+  },
+  "sop023": {
+    "title": "SOP-023 – New Construction Site Etiquette & Conduct",
+    "content": "PURPOSE\nTo ensure professional behavior, efficiency, and respect on all new construction job sites where multiple trades are present.\n\nRULES\n• We are guests on the builder's site.\n• Follow site rules, signage, and safety requirements at all times.\n• Do not interfere with other trades.\n• Do not touch, move, or use other trades' tools or materials.\n\nCONDUCT\n• No loud music.\n• No swearing, yelling, or inappropriate language.\n• No wandering into areas outside our scope.\n• No sitting on finished surfaces.\n\nCLEANLINESS\n• Keep work area clean at all times.\n• Do not leave debris for other trades.\n• Clean up daily per End-of-Day SOP.\n\nViolations will be reported to management and may result in removal from site."
+  },
+  "sop024": {
+    "title": "SOP-024 – Prep Standards by Surface Type",
+    "content": "PURPOSE\nTo standardize surface preparation to ensure adhesion, durability, and finish quality.\n\nDRYWALL\n• Sand all joints and repairs.\n• Remove dust before priming.\n• Spot-prime all patches.\n\nWOOD (TRIM, DOORS, FRAMES)\n• Sand smooth.\n• Fill nail holes.\n• Caulk gaps.\n• Spot-prime bare wood.\n\nPREVIOUSLY PAINTED SURFACES\n• Clean to remove dust, grease, or residue.\n• Sand to dull sheen.\n• Repair defects before coating.\n\nMETAL\n• Remove rust.\n• Degrease surface.\n• Prime with appropriate metal primer.\n\nNo paint is applied without proper prep."
+  },
+  "sop025": {
+    "title": "SOP-025 – Paint Handling, Mixing & Storage",
+    "content": "PURPOSE\nTo ensure paint quality, consistency, and safety.\n\nHANDLING\n• Store paint upright with lids sealed.\n• Label all paint with room, color, sheen, and date.\n• Do not leave paint exposed or open.\n\nMIXING\n• Stir thoroughly before use.\n• Box paint when required to ensure consistency.\n• Do not thin unless approved.\n\nSTORAGE\n• Store paint in temperature-controlled areas.\n• Protect from freezing or overheating.\n• Dispose of unusable paint properly.\n\nSPILLS\n• Clean immediately.\n• Report large spills."
+  },
+  "sop026": {
+    "title": "SOP-026 – Incident Investigation & Reporting",
+    "content": "PURPOSE\nTo ensure incidents are reported, documented, and corrected.\n\nINCIDENTS INCLUDE\n• Injury\n• Property damage\n• Near misses\n• Equipment failure\n• Safety violations\n\nPROCESS\n1. Stop work if unsafe.\n2. Secure area.\n3. Notify foreman immediately.\n4. Complete incident report same day.\n5. Take photos if applicable.\n\nNo retaliation for reporting incidents.\nFailure to report is a serious violation."
+  },
+  "sop027": {
+    "title": "SOP-027 – Safety Orientation & Jobsite Safety",
+    "content": "PURPOSE\nTo ensure all employees understand basic safety expectations.\n\nREQUIREMENTS\n• Attend safety orientation.\n• Understand site-specific hazards.\n• Wear required PPE.\n• Follow all safety SOPs.\n\nGENERAL SAFETY\n• Keep walkways clear.\n• Report hazards immediately.\n• Use tools only as trained.\n\nRIGHT TO REFUSE\n• Employees may refuse unsafe work.\n• Report concerns to foreman or management.\n\nSafety violations may result in immediate removal from site."
   }
 }
