@@ -214,45 +214,19 @@ export type Database = {
       }
     }
     Views: {
-      leaderboard_view: {
-        Row: {
-          available_points: number | null
-          full_name: string | null
-          sections_completed: number | null
-          total_points: number | null
-        }
-        Relationships: []
-      }
-      quiz_questions_safe: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          options: Json | null
-          question: string | null
-          section_key: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          options?: Json | null
-          question?: string | null
-          section_key?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          options?: Json | null
-          question?: string | null
-          section_key?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_leaderboard: {
+        Args: never
+        Returns: {
+          available_points: number
+          full_name: string
+          sections_completed: number
+          total_points: number
+        }[]
+      }
+      get_secure_leaderboard: {
         Args: never
         Returns: {
           available_points: number
