@@ -9,9 +9,11 @@ import {
   AlertTriangle,
   Search,
   PaintBucket,
+  ShieldCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,6 +23,7 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
   const navItems = [
@@ -30,6 +33,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
     { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
     { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
+    ...(isAdmin ? [{ path: "/admin", label: t("nav.admin"), icon: ShieldCheck }] : []),
   ];
 
   const filteredItems = navItems.filter((item) =>
