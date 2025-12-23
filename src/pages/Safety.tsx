@@ -1,16 +1,17 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Shield, AlertCircle, Search } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import SectionLock from "@/components/gamification/SectionLock";
 import QuizModal from "@/components/quiz/QuizModal";
+import SectionItemCard from "@/components/section/SectionItemCard";
+import SectionFinalExam from "@/components/section/SectionFinalExam";
 import { useProgress } from "@/hooks/useProgress";
+import { useSectionItemProgress } from "@/hooks/useSectionItemProgress";
 
 const SECTION_KEY = "safety";
-const PREVIOUS_SECTION = "sops";
 
 const safetyKeys = ["safety1", "safety2", "safety3", "safety4", "safety5", "safety6"];
 
@@ -18,26 +19,31 @@ const Safety = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [quizOpen, setQuizOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState<{ key: string; title: string; content: string } | null>(null);
+  const [isFinalExam, setIsFinalExam] = useState(false);
   
-  const { progress, isSectionUnlocked, refreshData } = useProgress();
+  const { progress, refreshData } = useProgress();
+  const { isItemCompleted, getCompletedItemCount, refreshProgress } = useSectionItemProgress(SECTION_KEY);
 
-  const isCompleted = progress?.some(
+  const isSectionCompleted = progress?.some(
     (p) => p.section_key === SECTION_KEY && p.completed
   ) ?? false;
 
-  const isUnlocked = isSectionUnlocked(SECTION_KEY);
-
   const safetyItems = useMemo(() => {
     return safetyKeys.map((key, index) => ({
+      key,
       id: `safety-${index + 1}`,
       title: t(`safety.${key}.title`),
       content: t(`safety.${key}.content`),
     }));
   }, [t]);
 
+  const totalItems = safetyItems.length;
+  const completedItems = getCompletedItemCount();
+  const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return safetyItems;
-    
     const query = searchQuery.toLowerCase();
     return safetyItems.filter(
       (item) =>
@@ -46,12 +52,25 @@ const Safety = () => {
     );
   }, [searchQuery, safetyItems]);
 
-  const sectionContent = useMemo(() => {
-    return safetyItems.map(item => `${item.title}: ${item.content}`).join('\n\n');
-  }, [safetyItems]);
+  const allContent = useMemo(() => 
+    safetyItems.map(item => `${item.title}: ${item.content}`).join('\n\n'),
+  [safetyItems]);
+
+  const handleStartMiniQuiz = (item: { key: string; title: string; content: string }) => {
+    setCurrentItem(item);
+    setIsFinalExam(false);
+    setQuizOpen(true);
+  };
+
+  const handleStartFinalExam = () => {
+    setCurrentItem(null);
+    setIsFinalExam(true);
+    setQuizOpen(true);
+  };
 
   const handleQuizComplete = (passed: boolean) => {
     if (passed) {
+      refreshProgress();
       refreshData();
     }
   };
@@ -72,22 +91,21 @@ const Safety = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Shield className="h-5 w-5 text-primary" />
             </div>
-            <div>
+            <div className="flex-1">
               <CardTitle className="font-serif">{t("sections.safety.title")}</CardTitle>
-              <CardDescription>
-                {t("sections.safety.description")}
-              </CardDescription>
+              <CardDescription>{t("sections.safety.description")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <SectionLock
-            isUnlocked={isUnlocked}
-            isCompleted={isCompleted}
-            sectionTitle={t("sections.safety.title")}
-            onStartQuiz={() => setQuizOpen(true)}
-          />
-
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{t("section.progress")}</span>
+              <span className="font-medium">{completedItems} / {totalItems}</span>
+            </div>
+            <Progress value={progressPercent} className="h-2" />
+          </div>
+          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -97,23 +115,49 @@ const Safety = () => {
               className="pl-10"
             />
           </div>
-          {filteredItems.length > 0 ? (
-            <PolicySection items={filteredItems} />
-          ) : (
-            <p className="text-center text-muted-foreground py-8">
-              {t("common.noResults")} "{searchQuery}"
-            </p>
-          )}
         </CardContent>
       </Card>
 
+      <SectionFinalExam
+        sectionTitle={t("sections.safety.title")}
+        completedCount={completedItems}
+        totalCount={totalItems}
+        isFinalExamCompleted={isSectionCompleted}
+        onStartFinalExam={handleStartFinalExam}
+      />
+
+      <div className="space-y-3">
+        {filteredItems.length > 0 ? (
+          filteredItems.map((item) => (
+            <SectionItemCard
+              key={item.key}
+              itemKey={item.key}
+              title={item.title}
+              content={item.content}
+              isCompleted={isItemCompleted(item.key)}
+              onStartQuiz={() => handleStartMiniQuiz(item)}
+            />
+          ))
+        ) : (
+          <p className="text-center text-muted-foreground py-8">
+            {t("common.noResults")} "{searchQuery}"
+          </p>
+        )}
+      </div>
+
       <QuizModal
         open={quizOpen}
-        onClose={() => setQuizOpen(false)}
+        onClose={() => {
+          setQuizOpen(false);
+          setCurrentItem(null);
+          setIsFinalExam(false);
+        }}
         sectionKey={SECTION_KEY}
-        sectionTitle={t("sections.safety.title")}
-        sectionContent={sectionContent}
+        sectionTitle={isFinalExam ? t("sections.safety.title") + " " + t("section.finalExam") : currentItem?.title || ""}
+        sectionContent={isFinalExam ? allContent : currentItem?.content || ""}
         onComplete={handleQuizComplete}
+        quizType={isFinalExam ? "final" : "mini"}
+        itemKey={currentItem?.key}
       />
     </div>
   );

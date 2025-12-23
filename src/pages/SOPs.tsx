@@ -148,7 +148,7 @@ const SOPs = () => {
         sectionContent={isFinalExam ? allSOPContent : currentSOP?.content || ""}
         onComplete={handleQuizComplete}
         quizType={isFinalExam ? "final" : "mini"}
-        sopKey={currentSOP?.key}
+        itemKey={currentSOP?.key}
       />
     </div>
   );

@@ -35,7 +35,7 @@ export const useQuiz = () => {
     sectionKey: string, 
     sectionContent: string,
     quizType?: "mini" | "final",
-    sopKey?: string
+    itemKey?: string
   ) => {
     if (!user) return;
 
@@ -54,7 +54,7 @@ export const useQuiz = () => {
           sectionContent, 
           userId: user.id,
           quizType,
-          sopKey,
+          itemKey,
         },
       });
 
@@ -100,7 +100,7 @@ export const useQuiz = () => {
   const submitQuiz = useCallback(async (
     sectionKey: string,
     quizType?: "mini" | "final",
-    sopKey?: string
+    itemKey?: string
   ) => {
     if (!user || questions.length === 0) return null;
 
@@ -113,7 +113,7 @@ export const useQuiz = () => {
           answers, 
           userId: user.id,
           quizType,
-          sopKey,
+          itemKey,
         },
       });
 
