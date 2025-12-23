@@ -5,12 +5,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Shield, AlertCircle, Search } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import SectionLock from "@/components/gamification/SectionLock";
+import QuizModal from "@/components/quiz/QuizModal";
+import { useProgress } from "@/hooks/useProgress";
+
+const SECTION_KEY = "safety";
+const PREVIOUS_SECTION = "sops";
 
 const safetyKeys = ["safety1", "safety2", "safety3", "safety4", "safety5", "safety6"];
 
 const Safety = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [quizOpen, setQuizOpen] = useState(false);
+  
+  const { progress, isSectionUnlocked, refreshData } = useProgress();
+
+  const isCompleted = progress?.some(
+    (p) => p.section_key === SECTION_KEY && p.completed
+  ) ?? false;
+
+  const isUnlocked = isSectionUnlocked(SECTION_KEY);
 
   const safetyItems = useMemo(() => {
     return safetyKeys.map((key, index) => ({
@@ -30,6 +45,16 @@ const Safety = () => {
         item.content.toLowerCase().includes(query)
     );
   }, [searchQuery, safetyItems]);
+
+  const sectionContent = useMemo(() => {
+    return safetyItems.map(item => `${item.title}: ${item.content}`).join('\n\n');
+  }, [safetyItems]);
+
+  const handleQuizComplete = (passed: boolean) => {
+    if (passed) {
+      refreshData();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -56,6 +81,13 @@ const Safety = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SectionLock
+            isUnlocked={isUnlocked}
+            isCompleted={isCompleted}
+            sectionTitle={t("sections.safety.title")}
+            onStartQuiz={() => setQuizOpen(true)}
+          />
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -74,6 +106,15 @@ const Safety = () => {
           )}
         </CardContent>
       </Card>
+
+      <QuizModal
+        open={quizOpen}
+        onClose={() => setQuizOpen(false)}
+        sectionKey={SECTION_KEY}
+        sectionTitle={t("sections.safety.title")}
+        sectionContent={sectionContent}
+        onComplete={handleQuizComplete}
+      />
     </div>
   );
 };

@@ -4,12 +4,26 @@ import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FileText, Search } from "lucide-react";
+import SectionLock from "@/components/gamification/SectionLock";
+import QuizModal from "@/components/quiz/QuizModal";
+import { useProgress } from "@/hooks/useProgress";
+
+const SECTION_KEY = "policies";
 
 const policyKeys = ["policy1", "policy2", "policy3", "policy4", "policy5", "policy6", "policy7", "policy8", "policy9", "policy10"];
 
 const Policies = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [quizOpen, setQuizOpen] = useState(false);
+  
+  const { progress, isSectionUnlocked, refreshData } = useProgress();
+
+  const isCompleted = progress?.some(
+    (p) => p.section_key === SECTION_KEY && p.completed
+  ) ?? false;
+
+  const isUnlocked = isSectionUnlocked(SECTION_KEY);
 
   const policyItems = useMemo(() => {
     return policyKeys.map((key, index) => ({
@@ -30,6 +44,16 @@ const Policies = () => {
     );
   }, [searchQuery, policyItems]);
 
+  const sectionContent = useMemo(() => {
+    return policyItems.map(item => `${item.title}: ${item.content}`).join('\n\n');
+  }, [policyItems]);
+
+  const handleQuizComplete = (passed: boolean) => {
+    if (passed) {
+      refreshData();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="border-primary/20">
@@ -47,6 +71,13 @@ const Policies = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SectionLock
+            isUnlocked={isUnlocked}
+            isCompleted={isCompleted}
+            sectionTitle={t("sections.policies.title")}
+            onStartQuiz={() => setQuizOpen(true)}
+          />
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -65,6 +96,15 @@ const Policies = () => {
           )}
         </CardContent>
       </Card>
+
+      <QuizModal
+        open={quizOpen}
+        onClose={() => setQuizOpen(false)}
+        sectionKey={SECTION_KEY}
+        sectionTitle={t("sections.policies.title")}
+        sectionContent={sectionContent}
+        onComplete={handleQuizComplete}
+      />
     </div>
   );
 };
