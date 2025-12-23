@@ -1,7 +1,8 @@
+import { useState, useMemo } from "react";
 import PolicySection from "@/components/manual/PolicySection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardList } from "lucide-react";
-
+import { Input } from "@/components/ui/input";
+import { ClipboardList, Search } from "lucide-react";
 const sopItems = [
   {
     id: "sop-001",
@@ -600,6 +601,19 @@ SAFETY
 ];
 
 const SOPs = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return sopItems;
+    
+    const query = searchQuery.toLowerCase();
+    return sopItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) ||
+        item.content.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
   return (
     <div className="space-y-6">
       <Card className="border-primary/20">
@@ -616,8 +630,23 @@ const SOPs = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <PolicySection items={sopItems} />
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search SOPs by keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {filteredItems.length > 0 ? (
+            <PolicySection items={filteredItems} />
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No SOPs found matching "{searchQuery}"
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
