@@ -146,5 +146,25 @@
   "sop037": {
     "title": "SOP-037 – Documentation, File Naming & Data Storage",
     "content": "PURPOSE\nTo ensure consistent, traceable documentation.\n\nFILE NAMING\n• JobName_Date_Description\n• Example: Smith_St_2025-03-12_DailyReport\n\nSTORAGE\n• Upload files to designated folders only.\n• No personal devices for company records.\n• Photos must be clear and dated.\n\nRETENTION\n• Do not delete company records.\n• Follow retention policies."
+  },
+  "sop038": {
+    "title": "SOP-038 – Confined Space Awareness (Painting Operations)",
+    "content": "PURPOSE\nTo ensure employees recognize confined spaces and avoid unsafe entry without proper authorization and controls.\n\nDEFINITION\nA confined space is an area that:\n• Is not designed for continuous occupancy\n• Has limited entry/exit\n• May contain hazards (poor air, fumes, dust)\n\nEXAMPLES\n• Crawl spaces\n• Attics with limited access\n• Mechanical rooms\n• Tanks or pits\n\nRULES\n• Employees do NOT enter confined spaces unless specifically trained and authorized.\n• No sanding, spraying, or coating in confined spaces without approval.\n• If unsure, STOP and contact the foreman."
+  },
+  "sop039": {
+    "title": "SOP-039 – Hazardous Materials & SDS (Safety Data Sheets)",
+    "content": "PURPOSE\nTo ensure safe handling of hazardous materials.\n\nRULES\n• All hazardous products must have an SDS available.\n• Employees must review SDS before use.\n• Follow PPE and ventilation requirements.\n\nHANDLING\n• Store chemicals properly.\n• Do not mix products unless approved.\n• Label all containers clearly.\n\nSPILLS\n• Stop work.\n• Contain spill.\n• Notify foreman immediately."
+  },
+  "sop040": {
+    "title": "SOP-040 – Noise & Hearing Protection",
+    "content": "PURPOSE\nTo protect hearing from excessive noise exposure.\n\nRULES\n• Hearing protection required when using loud equipment:\n  – Sanders\n  – Sprayers\n  – Compressors\n  – Power tools\n• Use earplugs or earmuffs as required.\n• Replace damaged hearing protection.\n\nPROHIBITED\n• Ignoring hearing protection requirements.\n• Modifying equipment to increase noise."
+  },
+  "sop041": {
+    "title": "SOP-041 – Electrical Safety (Tools & Power)",
+    "content": "PURPOSE\nTo prevent electrical injuries and equipment damage.\n\nRULES\n• Inspect cords daily.\n• Do not use damaged cords or tools.\n• Keep cords away from water and traffic areas.\n• Use GFCI protection where required.\n\nPROHIBITED\n• Overloading outlets.\n• Using makeshift repairs.\n• Running cords through water."
+  },
+  "sop042": {
+    "title": "SOP-042 – Annual Training, Review & Certification",
+    "content": "PURPOSE\nTo ensure ongoing compliance and skill development.\n\nREQUIREMENTS\n• Annual review of SOPs.\n• Annual safety training.\n• Tool and equipment refresher training.\n• Documentation of completed training.\n\nFAILURE\n• Failure to complete training may result in removal from site or discipline."
   }
 }
