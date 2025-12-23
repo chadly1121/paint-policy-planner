@@ -349,6 +349,132 @@ ENFORCEMENT
   – Disciplinary action
   – Responsibility for repair or replacement`,
   },
+  {
+    id: "sop-011",
+    title: "SOP-011 – General Tool Maintenance, Cleaning, Inspection & Storage",
+    content: `PURPOSE
+To ensure all tools used by the company are clean, safe, functional, and ready for use at all times. Proper maintenance extends tool life, improves work quality, prevents delays, and reduces safety risks.
+
+This SOP applies to ALL tools including (but not limited to):
+• Rollers, brushes, trays
+• Sanders, vacuums, sprayers
+• Hand tools, extension poles
+• Electric and mechanical equipment
+• Cleaning tools and accessories
+
+CORE RULES (NON-NEGOTIABLE)
+• All tools must be cleaned after use.
+• All tools must be inspected before use.
+• All tools must be stored properly.
+• Employees must arrive at work with clean, ready-to-use tools.
+• Damaged or unsafe tools must not be used.
+• Failure to maintain tools may result in discipline.
+
+DAILY TOOL CLEANING – END OF USE
+
+Roller Cages & Frames:
+• Clean immediately after use.
+• Remove all wet paint.
+• If paint dries on a cage, it must be fully scraped and cleaned before reuse.
+• Rollers must spin freely and be paint-free.
+
+Roller Covers:
+• Wash thoroughly until water runs clear.
+• Spin out excess water.
+• Allow to dry fully before storage.
+• Dispose of worn or damaged covers.
+
+Brushes:
+• Clean brushes daily.
+• Remove all paint from bristles and ferrule.
+• Shape bristles properly before drying.
+• Store hanging or flat to maintain shape.
+• Employees must arrive to work with clean brushes.
+
+Trays, Buckets & Liners:
+• Remove and dispose of used liners properly.
+• Clean trays and buckets before storing.
+• No dried paint buildup allowed.
+
+ELECTRIC & MECHANICAL TOOL CLEANING
+After each use:
+• Wipe down exterior surfaces.
+• Remove dust, debris, or paint splatter.
+• Clear vents and air intakes.
+• Empty and clean filters or bags (where applicable).
+
+Tools include:
+• Sanders
+• Vacuums
+• Sprayers
+• Mixers
+• Pressure washers
+
+DAILY INSPECTION – BEFORE USE
+Before using any tool, inspect for:
+
+Electric Tools:
+• Power cord cuts, frays, exposed wires
+• Loose plugs or strain relief damage
+• Cracked housings
+• Excessive vibration
+• Proper switch operation
+
+Mechanical Tools:
+• Loose bolts or fittings
+• Leaks (air, paint, fluid)
+• Abnormal noise
+• Worn or damaged parts
+
+Hand Tools:
+• Cracks in handles
+• Loose heads
+• Excessive wear
+
+If any defect is found:
+• DO NOT USE the tool
+• Tag it out of service
+• Report immediately to a Foreman or Chad
+
+WEEKLY & PERIODIC MAINTENANCE
+• Deep clean frequently used tools weekly.
+• Lubricate moving parts as required.
+• Replace worn rollers, brushes, filters, hoses, tips, or pads.
+• Check calibration where applicable (sprayers, pressure equipment).
+• Shop manager or foreman conducts spot inspections.
+
+STORAGE (NON-NEGOTIABLE)
+• All tools must be stored clean and dry.
+• Store tools in designated bins, racks, bags, or cases.
+• Electric tools must be stored with cords wrapped properly.
+• Do not throw tools loose into vans or job sites.
+• Tool cases and storage containers must remain clean and professional.
+
+Never:
+• Store dirty tools
+• Store wet tools
+• Store damaged tools
+• Mix clean and dirty tools together
+
+TRANSPORTATION
+• Secure tools during transport to prevent damage.
+• Heavier tools secured first.
+• No tools rolling loose in vehicles.
+
+REPORTING & ACCOUNTABILITY
+• Employees are responsible for the tools they use.
+• Damage due to neglect or misuse must be reported immediately.
+• Repeated failure to maintain tools may result in:
+  – Loss of tool privileges
+  – Disciplinary action
+  – Responsibility for repair or replacement
+
+SAFETY
+• Clean tools reduce injury risk.
+• Damaged cords and tools increase shock and fire hazards.
+• Dust buildup increases respiratory risk.
+• Proper maintenance is a safety requirement, not optional.`,
+  },
 ];
 
 const SOPs = () => {
