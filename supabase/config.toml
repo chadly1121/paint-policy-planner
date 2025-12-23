@@ -1,10 +1,10 @@
 project_id = "lajudxjxfinjnpfmwvbx"
 
 [functions.generate-quiz]
-verify_jwt = true
+verify_jwt = false
 
 [functions.submit-quiz]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-notification]
 verify_jwt = true
