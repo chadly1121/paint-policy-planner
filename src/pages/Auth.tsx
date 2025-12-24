@@ -16,7 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { languages } from "@/components/LanguageSelector";
+import { supabase } from "@/integrations/supabase/client";
+
+const DISCLAIMER_VERSION = "v1.0";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,6 +30,9 @@ const loginSchema = z.object({
 const signupSchema = loginSchema.extend({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   preferredLanguage: z.string().min(1, "Please select a language"),
+  disclaimerAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the disclaimer to create an account" }),
+  }),
 });
 
 const Auth = () => {
@@ -39,6 +46,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [preferredLanguage, setPreferredLanguage] = useState("en");
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -52,7 +60,7 @@ const Auth = () => {
       if (isLogin) {
         loginSchema.parse({ email, password });
       } else {
-        signupSchema.parse({ email, password, fullName, preferredLanguage });
+        signupSchema.parse({ email, password, fullName, preferredLanguage, disclaimerAccepted });
       }
       setErrors({});
       return true;
@@ -88,7 +96,7 @@ const Auth = () => {
           });
         }
       } else {
-        const { error } = await signUp(email, password, fullName, preferredLanguage);
+        const { error, data } = await signUp(email, password, fullName, preferredLanguage);
         if (error) {
           toast({
             variant: "destructive",
@@ -98,6 +106,19 @@ const Auth = () => {
               : error.message,
           });
         } else {
+          // Store disclaimer acceptance after successful signup
+          if (data?.user) {
+            try {
+              await supabase.from("disclaimer_acceptances").insert({
+                user_id: data.user.id,
+                disclaimer_version: DISCLAIMER_VERSION,
+                user_agent: navigator.userAgent,
+              });
+            } catch (disclaimerError) {
+              console.error("Failed to record disclaimer acceptance:", disclaimerError);
+            }
+          }
+          
           // Set language immediately after signup
           i18n.changeLanguage(preferredLanguage);
           toast({
@@ -105,6 +126,7 @@ const Auth = () => {
             description: "You can now sign in with your credentials.",
           });
           setIsLogin(true);
+          setDisclaimerAccepted(false);
         }
       }
     } finally {
@@ -202,7 +224,52 @@ const Auth = () => {
                 <p className="text-sm text-destructive">{errors.password}</p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            
+            {!isLogin && (
+              <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground">Legal Disclaimer & Acknowledgment</p>
+                  <p className="text-xs leading-relaxed">
+                    <strong>Important Notice – Not Legal Advice:</strong> This application provides operational tools, templates, checklists, and general best-practice guidance for painting and contracting businesses.
+                  </p>
+                  <p className="text-xs leading-relaxed">
+                    This application <strong>does not</strong> provide legal advice, does not guarantee compliance with federal, provincial, state, or local laws, and is not a substitute for professional legal, employment, safety, or regulatory advice.
+                  </p>
+                  <p className="text-xs leading-relaxed">
+                    Laws and regulations vary by jurisdiction and change over time. Users are solely responsible for understanding and complying with all applicable laws, regulations, and industry requirements in their location.
+                  </p>
+                  <p className="text-xs leading-relaxed font-medium">
+                    By using this application, you acknowledge that:
+                  </p>
+                  <ul className="text-xs list-disc list-inside space-y-1 ml-2">
+                    <li>You are responsible for determining legal compliance in your jurisdiction</li>
+                    <li>You will consult qualified professionals (e.g., legal counsel, HR, safety advisors) as needed</li>
+                    <li>The creators of this application are not liable for compliance decisions made using this software</li>
+                  </ul>
+                </div>
+                
+                <div className="flex items-start space-x-3 pt-2 border-t border-border">
+                  <Checkbox
+                    id="disclaimer"
+                    checked={disclaimerAccepted}
+                    onCheckedChange={(checked) => setDisclaimerAccepted(checked === true)}
+                    disabled={loading}
+                    className="mt-0.5"
+                  />
+                  <Label 
+                    htmlFor="disclaimer" 
+                    className="text-xs leading-relaxed cursor-pointer font-medium"
+                  >
+                    I acknowledge and agree that this application is not a legal compliance app, does not provide legal advice, and that I am solely responsible for ensuring compliance with all applicable laws and regulations in my jurisdiction.
+                  </Label>
+                </div>
+                {errors.disclaimerAccepted && (
+                  <p className="text-sm text-destructive">{errors.disclaimerAccepted}</p>
+                )}
+              </div>
+            )}
+            
+            <Button type="submit" className="w-full" disabled={loading || (!isLogin && !disclaimerAccepted)}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLogin ? "Sign In" : "Create Account"}
             </Button>
