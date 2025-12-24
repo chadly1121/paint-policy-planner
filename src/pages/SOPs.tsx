@@ -7,8 +7,10 @@ import { ClipboardList, Search } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
 import SOPCard from "@/components/sop/SOPCard";
 import SOPFinalExam from "@/components/sop/SOPFinalExam";
+import SOPEditor from "@/components/admin/SOPEditor";
 import { useProgress } from "@/hooks/useProgress";
 import { useSOPProgress } from "@/hooks/useSOPProgress";
+import { useCompanyContent } from "@/hooks/useCompanyContent";
 
 const SECTION_KEY = "sops";
 
@@ -18,9 +20,12 @@ const SOPs = () => {
   const [quizOpen, setQuizOpen] = useState(false);
   const [currentSOP, setCurrentSOP] = useState<{ key: string; title: string; content: string } | null>(null);
   const [isFinalExam, setIsFinalExam] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingSOP, setEditingSOP] = useState<{ key: string; title: string; content: string } | null>(null);
   
   const { progress, refreshData } = useProgress();
   const { sopProgress, isSOPCompleted, getCompletedSOPCount, refreshProgress } = useSOPProgress();
+  const { getCompanySOP } = useCompanyContent();
 
   const isSectionCompleted = progress?.some(
     (p) => p.section_key === SECTION_KEY && p.completed
@@ -52,12 +57,24 @@ const SOPs = () => {
     );
   }, [searchQuery, sopItems]);
 
+  // For content, use company version if exists
+  const getSOPContent = (sop: { key: string; title: string; content: string }) => {
+    const companySOP = getCompanySOP(sop.key);
+    return companySOP 
+      ? { title: companySOP.title, content: companySOP.content }
+      : { title: sop.title, content: sop.content };
+  };
+
   const allSOPContent = useMemo(() => 
-    sopItems.map(item => `${item.title}: ${item.content}`).join('\n\n'),
-  [sopItems]);
+    sopItems.map(item => {
+      const { title, content } = getSOPContent(item);
+      return `${title}: ${content}`;
+    }).join('\n\n'),
+  [sopItems, getCompanySOP]);
 
   const handleStartMiniQuiz = (sop: { key: string; title: string; content: string }) => {
-    setCurrentSOP(sop);
+    const { title, content } = getSOPContent(sop);
+    setCurrentSOP({ key: sop.key, title, content });
     setIsFinalExam(false);
     setQuizOpen(true);
   };
@@ -73,6 +90,11 @@ const SOPs = () => {
       refreshProgress();
       refreshData();
     }
+  };
+
+  const handleEditSOP = (sop: { key: string; title: string; content: string }) => {
+    setEditingSOP(sop);
+    setEditorOpen(true);
   };
 
   return (
@@ -127,6 +149,7 @@ const SOPs = () => {
               content={sop.content}
               isCompleted={isSOPCompleted(sop.key)}
               onStartQuiz={() => handleStartMiniQuiz(sop)}
+              onEdit={() => handleEditSOP(sop)}
             />
           ))
         ) : (
@@ -150,6 +173,19 @@ const SOPs = () => {
         quizType={isFinalExam ? "final" : "mini"}
         itemKey={currentSOP?.key}
       />
+
+      {editingSOP && (
+        <SOPEditor
+          open={editorOpen}
+          onClose={() => {
+            setEditorOpen(false);
+            setEditingSOP(null);
+          }}
+          sopKey={editingSOP.key}
+          systemTitle={editingSOP.title}
+          systemContent={editingSOP.content}
+        />
+      )}
     </div>
   );
 };

@@ -53,6 +53,99 @@ export type Database = {
         }
         Relationships: []
       }
+      company_policies: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean
+          source_policy_key: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          source_policy_key: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          source_policy_key?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      company_settings: {
+        Row: {
+          created_at: string
+          enable_custom_policies: boolean
+          enable_custom_sops: boolean
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enable_custom_policies?: boolean
+          enable_custom_sops?: boolean
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enable_custom_policies?: boolean
+          enable_custom_sops?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      company_sops: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean
+          source_sop_key: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          source_sop_key: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          source_sop_key?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       disclaimer_acceptances: {
         Row: {
           accepted_at: string
