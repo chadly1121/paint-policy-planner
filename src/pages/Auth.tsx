@@ -285,9 +285,13 @@ const Auth = () => {
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground space-x-2">
               <Link to="/terms" className="hover:text-primary transition-colors underline">
                 Terms of Service
+              </Link>
+              <span>·</span>
+              <Link to="/privacy" className="hover:text-primary transition-colors underline">
+                Privacy Policy
               </Link>
             </div>
           </div>
