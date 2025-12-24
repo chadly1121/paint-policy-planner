@@ -562,6 +562,95 @@ export type Database = {
         }
         Relationships: []
       }
+      sops: {
+        Row: {
+          ack_epoch: number
+          ack_required: boolean
+          ack_reset_on_change: boolean
+          content_md: string
+          created_at: string
+          created_by: string | null
+          forked_from_sop_id: string | null
+          id: string
+          last_change_summary: string | null
+          org_id: string | null
+          source: string
+          status: string
+          system_key: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          ack_epoch?: number
+          ack_required?: boolean
+          ack_reset_on_change?: boolean
+          content_md: string
+          created_at?: string
+          created_by?: string | null
+          forked_from_sop_id?: string | null
+          id?: string
+          last_change_summary?: string | null
+          org_id?: string | null
+          source: string
+          status?: string
+          system_key?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          ack_epoch?: number
+          ack_required?: boolean
+          ack_reset_on_change?: boolean
+          content_md?: string
+          created_at?: string
+          created_by?: string | null
+          forked_from_sop_id?: string | null
+          id?: string
+          last_change_summary?: string | null
+          org_id?: string | null
+          source?: string
+          status?: string
+          system_key?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sops_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sops_forked_from_sop_id_fkey"
+            columns: ["forked_from_sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sops_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sops_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
