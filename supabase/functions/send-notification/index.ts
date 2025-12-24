@@ -152,6 +152,55 @@ serve(async (req: Request): Promise<Response> => {
             <p style="color: #6b7280; font-size: 12px;">This is an automated notification from your Employee Manual platform.</p>
           </div>
         `;
+
+        // Also notify all admins about the new redemption request
+        try {
+          const { data: adminRoles, error: adminError } = await supabase
+            .from("user_roles")
+            .select("user_id")
+            .eq("role", "admin");
+
+          if (!adminError && adminRoles && adminRoles.length > 0) {
+            const adminUserIds = adminRoles.map((r) => r.user_id);
+            const { data: adminProfiles } = await supabase
+              .from("profiles")
+              .select("email, full_name")
+              .in("user_id", adminUserIds);
+
+            if (adminProfiles && adminProfiles.length > 0) {
+              const adminSubject = `🔔 New Redemption Request from ${profile.full_name}`;
+              const adminHtml = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h1 style="color: #f59e0b;">New Redemption Request</h1>
+                  <p>A new redemption request requires your review:</p>
+                  <ul style="line-height: 1.8;">
+                    <li><strong>Employee:</strong> ${profile.full_name}</li>
+                    <li><strong>Email:</strong> ${profile.email}</li>
+                    <li><strong>Points Requested:</strong> ${data.pointsRequested}</li>
+                    <li><strong>Estimated Value:</strong> $${((data.pointsRequested || 0) * 0.01).toFixed(2)}</li>
+                  </ul>
+                  <p>Please log in to the Admin panel to review and process this request.</p>
+                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+                  <p style="color: #6b7280; font-size: 12px;">This is an automated admin notification from the Employee Manual platform.</p>
+                </div>
+              `;
+
+              for (const admin of adminProfiles) {
+                try {
+                  console.log(`Sending admin notification to ${admin.email}`);
+                  await sendEmail(admin.email, adminSubject, adminHtml);
+                  console.log(`Admin notification sent to ${admin.email}`);
+                } catch (adminEmailError) {
+                  console.error(`Failed to send admin notification to ${admin.email}:`, adminEmailError);
+                }
+              }
+            }
+          }
+        } catch (adminNotifyError) {
+          console.error("Error sending admin notifications:", adminNotifyError);
+          // Don't fail the whole request if admin notification fails
+        }
+
         break;
 
       case "redemption_processed":
