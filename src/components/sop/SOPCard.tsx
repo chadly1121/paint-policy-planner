@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
+import { useCompanyContent } from "@/hooks/useCompanyContent";
 
 interface SOPCardProps {
   sopKey: string;
@@ -12,14 +15,23 @@ interface SOPCardProps {
   content: string;
   isCompleted: boolean;
   onStartQuiz: () => void;
+  onEdit?: () => void;
 }
 
-const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz }: SOPCardProps) => {
+const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: SOPCardProps) => {
   const { t } = useTranslation();
+  const { isAdmin } = useAuth();
+  const { enableCustomSOPs } = useCompanySettings();
+  const { getCompanySOP } = useCompanyContent();
   const [isOpen, setIsOpen] = useState(false);
 
+  const companySOP = getCompanySOP(sopKey);
+  const isCustomized = !!companySOP;
+  const displayTitle = isCustomized ? companySOP.title : title;
+  const displayContent = isCustomized ? companySOP.content : content;
+
   // Format content with proper line breaks
-  const formattedContent = content.split('\n').map((line, idx) => {
+  const formattedContent = displayContent.split('\n').map((line, idx) => {
     if (line.startsWith('•')) {
       return <li key={idx} className="ml-4">{line.substring(1).trim()}</li>;
     }
@@ -29,11 +41,19 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz }: SOPCardPr
     if (line.trim() === '') {
       return <br key={idx} />;
     }
+    if (line.startsWith('---')) {
+      return <hr key={idx} className="my-3 border-border" />;
+    }
+    if (line.startsWith('⚠️')) {
+      return <p key={idx} className="text-amber-600 dark:text-amber-400 text-sm font-medium mt-2">{line}</p>;
+    }
     if (line.toUpperCase() === line && line.length > 3) {
       return <h4 key={idx} className="font-semibold mt-3 mb-1 text-primary">{line}</h4>;
     }
     return <p key={idx} className="mb-1">{line}</p>;
   });
+
+  const canEdit = isAdmin && enableCustomSOPs;
 
   return (
     <Card className={`transition-all ${isCompleted ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/10' : 'border-border'}`}>
@@ -44,9 +64,19 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz }: SOPCardPr
               {isCompleted && (
                 <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
               )}
-              <CardTitle className="text-base font-medium truncate">{title}</CardTitle>
+              <CardTitle className="text-base font-medium truncate">{displayTitle}</CardTitle>
+              {isCustomized ? (
+                <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
+              ) : canEdit ? (
+                <Badge variant="outline" className="text-xs flex-shrink-0">🛡️ System</Badge>
+              ) : null}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              {canEdit && onEdit && (
+                <Button size="sm" variant="ghost" onClick={onEdit} className="text-muted-foreground hover:text-primary">
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
               {isCompleted ? (
                 <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                   +10 pts
