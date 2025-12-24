@@ -291,11 +291,15 @@ const Auth = () => {
               </button>
               <div className="text-xs text-muted-foreground space-x-2">
                 <Link to="/terms" className="hover:text-primary transition-colors underline">
-                  Terms of Service
+                  Terms
                 </Link>
                 <span>·</span>
                 <Link to="/privacy" className="hover:text-primary transition-colors underline">
-                  Privacy Policy
+                  Privacy
+                </Link>
+                <span>·</span>
+                <Link to="/compliance-guidance" className="hover:text-primary transition-colors underline">
+                  Compliance Guidance
                 </Link>
               </div>
             </div>
@@ -537,11 +541,15 @@ const Auth = () => {
             </button>
             <div className="text-xs text-muted-foreground space-x-2">
               <Link to="/terms" className="hover:text-primary transition-colors underline">
-                Terms of Service
+                Terms
               </Link>
               <span>·</span>
               <Link to="/privacy" className="hover:text-primary transition-colors underline">
-                Privacy Policy
+                Privacy
+              </Link>
+              <span>·</span>
+              <Link to="/compliance-guidance" className="hover:text-primary transition-colors underline">
+                Compliance Guidance
               </Link>
             </div>
           </div>
