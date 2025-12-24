@@ -55,34 +55,43 @@ export type Database = {
       }
       company_policies: {
         Row: {
+          change_summary: string | null
           content: string
           created_at: string
+          edited_by: string | null
           id: string
           is_active: boolean
           source_policy_key: string
           title: string
           updated_at: string
           user_id: string
+          version: number
         }
         Insert: {
+          change_summary?: string | null
           content: string
           created_at?: string
+          edited_by?: string | null
           id?: string
           is_active?: boolean
           source_policy_key: string
           title: string
           updated_at?: string
           user_id: string
+          version?: number
         }
         Update: {
+          change_summary?: string | null
           content?: string
           created_at?: string
+          edited_by?: string | null
           id?: string
           is_active?: boolean
           source_policy_key?: string
           title?: string
           updated_at?: string
           user_id?: string
+          version?: number
         }
         Relationships: []
       }
@@ -115,34 +124,43 @@ export type Database = {
       }
       company_sops: {
         Row: {
+          change_summary: string | null
           content: string
           created_at: string
+          edited_by: string | null
           id: string
           is_active: boolean
           source_sop_key: string
           title: string
           updated_at: string
           user_id: string
+          version: number
         }
         Insert: {
+          change_summary?: string | null
           content: string
           created_at?: string
+          edited_by?: string | null
           id?: string
           is_active?: boolean
           source_sop_key: string
           title: string
           updated_at?: string
           user_id: string
+          version?: number
         }
         Update: {
+          change_summary?: string | null
           content?: string
           created_at?: string
+          edited_by?: string | null
           id?: string
           is_active?: boolean
           source_sop_key?: string
           title?: string
           updated_at?: string
           user_id?: string
+          version?: number
         }
         Relationships: []
       }
@@ -393,6 +411,66 @@ export type Database = {
           created_at?: string
           id?: string
           section_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sop_acknowledgments: {
+        Row: {
+          acknowledged_at: string
+          id: string
+          ip_address: string | null
+          sop_key: string
+          sop_version: number
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string
+          id?: string
+          ip_address?: string | null
+          sop_key: string
+          sop_version?: number
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string
+          id?: string
+          ip_address?: string | null
+          sop_key?: string
+          sop_version?: number
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sop_assignments: {
+        Row: {
+          assigned_role: Database["public"]["Enums"]["app_role"]
+          created_at: string
+          id: string
+          requires_acknowledgment: boolean
+          sop_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_role: Database["public"]["Enums"]["app_role"]
+          created_at?: string
+          id?: string
+          requires_acknowledgment?: boolean
+          sop_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_role?: Database["public"]["Enums"]["app_role"]
+          created_at?: string
+          id?: string
+          requires_acknowledgment?: boolean
+          sop_key?: string
           updated_at?: string
           user_id?: string
         }

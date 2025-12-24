@@ -4,16 +4,33 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Settings, AlertTriangle, FileEdit, Loader2 } from "lucide-react";
+import { Settings, AlertTriangle, FileEdit, Loader2, CheckCircle } from "lucide-react";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
+import { useDisclaimerAcceptance } from "@/hooks/useDisclaimerAcceptance";
 import { useToast } from "@/hooks/use-toast";
+import DisclaimerModal from "@/components/admin/DisclaimerModal";
+import { format } from "date-fns";
 
 const ContentSettingsCard = () => {
   const { settings, loading, updateSettings, enableCustomSOPs, enableCustomPolicies } = useCompanySettings();
+  const { hasAccepted, acceptance, loading: disclaimerLoading } = useDisclaimerAcceptance();
   const { toast } = useToast();
   const [updating, setUpdating] = useState<string | null>(null);
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+  const [pendingToggle, setPendingToggle] = useState<{ field: 'enable_custom_sops' | 'enable_custom_policies'; value: boolean } | null>(null);
 
   const handleToggle = async (field: 'enable_custom_sops' | 'enable_custom_policies', value: boolean) => {
+    // If enabling and disclaimer not accepted, show modal first
+    if (value && !hasAccepted) {
+      setPendingToggle({ field, value });
+      setShowDisclaimerModal(true);
+      return;
+    }
+
+    await performToggle(field, value);
+  };
+
+  const performToggle = async (field: 'enable_custom_sops' | 'enable_custom_policies', value: boolean) => {
     setUpdating(field);
     const { error } = await updateSettings({ [field]: value });
     
@@ -34,7 +51,15 @@ const ContentSettingsCard = () => {
     setUpdating(null);
   };
 
-  if (loading) {
+  const handleDisclaimerAccepted = async () => {
+    setShowDisclaimerModal(false);
+    if (pendingToggle) {
+      await performToggle(pendingToggle.field, pendingToggle.value);
+      setPendingToggle(null);
+    }
+  };
+
+  if (loading || disclaimerLoading) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
@@ -45,6 +70,15 @@ const ContentSettingsCard = () => {
   }
 
   return (
+    <>
+      <DisclaimerModal
+        open={showDisclaimerModal}
+        onClose={() => {
+          setShowDisclaimerModal(false);
+          setPendingToggle(null);
+        }}
+        onAccepted={handleDisclaimerAccepted}
+      />
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -57,6 +91,15 @@ const ContentSettingsCard = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {hasAccepted && acceptance && (
+          <Alert className="border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              Disclaimer accepted on {format(new Date(acceptance.accepted_at), "MMMM d, yyyy 'at' h:mm a")}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800 dark:text-amber-200">
@@ -109,10 +152,12 @@ const ContentSettingsCard = () => {
             <li>Custom content (✏️) is your company's edited version</li>
             <li>You can reset any custom content back to system default</li>
             <li>All edits include a non-removable compliance disclaimer</li>
+            <li>Version numbers auto-increment on edits, resetting acknowledgments</li>
           </ul>
         </div>
       </CardContent>
     </Card>
+    </>
   );
 };
 

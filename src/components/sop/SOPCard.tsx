@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, Shield } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useCompanyContent } from "@/hooks/useCompanyContent";
+import SOPAcknowledgmentButton from "@/components/sop/SOPAcknowledgmentButton";
 
 interface SOPCardProps {
   sopKey: string;
@@ -29,6 +30,7 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: S
   const isCustomized = !!companySOP;
   const displayTitle = isCustomized ? companySOP.title : title;
   const displayContent = isCustomized ? companySOP.content : content;
+  const sopVersion = companySOP?.version ?? 1;
 
   // Format content with proper line breaks
   const formattedContent = displayContent.split('\n').map((line, idx) => {
@@ -77,6 +79,7 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: S
                   <Pencil className="h-3 w-3" />
                 </Button>
               )}
+              <SOPAcknowledgmentButton sopKey={sopKey} sopVersion={sopVersion} />
               {isCompleted ? (
                 <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                   +10 pts
