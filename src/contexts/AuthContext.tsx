@@ -8,7 +8,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string, preferredLanguage?: string) => Promise<{ error: Error | null; data?: { user: User | null } }>;
+  signUp: (email: string, password: string, companyName: string, preferredLanguage?: string, country?: string) => Promise<{ error: Error | null; data?: { user: User | null } }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error: error as Error | null };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, preferredLanguage: string = "en") => {
+  const signUp = async (email: string, password: string, companyName: string, preferredLanguage: string = "en", country?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     const { error, data } = await supabase.auth.signUp({
       email,
@@ -87,8 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       options: {
         emailRedirectTo: redirectUrl,
         data: { 
-          full_name: fullName,
-          preferred_language: preferredLanguage
+          full_name: companyName,
+          company_name: companyName,
+          preferred_language: preferredLanguage,
+          country: country || null,
         },
       },
     });
