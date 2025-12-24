@@ -11,6 +11,9 @@ export interface CompanySOP {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  version: number;
+  edited_by: string | null;
+  change_summary: string | null;
 }
 
 export interface CompanyPolicy {
@@ -22,6 +25,9 @@ export interface CompanyPolicy {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  version: number;
+  edited_by: string | null;
+  change_summary: string | null;
 }
 
 export const useCompanyContent = () => {
