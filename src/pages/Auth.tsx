@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -274,7 +274,7 @@ const Auth = () => {
               {isLogin ? "Sign In" : "Create Account"}
             </Button>
           </form>
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
             <button
               type="button"
               onClick={() => {
@@ -285,6 +285,11 @@ const Auth = () => {
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
+            <div className="text-xs text-muted-foreground">
+              <Link to="/terms" className="hover:text-primary transition-colors underline">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -14,6 +14,7 @@ import Disciplinary from "./pages/Disciplinary";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/terms" element={<Terms />} />
             <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
               <Route path="/" element={<Index />} />
               <Route path="/sops" element={<SOPs />} />
