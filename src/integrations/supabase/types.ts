@@ -499,6 +499,54 @@ export type Database = {
         }
         Relationships: []
       }
+      sop_acks: {
+        Row: {
+          ack_epoch: number
+          acknowledged_at: string
+          id: string
+          ip_address: string | null
+          org_user_id: string | null
+          sop_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          ack_epoch: number
+          acknowledged_at?: string
+          id?: string
+          ip_address?: string | null
+          org_user_id?: string | null
+          sop_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          ack_epoch?: number
+          acknowledged_at?: string
+          id?: string
+          ip_address?: string | null
+          org_user_id?: string | null
+          sop_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_acks_org_user_id_fkey"
+            columns: ["org_user_id"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_acks_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sop_assignments: {
         Row: {
           assigned_role: Database["public"]["Enums"]["app_role"]
@@ -561,6 +609,58 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sop_role_assignments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_required: boolean
+          org_id: string
+          role: string
+          sop_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_required?: boolean
+          org_id: string
+          role: string
+          sop_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_required?: boolean
+          org_id?: string
+          role?: string
+          sop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sop_role_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_role_assignments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sop_role_assignments_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sops: {
         Row: {
@@ -692,7 +792,25 @@ export type Database = {
           total_points: number
         }[]
       }
+      get_user_assigned_sops: {
+        Args: { _user_id: string }
+        Returns: {
+          ack_epoch: number
+          ack_required: boolean
+          content_md: string
+          is_acknowledged: boolean
+          sop_id: string
+          source: string
+          system_key: string
+          title: string
+          version: number
+        }[]
+      }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
+      has_acknowledged_sop: {
+        Args: { _sop_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_org_role: {
         Args: { _org_id: string; _role: string; _user_id: string }
         Returns: boolean
