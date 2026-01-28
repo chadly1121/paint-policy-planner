@@ -4,36 +4,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useCompanySettings } from "@/hooks/useCompanySettings";
-import { useCompanyContent } from "@/hooks/useCompanyContent";
-import SOPAcknowledgmentButton from "@/components/sop/SOPAcknowledgmentButton";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck } from "lucide-react";
+import { useOrgSops } from "@/hooks/useOrgSops";
+import { useToast } from "@/hooks/use-toast";
 
 interface SOPCardProps {
-  sopKey: string;
+  sopId: string;
   title: string;
   content: string;
-  isCompleted: boolean;
+  source: string;
+  isAcknowledged: boolean;
+  ackRequired: boolean;
+  version: number;
+  ackEpoch: number;
+  canEdit: boolean;
   onStartQuiz: () => void;
   onEdit?: () => void;
+  onAckSuccess?: () => void;
 }
 
-const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: SOPCardProps) => {
+const SOPCard = ({ 
+  sopId, 
+  title, 
+  content, 
+  source,
+  isAcknowledged, 
+  ackRequired,
+  version,
+  ackEpoch,
+  canEdit,
+  onStartQuiz, 
+  onEdit,
+  onAckSuccess
+}: SOPCardProps) => {
   const { t } = useTranslation();
-  const { isAdmin } = useAuth();
-  const { enableCustomSOPs } = useCompanySettings();
-  const { getCompanySOP } = useCompanyContent();
+  const { toast } = useToast();
+  const { acknowledgeSop } = useOrgSops();
   const [isOpen, setIsOpen] = useState(false);
-
-  const companySOP = getCompanySOP(sopKey);
-  const isCustomized = !!companySOP;
-  const displayTitle = isCustomized ? companySOP.title : title;
-  const displayContent = isCustomized ? companySOP.content : content;
-  const sopVersion = companySOP?.version ?? 1;
+  const [acknowledging, setAcknowledging] = useState(false);
 
   // Format content with proper line breaks
-  const formattedContent = displayContent.split('\n').map((line, idx) => {
+  const formattedContent = content.split('\n').map((line, idx) => {
     if (line.startsWith('•')) {
       return <li key={idx} className="ml-4">{line.substring(1).trim()}</li>;
     }
@@ -55,23 +66,40 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: S
     return <p key={idx} className="mb-1">{line}</p>;
   });
 
-  const canEdit = isAdmin && enableCustomSOPs;
+  const handleAcknowledge = async () => {
+    setAcknowledging(true);
+    const { error } = await acknowledgeSop(sopId);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to acknowledge",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "SOP Acknowledged",
+        description: "Your acknowledgment has been recorded.",
+      });
+      onAckSuccess?.();
+    }
+    setAcknowledging(false);
+  };
 
   return (
-    <Card className={`transition-all ${isCompleted ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/10' : 'border-border'}`}>
+    <Card className={`transition-all ${isAcknowledged ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/10' : 'border-border'}`}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              {isCompleted && (
+              {isAcknowledged && (
                 <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
               )}
-              <CardTitle className="text-base font-medium truncate">{displayTitle}</CardTitle>
-              {isCustomized ? (
+              <CardTitle className="text-base font-medium truncate">{title}</CardTitle>
+              {source === "org" ? (
                 <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
-              ) : canEdit ? (
+              ) : (
                 <Badge variant="outline" className="text-xs flex-shrink-0">🛡️ System</Badge>
-              ) : null}
+              )}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {canEdit && onEdit && (
@@ -79,10 +107,21 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: S
                   <Pencil className="h-3 w-3" />
                 </Button>
               )}
-              <SOPAcknowledgmentButton sopKey={sopKey} sopVersion={sopVersion} />
-              {isCompleted ? (
+              {ackRequired && !isAcknowledged && (
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleAcknowledge}
+                  disabled={acknowledging}
+                  className="text-xs"
+                >
+                  <FileCheck className="h-3 w-3 mr-1" />
+                  {acknowledging ? "..." : "Acknowledge"}
+                </Button>
+              )}
+              {isAcknowledged ? (
                 <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                  +10 pts
+                  ✓ Acknowledged
                 </Badge>
               ) : (
                 <Button size="sm" variant="outline" onClick={onStartQuiz}>
@@ -103,9 +142,23 @@ const SOPCard = ({ sopKey, title, content, isCompleted, onStartQuiz, onEdit }: S
             <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
               {formattedContent}
             </div>
-            {!isCompleted && (
-              <div className="mt-4 pt-4 border-t">
-                <Button onClick={onStartQuiz} className="w-full">
+            <div className="mt-2 text-xs text-muted-foreground">
+              Version {version} • Epoch {ackEpoch}
+            </div>
+            {!isAcknowledged && (
+              <div className="mt-4 pt-4 border-t flex gap-2">
+                {ackRequired && (
+                  <Button 
+                    onClick={handleAcknowledge} 
+                    disabled={acknowledging}
+                    variant="secondary"
+                    className="flex-1"
+                  >
+                    <FileCheck className="h-4 w-4 mr-2" />
+                    {acknowledging ? "Acknowledging..." : "Acknowledge SOP"}
+                  </Button>
+                )}
+                <Button onClick={onStartQuiz} className="flex-1">
                   <Play className="h-4 w-4 mr-2" />
                   {t("quiz.takeQuiz")} (2 {t("quiz.questions")})
                 </Button>

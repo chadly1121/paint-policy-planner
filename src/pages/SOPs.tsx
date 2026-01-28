@@ -7,44 +7,59 @@ import { ClipboardList, Search } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
 import SOPCard from "@/components/sop/SOPCard";
 import SOPFinalExam from "@/components/sop/SOPFinalExam";
-import SOPEditor from "@/components/admin/SOPEditor";
+import OrgSOPEditor from "@/components/admin/OrgSOPEditor";
 import { useProgress } from "@/hooks/useProgress";
-import { useSOPProgress } from "@/hooks/useSOPProgress";
-import { useCompanyContent } from "@/hooks/useCompanyContent";
+import { useOrgSops } from "@/hooks/useOrgSops";
+import { useOrg } from "@/contexts/OrganizationContext";
 
 const SECTION_KEY = "sops";
+
+interface SOPItem {
+  id: string;
+  title: string;
+  content: string;
+  source: string;
+  systemKey: string | null;
+  version: number;
+  ackEpoch: number;
+  ackRequired: boolean;
+  isAcknowledged: boolean;
+}
 
 const SOPs = () => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [quizOpen, setQuizOpen] = useState(false);
-  const [currentSOP, setCurrentSOP] = useState<{ key: string; title: string; content: string } | null>(null);
+  const [currentSOP, setCurrentSOP] = useState<SOPItem | null>(null);
   const [isFinalExam, setIsFinalExam] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [editingSOP, setEditingSOP] = useState<{ key: string; title: string; content: string } | null>(null);
+  const [editingSOP, setEditingSOP] = useState<SOPItem | null>(null);
   
   const { progress, refreshData } = useProgress();
-  const { sopProgress, isSOPCompleted, getCompletedSOPCount, refreshProgress } = useSOPProgress();
-  const { getCompanySOP } = useCompanyContent();
+  const { assignedSops, loading, hasAcknowledged, refresh } = useOrgSops();
+  const { isOrgAdmin } = useOrg();
 
   const isSectionCompleted = progress?.some(
     (p) => p.section_key === SECTION_KEY && p.completed
   ) ?? false;
 
-  // Generate SOP items from translations
-  const sopKeys = Array.from({ length: 55 }, (_, i) => `sop${String(i + 1).padStart(3, '0')}`);
-  
-  const sopItems = useMemo(() => 
-    sopKeys.map((key, idx) => ({
-      key,
-      id: `sop-${String(idx + 1).padStart(3, '0')}`,
-      title: t(`sops.${key}.title`, { defaultValue: '' }),
-      content: t(`sops.${key}.content`, { defaultValue: '' }),
-    })).filter(item => item.title && item.content),
-  [t, sopKeys]);
+  // Map assigned SOPs to component format
+  const sopItems: SOPItem[] = useMemo(() => 
+    assignedSops.map((sop) => ({
+      id: sop.sop_id,
+      title: sop.title,
+      content: sop.content_md,
+      source: sop.source,
+      systemKey: sop.system_key,
+      version: sop.version,
+      ackEpoch: sop.ack_epoch,
+      ackRequired: sop.ack_required,
+      isAcknowledged: sop.is_acknowledged,
+    })),
+  [assignedSops]);
 
+  const completedSOPs = sopItems.filter((sop) => sop.isAcknowledged).length;
   const totalSOPs = sopItems.length;
-  const completedSOPs = getCompletedSOPCount();
   const progressPercent = totalSOPs > 0 ? Math.round((completedSOPs / totalSOPs) * 100) : 0;
 
   const filteredItems = useMemo(() => {
@@ -57,24 +72,12 @@ const SOPs = () => {
     );
   }, [searchQuery, sopItems]);
 
-  // For content, use company version if exists
-  const getSOPContent = (sop: { key: string; title: string; content: string }) => {
-    const companySOP = getCompanySOP(sop.key);
-    return companySOP 
-      ? { title: companySOP.title, content: companySOP.content }
-      : { title: sop.title, content: sop.content };
-  };
-
   const allSOPContent = useMemo(() => 
-    sopItems.map(item => {
-      const { title, content } = getSOPContent(item);
-      return `${title}: ${content}`;
-    }).join('\n\n'),
-  [sopItems, getCompanySOP]);
+    sopItems.map(item => `${item.title}: ${item.content}`).join('\n\n'),
+  [sopItems]);
 
-  const handleStartMiniQuiz = (sop: { key: string; title: string; content: string }) => {
-    const { title, content } = getSOPContent(sop);
-    setCurrentSOP({ key: sop.key, title, content });
+  const handleStartMiniQuiz = (sop: SOPItem) => {
+    setCurrentSOP(sop);
     setIsFinalExam(false);
     setQuizOpen(true);
   };
@@ -87,15 +90,29 @@ const SOPs = () => {
 
   const handleQuizComplete = (passed: boolean) => {
     if (passed) {
-      refreshProgress();
+      refresh();
       refreshData();
     }
   };
 
-  const handleEditSOP = (sop: { key: string; title: string; content: string }) => {
+  const handleEditSOP = (sop: SOPItem) => {
     setEditingSOP(sop);
     setEditorOpen(true);
   };
+
+  const handleEditorClose = () => {
+    setEditorOpen(false);
+    setEditingSOP(null);
+    refresh();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -143,18 +160,24 @@ const SOPs = () => {
         {filteredItems.length > 0 ? (
           filteredItems.map((sop) => (
             <SOPCard
-              key={sop.key}
-              sopKey={sop.key}
+              key={sop.id}
+              sopId={sop.id}
               title={sop.title}
               content={sop.content}
-              isCompleted={isSOPCompleted(sop.key)}
+              source={sop.source}
+              isAcknowledged={sop.isAcknowledged}
+              ackRequired={sop.ackRequired}
+              version={sop.version}
+              ackEpoch={sop.ackEpoch}
+              canEdit={isOrgAdmin && sop.source === "org"}
               onStartQuiz={() => handleStartMiniQuiz(sop)}
               onEdit={() => handleEditSOP(sop)}
+              onAckSuccess={refresh}
             />
           ))
         ) : (
           <p className="text-center text-muted-foreground py-8">
-            {t("common.noResults")} "{searchQuery}"
+            {searchQuery ? `${t("common.noResults")} "${searchQuery}"` : "No SOPs assigned to your role."}
           </p>
         )}
       </div>
@@ -171,19 +194,16 @@ const SOPs = () => {
         sectionContent={isFinalExam ? allSOPContent : currentSOP?.content || ""}
         onComplete={handleQuizComplete}
         quizType={isFinalExam ? "final" : "mini"}
-        itemKey={currentSOP?.key}
+        itemKey={currentSOP?.id}
       />
 
       {editingSOP && (
-        <SOPEditor
+        <OrgSOPEditor
           open={editorOpen}
-          onClose={() => {
-            setEditorOpen(false);
-            setEditingSOP(null);
-          }}
-          sopKey={editingSOP.key}
-          systemTitle={editingSOP.title}
-          systemContent={editingSOP.content}
+          onClose={handleEditorClose}
+          sopId={editingSOP.id}
+          currentTitle={editingSOP.title}
+          currentContent={editingSOP.content}
         />
       )}
     </div>
