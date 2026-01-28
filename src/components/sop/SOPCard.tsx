@@ -119,16 +119,15 @@ const SOPCard = ({
                   {acknowledging ? "..." : "Acknowledge"}
                 </Button>
               )}
-              {isAcknowledged ? (
+              {isAcknowledged && (
                 <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                   ✓ Acknowledged
                 </Badge>
-              ) : (
-                <Button size="sm" variant="outline" onClick={onStartQuiz}>
-                  <Play className="h-3 w-3 mr-1" />
-                  Quiz
-                </Button>
               )}
+              <Button size="sm" variant="outline" onClick={onStartQuiz}>
+                <Play className="h-3 w-3 mr-1" />
+                Quiz
+              </Button>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm">
                   {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -145,25 +144,23 @@ const SOPCard = ({
             <div className="mt-2 text-xs text-muted-foreground">
               Version {version} • Epoch {ackEpoch}
             </div>
-            {!isAcknowledged && (
-              <div className="mt-4 pt-4 border-t flex gap-2">
-                {ackRequired && (
-                  <Button 
-                    onClick={handleAcknowledge} 
-                    disabled={acknowledging}
-                    variant="secondary"
-                    className="flex-1"
-                  >
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    {acknowledging ? "Acknowledging..." : "Acknowledge SOP"}
-                  </Button>
-                )}
-                <Button onClick={onStartQuiz} className="flex-1">
-                  <Play className="h-4 w-4 mr-2" />
-                  {t("quiz.takeQuiz")} (2 {t("quiz.questions")})
+            <div className="mt-4 pt-4 border-t flex gap-2">
+              {ackRequired && !isAcknowledged && (
+                <Button 
+                  onClick={handleAcknowledge} 
+                  disabled={acknowledging}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  <FileCheck className="h-4 w-4 mr-2" />
+                  {acknowledging ? "Acknowledging..." : "Acknowledge SOP"}
                 </Button>
-              </div>
-            )}
+              )}
+              <Button onClick={onStartQuiz} className="flex-1">
+                <Play className="h-4 w-4 mr-2" />
+                {t("quiz.takeQuiz")} (2 {t("quiz.questions")})
+              </Button>
+            </div>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
