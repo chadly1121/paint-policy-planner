@@ -136,62 +136,75 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert document processor for an employee manual system. Your task is to take raw document content and transform it into a well-structured ${contentTypeDescriptions[detectedType] || detectedType}.
 
-IMPORTANT FORMATTING RULES:
-1. Use proper markdown formatting with clear headings (## for main sections, ### for subsections)
-2. Use bullet points for lists of items or steps
-3. Use numbered lists for sequential procedures
-4. Keep paragraphs concise and professional
-5. Maintain a consistent, formal tone appropriate for workplace documentation
-6. Organize content logically with clear section breaks
-7. Include an overview/purpose section at the beginning if not present
-8. Add any necessary safety warnings or compliance notes where appropriate
+CRITICAL FORMATTING RULES - Follow these exactly:
+1. Use ## for main section headers (e.g., "## Purpose/Overview")
+2. Use ### for subsection headers (e.g., "### Required Materials")
+3. Use "- " for bullet points (dash followed by space)
+4. Use "1. ", "2. ", etc. for numbered steps in procedures
+5. Use **bold** for emphasis on key terms or warnings
+6. Keep paragraphs concise and professional
+7. Separate sections with blank lines for readability
+8. DO NOT use underscores, asterisks for horizontal lines, or other unusual formatting
+9. DO NOT include raw HTML tags
+
+EXAMPLE FORMAT:
+## Purpose/Overview
+This procedure outlines the steps for [task description].
+
+## Scope
+This applies to all employees who [relevant criteria].
+
+## Procedure
+1. First step with clear instructions
+2. Second step explaining the next action
+3. Third step with any relevant details
+
+## Safety Considerations
+- Always wear appropriate PPE
+- Report any hazards immediately
+- Follow lockout/tagout procedures
 
 CONTENT STRUCTURE FOR ${detectedType.toUpperCase()}:
 ${detectedType === "sop" ? `
-- Purpose/Overview
-- Scope (who this applies to)
-- Materials/Equipment Needed (if applicable)
-- Step-by-step Procedure (numbered)
-- Safety Considerations
-- Quality Standards
-- Documentation Requirements` : ""}
+## Purpose/Overview
+## Scope
+## Materials/Equipment Needed
+## Procedure (numbered steps)
+## Safety Considerations
+## Quality Standards
+## Documentation Requirements` : ""}
 ${detectedType === "policy" ? `
-- Policy Statement
-- Purpose
-- Scope
-- Definitions (if needed)
-- Policy Details
-- Responsibilities
-- Consequences of Non-Compliance
-- Related Policies` : ""}
+## Policy Statement
+## Purpose
+## Scope
+## Policy Details
+## Responsibilities
+## Consequences of Non-Compliance` : ""}
 ${detectedType === "training" ? `
-- Learning Objectives
-- Introduction
-- Key Concepts
-- Detailed Content
-- Best Practices
-- Summary/Key Takeaways
-- Assessment Questions (if applicable)` : ""}
+## Learning Objectives
+## Introduction
+## Key Concepts
+## Detailed Content
+## Best Practices
+## Summary/Key Takeaways` : ""}
 ${detectedType === "safety" ? `
-- Purpose
-- Hazard Identification
-- Required PPE
-- Safety Procedures
-- Emergency Procedures
-- Reporting Requirements
-- Training Requirements` : ""}
+## Purpose
+## Hazard Identification
+## Required PPE
+## Safety Procedures
+## Emergency Procedures
+## Reporting Requirements` : ""}
 ${detectedType === "disciplinary" ? `
-- Purpose
-- Scope
-- Types of Misconduct
-- Progressive Discipline Steps
-- Documentation Requirements
-- Appeal Process
-- Employee Rights` : ""}
+## Purpose
+## Scope
+## Types of Misconduct
+## Progressive Discipline Steps
+## Documentation Requirements
+## Appeal Process` : ""}
 
 Return a JSON object with:
-- "title": A clear, professional title for this document (max 100 characters)
-- "content": The fully formatted markdown content
+- "title": A clear, professional title for this document (max 100 characters, no prefix like "SOP:" needed)
+- "content": The fully formatted content following the rules above
 - "summary": A brief 1-2 sentence summary of what this document covers`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
