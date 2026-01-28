@@ -39,29 +39,31 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/compliance-guidance" element={<ComplianceGuidance />} />
-            <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-              <Route path="/" element={<Index />} />
-              <Route path="/sops" element={<SOPs />} />
-              <Route path="/safety" element={<Safety />} />
-              <Route path="/policies" element={<Policies />} />
-              <Route path="/training" element={<Training />} />
-              <Route path="/disciplinary" element={<Disciplinary />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/admin" element={<Admin />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <OrganizationProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/compliance-guidance" element={<ComplianceGuidance />} />
+              <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                <Route path="/" element={<Index />} />
+                <Route path="/sops" element={<SOPs />} />
+                <Route path="/safety" element={<Safety />} />
+                <Route path="/policies" element={<Policies />} />
+                <Route path="/training" element={<Training />} />
+                <Route path="/disciplinary" element={<Disciplinary />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/admin" element={<Admin />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </OrganizationProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
