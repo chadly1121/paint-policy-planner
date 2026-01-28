@@ -189,6 +189,7 @@ const SOPs = () => {
               ackEpoch={sop.ackEpoch}
               canEdit={isOrgAdmin && sop.source === "org"}
               canEditSystem={isOrgAdmin && sop.source === "system"}
+              canHideSystem={isOrgAdmin && sop.source === "system"}
               itemNumber={index + 1}
               onStartQuiz={() => handleStartMiniQuiz(sop)}
               onEdit={() => handleEditSOP(sop)}

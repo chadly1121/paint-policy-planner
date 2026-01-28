@@ -42,12 +42,20 @@ interface AssignedSOP {
   system_key: string | null;
 }
 
+interface HiddenSOP {
+  id: string;
+  org_id: string;
+  system_key: string;
+  hidden_at: string;
+}
+
 export const useOrgSops = () => {
   const { user } = useAuth();
   const { org, orgUser } = useOrganization();
   const [sops, setSops] = useState<SOP[]>([]);
   const [acks, setAcks] = useState<SOPAck[]>([]);
   const [assignedSops, setAssignedSops] = useState<AssignedSOP[]>([]);
+  const [hiddenSops, setHiddenSops] = useState<HiddenSOP[]>([]);
   const [loading, setLoading] = useState(true);
 
   const assignSopToAllRoles = useCallback(
@@ -109,6 +117,20 @@ export const useOrgSops = () => {
         console.error("Error fetching assigned SOPs:", assignedError);
       } else {
         setAssignedSops((assignedData || []) as AssignedSOP[]);
+      }
+
+      // Fetch hidden SOPs for the org
+      if (org?.id) {
+        const { data: hiddenData, error: hiddenError } = await supabase
+          .from("org_hidden_sops")
+          .select("*")
+          .eq("org_id", org.id);
+
+        if (hiddenError) {
+          console.error("Error fetching hidden SOPs:", hiddenError);
+        } else {
+          setHiddenSops((hiddenData || []) as HiddenSOP[]);
+        }
       }
     } catch (error) {
       console.error("Error fetching SOPs:", error);
@@ -317,6 +339,62 @@ export const useOrgSops = () => {
     }
   };
 
+  const hideSystemSop = async (
+    systemKey: string
+  ): Promise<{ error: Error | null }> => {
+    if (!user?.id || !org?.id || !orgUser?.id) {
+      return { error: new Error("Not authenticated or no org") };
+    }
+
+    try {
+      const { error } = await supabase.from("org_hidden_sops").insert({
+        org_id: org.id,
+        system_key: systemKey,
+        hidden_by: orgUser.id,
+      });
+
+      if (error) throw error;
+
+      await fetchSops();
+      return { error: null };
+    } catch (error) {
+      console.error("Error hiding SOP:", error);
+      return { error: error as Error };
+    }
+  };
+
+  const unhideSystemSop = async (
+    systemKey: string
+  ): Promise<{ error: Error | null }> => {
+    if (!user?.id || !org?.id) {
+      return { error: new Error("Not authenticated or no org") };
+    }
+
+    try {
+      const { error } = await supabase
+        .from("org_hidden_sops")
+        .delete()
+        .eq("org_id", org.id)
+        .eq("system_key", systemKey);
+
+      if (error) throw error;
+
+      await fetchSops();
+      return { error: null };
+    } catch (error) {
+      console.error("Error unhiding SOP:", error);
+      return { error: error as Error };
+    }
+  };
+
+  const isSystemSopHidden = useCallback(
+    (systemKey: string | null): boolean => {
+      if (!systemKey) return false;
+      return hiddenSops.some((h) => h.system_key === systemKey);
+    },
+    [hiddenSops]
+  );
+
   // Filter helpers
   const systemSops = sops.filter((s) => s.source === "system");
   const orgSops = sops.filter((s) => s.source === "org" && s.org_id === org?.id);
@@ -330,6 +408,7 @@ export const useOrgSops = () => {
     orgSops,
     acks,
     assignedSops,
+    hiddenSops,
     pendingAcks,
     loading,
     hasAcknowledged,
@@ -339,6 +418,9 @@ export const useOrgSops = () => {
     updateSop,
     archiveSop,
     deleteSop,
+    hideSystemSop,
+    unhideSystemSop,
+    isSystemSopHidden,
     refresh: fetchSops,
   };
 };
