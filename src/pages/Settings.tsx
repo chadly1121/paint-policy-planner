@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Globe, User, Lock, Save } from "lucide-react";
+import { Loader2, Globe, User, Lock, Save, UserCircle, ArrowRight } from "lucide-react";
 import { z } from "zod";
 import {
   Select,
@@ -192,6 +193,27 @@ const Settings = () => {
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
       
+      {/* Profile Link Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserCircle className="h-5 w-5" />
+            My Profile
+          </CardTitle>
+          <CardDescription>
+            Manage your photo, bio, certificates, and awards
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/profile">
+              View Full Profile
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
