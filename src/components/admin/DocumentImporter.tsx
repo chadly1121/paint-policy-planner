@@ -5,6 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -22,7 +25,12 @@ import {
   FileUp,
   Clipboard,
   RefreshCw,
-  Save
+  Save,
+  X,
+  Files,
+  CheckCircle2,
+  XCircle,
+  Clock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +42,16 @@ interface ProcessedDocument {
   content: string;
   summary: string;
   type: string;
+}
+
+interface BulkFileItem {
+  id: string;
+  file: File;
+  status: "pending" | "processing" | "processed" | "error" | "saved";
+  processedDoc?: ProcessedDocument;
+  editedTitle?: string;
+  editedContent?: string;
+  error?: string;
 }
 
 type ContentType = "sop" | "policy" | "training" | "safety" | "disciplinary";
@@ -65,6 +83,10 @@ const DocumentImporter = () => {
     refreshContent 
   } = useCompanyContent();
   
+  // Mode: single or bulk
+  const [uploadMode, setUploadMode] = useState<"single" | "bulk">("single");
+  
+  // Single mode state
   const [inputMode, setInputMode] = useState<"file" | "paste">("file");
   const [file, setFile] = useState<File | null>(null);
   const [pastedText, setPastedText] = useState("");
@@ -74,6 +96,12 @@ const DocumentImporter = () => {
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Bulk mode state
+  const [bulkFiles, setBulkFiles] = useState<BulkFileItem[]>([]);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState(0);
+  const [bulkSaving, setBulkSaving] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -92,6 +120,40 @@ const DocumentImporter = () => {
     }
   };
 
+  const handleBulkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+
+    const newFiles: BulkFileItem[] = [];
+    const errors: string[] = [];
+
+    Array.from(selectedFiles).forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        errors.push(`${file.name} is too large (max 10MB)`);
+        return;
+      }
+      newFiles.push({
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        file,
+        status: "pending",
+      });
+    });
+
+    if (errors.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Some files skipped",
+        description: errors.join(", "),
+      });
+    }
+
+    setBulkFiles((prev) => [...prev, ...newFiles]);
+  };
+
+  const removeBulkFile = (id: string) => {
+    setBulkFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
   const extractTextFromFile = async (file: File): Promise<string> => {
     const fileType = file.type;
     const fileName = file.name.toLowerCase();
@@ -107,21 +169,42 @@ const DocumentImporter = () => {
     }
 
     // For PDF, DOCX, etc. - read as text (basic extraction)
-    // Note: Full PDF/DOCX parsing would require additional libraries
     if (fileName.endsWith(".pdf")) {
-      // Basic text extraction attempt
       const text = await file.text();
-      // If it looks like binary, inform user
       if (text.includes("%PDF")) {
         throw new Error(
-          "PDF detected. Please copy and paste the text content directly, or use Google Drive integration for automatic extraction."
+          "PDF binary detected. Please use text files or paste content directly."
         );
       }
       return text;
     }
 
-    // For other files, try text extraction
     return await file.text();
+  };
+
+  const processFileWithAI = async (textContent: string, fileName: string): Promise<ProcessedDocument> => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      throw new Error("Not authenticated");
+    }
+
+    const response = await supabase.functions.invoke("process-document", {
+      body: {
+        documentText: textContent,
+        contentType,
+        fileName,
+      },
+    });
+
+    if (response.error) {
+      throw new Error(response.error.message || "Processing failed");
+    }
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.error || "Processing failed");
+    }
+
+    return response.data.data as ProcessedDocument;
   };
 
   const handleProcess = async () => {
@@ -175,28 +258,7 @@ const DocumentImporter = () => {
     setProcessedDoc(null);
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        throw new Error("Not authenticated");
-      }
-
-      const response = await supabase.functions.invoke("process-document", {
-        body: {
-          documentText: textContent,
-          contentType,
-          fileName,
-        },
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || "Processing failed");
-      }
-
-      if (!response.data?.success) {
-        throw new Error(response.data?.error || "Processing failed");
-      }
-
-      const processed = response.data.data as ProcessedDocument;
+      const processed = await processFileWithAI(textContent, fileName);
       setProcessedDoc(processed);
       setEditedTitle(processed.title);
       setEditedContent(processed.content);
@@ -217,6 +279,118 @@ const DocumentImporter = () => {
     }
   };
 
+  const handleBulkProcess = async () => {
+    const pendingFiles = bulkFiles.filter((f) => f.status === "pending");
+    if (pendingFiles.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No files to process",
+        description: "Add files to process first",
+      });
+      return;
+    }
+
+    setBulkProcessing(true);
+    setBulkProgress(0);
+
+    const total = pendingFiles.length;
+    let completed = 0;
+
+    for (const fileItem of pendingFiles) {
+      // Update status to processing
+      setBulkFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileItem.id ? { ...f, status: "processing" as const } : f
+        )
+      );
+
+      try {
+        const textContent = await extractTextFromFile(fileItem.file);
+        
+        if (textContent.length < 50) {
+          throw new Error("Content too short (min 50 characters)");
+        }
+
+        const processed = await processFileWithAI(textContent, fileItem.file.name);
+
+        setBulkFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileItem.id
+              ? {
+                  ...f,
+                  status: "processed" as const,
+                  processedDoc: processed,
+                  editedTitle: processed.title,
+                  editedContent: processed.content,
+                }
+              : f
+          )
+        );
+      } catch (error) {
+        console.error(`Error processing ${fileItem.file.name}:`, error);
+        setBulkFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileItem.id
+              ? {
+                  ...f,
+                  status: "error" as const,
+                  error: error instanceof Error ? error.message : "Unknown error",
+                }
+              : f
+          )
+        );
+      }
+
+      completed++;
+      setBulkProgress(Math.round((completed / total) * 100));
+    }
+
+    setBulkProcessing(false);
+
+    const successCount = bulkFiles.filter((f) => f.status === "processed").length + 
+                        pendingFiles.filter((_, i) => i < completed).filter((f) => 
+                          bulkFiles.find((b) => b.id === f.id)?.status === "processed"
+                        ).length;
+    
+    toast({
+      title: "Bulk processing complete",
+      description: `${completed} files processed`,
+    });
+  };
+
+  const saveContent = async (title: string, content: string): Promise<Error | null> => {
+    const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
+    const contentWithFooter = content.trim() + complianceFooter;
+    const sourceKey = `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    let error: Error | null = null;
+
+    switch (contentType) {
+      case "sop":
+        const sopResult = await createOrgSop(title.trim(), contentWithFooter);
+        error = sopResult.error;
+        break;
+      case "policy":
+        const policyResult = await upsertCompanyPolicy(sourceKey, title.trim(), contentWithFooter);
+        error = policyResult.error as Error | null;
+        break;
+      case "training":
+        const trainingResult = await upsertCompanyTrainingContent(sourceKey, title.trim(), contentWithFooter);
+        error = trainingResult.error as Error | null;
+        break;
+      case "safety":
+        const safetyResult = await upsertCompanySafetyContent(sourceKey, title.trim(), contentWithFooter);
+        error = safetyResult.error as Error | null;
+        break;
+      case "disciplinary":
+        const disciplinaryResult = await upsertCompanyDisciplinaryContent(sourceKey, title.trim(), contentWithFooter);
+        error = disciplinaryResult.error as Error | null;
+        break;
+    }
+
+    return error;
+  };
+
   const handleSave = async () => {
     if (!editedTitle.trim() || !editedContent.trim()) {
       toast({
@@ -230,43 +404,16 @@ const DocumentImporter = () => {
     setSaving(true);
 
     try {
-      // Add compliance footer for org content
-      const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
-      const contentWithFooter = editedContent.trim() + complianceFooter;
-      const sourceKey = `imported-${Date.now()}`;
-
-      let error: Error | null = null;
-
-      switch (contentType) {
-        case "sop":
-          const sopResult = await createOrgSop(editedTitle.trim(), contentWithFooter);
-          error = sopResult.error;
-          await refreshSops();
-          break;
-        case "policy":
-          const policyResult = await upsertCompanyPolicy(sourceKey, editedTitle.trim(), contentWithFooter);
-          error = policyResult.error as Error | null;
-          await refreshContent();
-          break;
-        case "training":
-          const trainingResult = await upsertCompanyTrainingContent(sourceKey, editedTitle.trim(), contentWithFooter);
-          error = trainingResult.error as Error | null;
-          await refreshContent();
-          break;
-        case "safety":
-          const safetyResult = await upsertCompanySafetyContent(sourceKey, editedTitle.trim(), contentWithFooter);
-          error = safetyResult.error as Error | null;
-          await refreshContent();
-          break;
-        case "disciplinary":
-          const disciplinaryResult = await upsertCompanyDisciplinaryContent(sourceKey, editedTitle.trim(), contentWithFooter);
-          error = disciplinaryResult.error as Error | null;
-          await refreshContent();
-          break;
-      }
+      const error = await saveContent(editedTitle, editedContent);
 
       if (error) {
         throw error;
+      }
+
+      if (contentType === "sop") {
+        await refreshSops();
+      } else {
+        await refreshContent();
       }
 
       toast({
@@ -292,6 +439,55 @@ const DocumentImporter = () => {
     }
   };
 
+  const handleBulkSave = async () => {
+    const processedFiles = bulkFiles.filter((f) => f.status === "processed");
+    if (processedFiles.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No files to save",
+        description: "Process files first before saving",
+      });
+      return;
+    }
+
+    setBulkSaving(true);
+    let savedCount = 0;
+    let errorCount = 0;
+
+    for (const fileItem of processedFiles) {
+      if (!fileItem.editedTitle || !fileItem.editedContent) continue;
+
+      try {
+        const error = await saveContent(fileItem.editedTitle, fileItem.editedContent);
+        if (error) throw error;
+
+        setBulkFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileItem.id ? { ...f, status: "saved" as const } : f
+          )
+        );
+        savedCount++;
+      } catch (error) {
+        console.error(`Error saving ${fileItem.editedTitle}:`, error);
+        errorCount++;
+      }
+    }
+
+    // Refresh data
+    if (contentType === "sop") {
+      await refreshSops();
+    } else {
+      await refreshContent();
+    }
+
+    setBulkSaving(false);
+
+    toast({
+      title: "Bulk save complete",
+      description: `${savedCount} saved, ${errorCount} errors`,
+    });
+  };
+
   const handleReset = () => {
     setFile(null);
     setPastedText("");
@@ -299,6 +495,22 @@ const DocumentImporter = () => {
     setEditedTitle("");
     setEditedContent("");
   };
+
+  const handleBulkReset = () => {
+    setBulkFiles([]);
+    setBulkProgress(0);
+  };
+
+  const updateBulkFileTitle = (id: string, title: string) => {
+    setBulkFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, editedTitle: title } : f))
+    );
+  };
+
+  const processedCount = bulkFiles.filter((f) => f.status === "processed").length;
+  const savedCount = bulkFiles.filter((f) => f.status === "saved").length;
+  const errorCount = bulkFiles.filter((f) => f.status === "error").length;
+  const pendingCount = bulkFiles.filter((f) => f.status === "pending").length;
 
   return (
     <div className="space-y-6">
@@ -314,6 +526,28 @@ const DocumentImporter = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Upload Mode Toggle */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant={uploadMode === "single" ? "default" : "outline"}
+              onClick={() => setUploadMode("single")}
+              className="flex-1"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Single File
+            </Button>
+            <Button
+              type="button"
+              variant={uploadMode === "bulk" ? "default" : "outline"}
+              onClick={() => setUploadMode("bulk")}
+              className="flex-1"
+            >
+              <Files className="h-4 w-4 mr-2" />
+              Bulk Upload
+            </Button>
+          </div>
+
           {/* Content Type Selection */}
           <div className="space-y-2">
             <Label>Content Type</Label>
@@ -334,116 +568,322 @@ const DocumentImporter = () => {
             </Select>
           </div>
 
-          {/* Input Mode Toggle */}
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={inputMode === "file" ? "default" : "outline"}
-              onClick={() => setInputMode("file")}
-              className="flex-1"
-            >
-              <FileUp className="h-4 w-4 mr-2" />
-              Upload File
-            </Button>
-            <Button
-              type="button"
-              variant={inputMode === "paste" ? "default" : "outline"}
-              onClick={() => setInputMode("paste")}
-              className="flex-1"
-            >
-              <Clipboard className="h-4 w-4 mr-2" />
-              Paste Text
-            </Button>
-          </div>
+          {/* SINGLE MODE */}
+          {uploadMode === "single" && (
+            <>
+              {/* Input Mode Toggle */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={inputMode === "file" ? "secondary" : "ghost"}
+                  onClick={() => setInputMode("file")}
+                  size="sm"
+                  className="flex-1"
+                >
+                  <FileUp className="h-4 w-4 mr-2" />
+                  Upload File
+                </Button>
+                <Button
+                  type="button"
+                  variant={inputMode === "paste" ? "secondary" : "ghost"}
+                  onClick={() => setInputMode("paste")}
+                  size="sm"
+                  className="flex-1"
+                >
+                  <Clipboard className="h-4 w-4 mr-2" />
+                  Paste Text
+                </Button>
+              </div>
 
-          {/* File Upload */}
-          {inputMode === "file" && (
-            <div className="space-y-2">
-              <Label>Select File</Label>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                <input
-                  type="file"
-                  id="file-upload"
-                  className="hidden"
-                  accept=".txt,.md,.pdf,.doc,.docx,.csv"
-                  onChange={handleFileChange}
-                />
-                <label htmlFor="file-upload" className="cursor-pointer">
-                  {file ? (
-                    <div className="flex items-center justify-center gap-2 text-primary">
-                      <FileText className="h-8 w-8" />
-                      <div className="text-left">
-                        <p className="font-medium">{file.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {(file.size / 1024).toFixed(1)} KB
-                        </p>
-                      </div>
-                    </div>
+              {/* File Upload */}
+              {inputMode === "file" && (
+                <div className="space-y-2">
+                  <Label>Select File</Label>
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                    <input
+                      type="file"
+                      id="file-upload"
+                      className="hidden"
+                      accept=".txt,.md,.pdf,.doc,.docx,.csv"
+                      onChange={handleFileChange}
+                    />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      {file ? (
+                        <div className="flex items-center justify-center gap-2 text-primary">
+                          <FileText className="h-8 w-8" />
+                          <div className="text-left">
+                            <p className="font-medium">{file.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {(file.size / 1024).toFixed(1)} KB
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground">
+                          <Upload className="h-8 w-8 mx-auto mb-2" />
+                          <p>Click to upload or drag and drop</p>
+                          <p className="text-sm">TXT, MD, PDF, DOC, DOCX (max 10MB)</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                  <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
+                      For best results with PDF/DOCX files, copy and paste the text content directly using the "Paste Text" option.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+
+              {/* Paste Text */}
+              {inputMode === "paste" && (
+                <div className="space-y-2">
+                  <Label>Paste Content</Label>
+                  <Textarea
+                    value={pastedText}
+                    onChange={(e) => setPastedText(e.target.value)}
+                    placeholder="Paste your document content here..."
+                    className="min-h-[200px] font-mono text-sm"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {pastedText.length} characters
+                  </p>
+                </div>
+              )}
+
+              {/* Process Button */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleProcess}
+                  disabled={processing || (inputMode === "file" && !file) || (inputMode === "paste" && !pastedText.trim())}
+                  className="flex-1"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing with AI...
+                    </>
                   ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Process with AI
+                    </>
+                  )}
+                </Button>
+                {(file || pastedText || processedDoc) && (
+                  <Button variant="outline" onClick={handleReset}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reset
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* BULK MODE */}
+          {uploadMode === "bulk" && (
+            <>
+              {/* Bulk File Upload */}
+              <div className="space-y-2">
+                <Label>Select Multiple Files</Label>
+                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                  <input
+                    type="file"
+                    id="bulk-file-upload"
+                    className="hidden"
+                    accept=".txt,.md,.pdf,.doc,.docx,.csv"
+                    multiple
+                    onChange={handleBulkFileChange}
+                  />
+                  <label htmlFor="bulk-file-upload" className="cursor-pointer">
                     <div className="text-muted-foreground">
-                      <Upload className="h-8 w-8 mx-auto mb-2" />
-                      <p>Click to upload or drag and drop</p>
-                      <p className="text-sm">TXT, MD, PDF, DOC, DOCX (max 10MB)</p>
+                      <Files className="h-8 w-8 mx-auto mb-2" />
+                      <p>Click to select multiple files</p>
+                      <p className="text-sm">TXT, MD, PDF, DOC, DOCX (max 10MB each)</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* File List */}
+              {bulkFiles.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Files ({bulkFiles.length})</Label>
+                    <div className="flex gap-2 text-xs">
+                      {pendingCount > 0 && (
+                        <Badge variant="outline">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {pendingCount} pending
+                        </Badge>
+                      )}
+                      {processedCount > 0 && (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          <Check className="h-3 w-3 mr-1" />
+                          {processedCount} processed
+                        </Badge>
+                      )}
+                      {savedCount > 0 && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          {savedCount} saved
+                        </Badge>
+                      )}
+                      {errorCount > 0 && (
+                        <Badge variant="destructive">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          {errorCount} errors
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <ScrollArea className="h-[300px] border rounded-lg">
+                    <div className="p-3 space-y-2">
+                      {bulkFiles.map((fileItem) => (
+                        <div
+                          key={fileItem.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg border ${
+                            fileItem.status === "saved"
+                              ? "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800"
+                              : fileItem.status === "processed"
+                              ? "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800"
+                              : fileItem.status === "error"
+                              ? "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800"
+                              : fileItem.status === "processing"
+                              ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800"
+                              : "bg-muted/30"
+                          }`}
+                        >
+                          {/* Status Icon */}
+                          <div className="shrink-0">
+                            {fileItem.status === "pending" && (
+                              <Clock className="h-5 w-5 text-muted-foreground" />
+                            )}
+                            {fileItem.status === "processing" && (
+                              <Loader2 className="h-5 w-5 text-amber-600 animate-spin" />
+                            )}
+                            {fileItem.status === "processed" && (
+                              <Check className="h-5 w-5 text-blue-600" />
+                            )}
+                            {fileItem.status === "saved" && (
+                              <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            )}
+                            {fileItem.status === "error" && (
+                              <XCircle className="h-5 w-5 text-red-600" />
+                            )}
+                          </div>
+
+                          {/* File Info */}
+                          <div className="flex-1 min-w-0">
+                            {fileItem.status === "processed" || fileItem.status === "saved" ? (
+                              <Input
+                                value={fileItem.editedTitle || ""}
+                                onChange={(e) => updateBulkFileTitle(fileItem.id, e.target.value)}
+                                className="h-8 text-sm"
+                                placeholder="Document title"
+                                disabled={fileItem.status === "saved"}
+                              />
+                            ) : (
+                              <p className="font-medium text-sm truncate">{fileItem.file.name}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {fileItem.error || (
+                                fileItem.status === "saved" 
+                                  ? "Saved successfully" 
+                                  : fileItem.status === "processed"
+                                  ? fileItem.processedDoc?.summary?.slice(0, 60) + "..."
+                                  : `${(fileItem.file.size / 1024).toFixed(1)} KB`
+                              )}
+                            </p>
+                          </div>
+
+                          {/* Remove Button */}
+                          {fileItem.status !== "saved" && fileItem.status !== "processing" && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0 h-8 w-8"
+                              onClick={() => removeBulkFile(fileItem.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+
+                  {/* Progress Bar */}
+                  {bulkProcessing && (
+                    <div className="space-y-2">
+                      <Progress value={bulkProgress} className="h-2" />
+                      <p className="text-sm text-center text-muted-foreground">
+                        Processing... {bulkProgress}%
+                      </p>
                     </div>
                   )}
-                </label>
+                </div>
+              )}
+
+              {/* Bulk Action Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleBulkProcess}
+                  disabled={bulkProcessing || pendingCount === 0}
+                  className="flex-1"
+                >
+                  {bulkProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Process All ({pendingCount})
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleBulkSave}
+                  disabled={bulkSaving || processedCount === 0}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  {bulkSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save All ({processedCount})
+                    </>
+                  )}
+                </Button>
+                {bulkFiles.length > 0 && (
+                  <Button variant="outline" onClick={handleBulkReset}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
+
               <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
-                  For best results with PDF/DOCX files, copy and paste the text content directly using the "Paste Text" option.
+                  For best results, use plain text (.txt) or markdown (.md) files. PDF and DOCX files may not extract properly.
                 </AlertDescription>
               </Alert>
-            </div>
+            </>
           )}
-
-          {/* Paste Text */}
-          {inputMode === "paste" && (
-            <div className="space-y-2">
-              <Label>Paste Content</Label>
-              <Textarea
-                value={pastedText}
-                onChange={(e) => setPastedText(e.target.value)}
-                placeholder="Paste your document content here..."
-                className="min-h-[200px] font-mono text-sm"
-              />
-              <p className="text-sm text-muted-foreground">
-                {pastedText.length} characters
-              </p>
-            </div>
-          )}
-
-          {/* Process Button */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handleProcess}
-              disabled={processing || (inputMode === "file" && !file) || (inputMode === "paste" && !pastedText.trim())}
-              className="flex-1"
-            >
-              {processing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Processing with AI...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Process with AI
-                </>
-              )}
-            </Button>
-            {(file || pastedText || processedDoc) && (
-              <Button variant="outline" onClick={handleReset}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Reset
-              </Button>
-            )}
-          </div>
         </CardContent>
       </Card>
 
-      {/* Preview & Edit Card */}
-      {processedDoc && (
+      {/* Preview & Edit Card (Single Mode Only) */}
+      {uploadMode === "single" && processedDoc && (
         <Card className="border-primary/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -500,7 +940,7 @@ const DocumentImporter = () => {
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save {contentTypeLabels[contentType]}
+                  Save to {contentTypeLabels[contentType]}
                 </>
               )}
             </Button>
