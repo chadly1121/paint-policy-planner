@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,9 +22,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Save, AlertTriangle, Trash2 } from "lucide-react";
+import { Loader2, Save, AlertTriangle, Trash2, Upload, FileText } from "lucide-react";
 import { useOrgSops } from "@/hooks/useOrgSops";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/hooks/useOrganization";
+import { supabase } from "@/integrations/supabase/client";
+import mammoth from "mammoth";
 
 interface OrgSOPEditorProps {
   open: boolean;
@@ -33,13 +36,21 @@ interface OrgSOPEditorProps {
   currentTitle: string;
   currentContent: string;
   currentVideoUrl?: string | null;
+  currentSourceFileUrl?: string | null;
 }
 
 const COMPLIANCE_FOOTER = "\n\n---\n⚠️ This SOP has been customized by the company and may differ from system templates. The company is responsible for compliance.";
 
-const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, currentVideoUrl }: OrgSOPEditorProps) => {
+// Sanitize text for PostgreSQL - remove null characters
+const sanitizeForPostgres = (text: string): string => {
+  return text.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+};
+
+const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, currentVideoUrl, currentSourceFileUrl }: OrgSOPEditorProps) => {
   const { toast } = useToast();
   const { updateSop, deleteSop } = useOrgSops();
+  const { org } = useOrganization();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [title, setTitle] = useState(currentTitle);
   const [content, setContent] = useState(currentContent);
@@ -49,6 +60,8 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, curr
   const [deleting, setDeleting] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [newSourceFileUrl, setNewSourceFileUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -57,8 +70,88 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, curr
       setContent(currentContent.replace(COMPLIANCE_FOOTER, ""));
       setVideoUrl(currentVideoUrl || "");
       setChangeSummary("");
+      setNewSourceFileUrl(null);
     }
   }, [open, currentTitle, currentContent, currentVideoUrl]);
+
+  // Handle file upload and extract content
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !org?.id) return;
+
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword', // .doc
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please upload a Word document (.docx or .doc)",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Extract text from Word document
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      const extractedText = sanitizeForPostgres(result.value);
+
+      if (!extractedText.trim()) {
+        throw new Error("Could not extract text from document");
+      }
+
+      // Upload file to storage
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const filePath = `org_${org.id}/${timestamp}_${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("org-documents")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast({
+          variant: "default",
+          title: "File upload warning",
+          description: "Content extracted but original file could not be stored.",
+        });
+      } else {
+        setNewSourceFileUrl(filePath);
+      }
+
+      // Update content with extracted text
+      setContent(extractedText);
+      
+      // Extract title from filename if title is empty
+      if (!title.trim()) {
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, ' ');
+        setTitle(nameWithoutExt);
+      }
+
+      toast({
+        title: "Document imported",
+        description: "Content extracted from Word file. Review and save when ready.",
+      });
+    } catch (error) {
+      console.error("File processing error:", error);
+      toast({
+        variant: "destructive",
+        title: "Import failed",
+        description: error instanceof Error ? error.message : "Could not process file",
+      });
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleSaveClick = () => {
     if (!title.trim() || !content.trim()) {
@@ -75,14 +168,27 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, curr
   const handleConfirmSave = async () => {
     setShowSaveConfirm(false);
     setSaving(true);
-    const contentWithFooter = content.trim() + COMPLIANCE_FOOTER;
+    const contentWithFooter = sanitizeForPostgres(content.trim()) + COMPLIANCE_FOOTER;
     
-    const { error } = await updateSop(sopId, {
-      title: title.trim(),
+    const updateData: { 
+      title?: string; 
+      content_md?: string; 
+      last_change_summary?: string | null; 
+      video_url?: string | null;
+      source_file_url?: string | null;
+    } = {
+      title: sanitizeForPostgres(title.trim()),
       content_md: contentWithFooter,
       last_change_summary: changeSummary.trim() || null,
       video_url: videoUrl.trim() || null,
-    });
+    };
+
+    // Include new source file URL if a new file was uploaded
+    if (newSourceFileUrl) {
+      updateData.source_file_url = newSourceFileUrl;
+    }
+
+    const { error } = await updateSop(sopId, updateData);
     
     if (error) {
       toast({
@@ -166,6 +272,44 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, curr
               <p className="text-xs text-muted-foreground">
                 YouTube or Vimeo link. Users can watch the video before taking the quiz.
               </p>
+            </div>
+
+            {/* Replace from Word document */}
+            <div className="space-y-2">
+              <Label>Replace from Word Document</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".docx,.doc"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="replace-file-upload"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex-1"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4 mr-2" />
+                  )}
+                  {uploading ? "Importing..." : "Upload Word File (.docx)"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Upload an edited Word document to replace the content. The original file will be stored for easy access.
+              </p>
+              {(newSourceFileUrl || currentSourceFileUrl) && (
+                <div className="flex items-center gap-2 text-xs text-primary">
+                  <FileText className="h-3 w-3" />
+                  <span>Original file: {(newSourceFileUrl || currentSourceFileUrl)?.split('/').pop()}</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

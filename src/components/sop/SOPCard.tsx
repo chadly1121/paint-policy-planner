@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff, Video } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff, Video, Download, FileText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,12 +18,14 @@ import {
 import { useOrgSops } from "@/hooks/useOrgSops";
 import { useToast } from "@/hooks/use-toast";
 import VideoEmbed from "@/components/video/VideoEmbed";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SOPCardProps {
   sopId: string;
   title: string;
   content: string;
   videoUrl?: string | null;
+  sourceFileUrl?: string | null;
   source: string;
   systemKey: string | null;
   isAcknowledged: boolean;
@@ -45,6 +47,7 @@ const SOPCard = ({
   title, 
   content, 
   videoUrl,
+  sourceFileUrl,
   source,
   systemKey,
   isAcknowledged, 
@@ -67,6 +70,45 @@ const SOPCard = ({
   const [acknowledging, setAcknowledging] = useState(false);
   const [showHideDialog, setShowHideDialog] = useState(false);
   const [hiding, setHiding] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  // Download original file from storage
+  const handleDownloadOriginal = async () => {
+    if (!sourceFileUrl) return;
+    
+    setDownloading(true);
+    try {
+      // sourceFileUrl is the full path in storage, extract the path after the bucket
+      // Format: org_{org_id}/filename.docx
+      const { data, error } = await supabase.storage
+        .from("org-documents")
+        .createSignedUrl(sourceFileUrl, 60); // 60 seconds expiry
+      
+      if (error) throw error;
+      
+      // Open download link in new tab
+      const link = document.createElement('a');
+      link.href = data.signedUrl;
+      link.download = sourceFileUrl.split('/').pop() || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download started",
+        description: "Your original document is downloading.",
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: error instanceof Error ? error.message : "Could not download file",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   // Enhanced content formatting for both system and uploaded content
   const formattedContent = content.split('\n').map((line, idx) => {
@@ -232,6 +274,12 @@ const SOPCard = ({
                   Video
                 </Badge>
               )}
+              {sourceFileUrl && (
+                <Badge variant="outline" className="text-xs flex-shrink-0 border-primary/50 text-primary">
+                  <FileText className="h-3 w-3 mr-1" />
+                  Original
+                </Badge>
+              )}
               {source === "org" ? (
                 <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
               ) : (
@@ -303,7 +351,19 @@ const SOPCard = ({
             <div className="mt-2 text-xs text-muted-foreground">
               Version {version} • Epoch {ackEpoch}
             </div>
-            <div className="mt-4 pt-4 border-t flex gap-2">
+            <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+              {/* Download original file button */}
+              {sourceFileUrl && (
+                <Button 
+                  onClick={handleDownloadOriginal} 
+                  disabled={downloading}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {downloading ? "Downloading..." : "Download Original"}
+                </Button>
+              )}
               {ackRequired && !isAcknowledged && (
                 <Button 
                   onClick={handleAcknowledge} 
