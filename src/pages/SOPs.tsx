@@ -161,7 +161,7 @@ const SOPs = () => {
 
       <div className="space-y-3">
         {filteredItems.length > 0 ? (
-          filteredItems.map((sop) => (
+          filteredItems.map((sop, index) => (
             <SOPCard
               key={sop.id}
               sopId={sop.id}
@@ -173,6 +173,7 @@ const SOPs = () => {
               version={sop.version}
               ackEpoch={sop.ackEpoch}
               canEdit={isOrgAdmin && sop.source === "org"}
+              itemNumber={index + 1}
               onStartQuiz={() => handleStartMiniQuiz(sop)}
               onEdit={() => handleEditSOP(sop)}
               onAckSuccess={refresh}
