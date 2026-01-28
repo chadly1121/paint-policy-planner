@@ -49,6 +49,29 @@ export const useOrgSops = () => {
   const [assignedSops, setAssignedSops] = useState<AssignedSOP[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const assignSopToAllRoles = useCallback(
+    async (sopId: string, orgId: string) => {
+      // Newly created org SOPs must be assigned to a role to appear in the SOPs page.
+      // We default to "all" so the SOP is visible to everyone in the org unless the admin
+      // later changes assignments.
+      const { error } = await supabase.from("sop_role_assignments").insert({
+        org_id: orgId,
+        sop_id: sopId,
+        role: "all",
+        is_required: true,
+        created_by: orgUser?.id ?? null,
+      });
+
+      // If there's a unique constraint in the DB, repeated inserts may throw 23505.
+      // Treat that as success.
+      if (error) {
+        const code = (error as unknown as { code?: string })?.code;
+        if (code !== "23505") throw error;
+      }
+    },
+    [orgUser?.id]
+  );
+
   const fetchSops = useCallback(async () => {
     if (!user?.id) {
       setSops([]);
@@ -167,6 +190,8 @@ export const useOrgSops = () => {
 
       if (error) throw error;
 
+      await assignSopToAllRoles((data as SOP).id, org.id);
+
       await fetchSops();
       return { sop: data as SOP, error: null };
     } catch (error) {
@@ -198,6 +223,8 @@ export const useOrgSops = () => {
         .single();
 
       if (error) throw error;
+
+      await assignSopToAllRoles((data as SOP).id, org.id);
 
       await fetchSops();
       return { sop: data as SOP, error: null };
