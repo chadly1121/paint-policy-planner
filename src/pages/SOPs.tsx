@@ -9,6 +9,7 @@ import QuizModal from "@/components/quiz/QuizModal";
 import SOPCard from "@/components/sop/SOPCard";
 import SOPFinalExam from "@/components/sop/SOPFinalExam";
 import OrgSOPEditor from "@/components/admin/OrgSOPEditor";
+import SystemSOPEditor from "@/components/admin/SystemSOPEditor";
 import { useProgress } from "@/hooks/useProgress";
 import { useOrgSops } from "@/hooks/useOrgSops";
 import { useOrg } from "@/contexts/OrganizationContext";
@@ -35,6 +36,8 @@ const SOPs = () => {
   const [isFinalExam, setIsFinalExam] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingSOP, setEditingSOP] = useState<SOPItem | null>(null);
+  const [systemEditorOpen, setSystemEditorOpen] = useState(false);
+  const [editingSystemSOP, setEditingSystemSOP] = useState<SOPItem | null>(null);
   
   const { progress, refreshData } = useProgress();
   const { assignedSops, loading, hasAcknowledged, refresh } = useOrgSops();
@@ -101,9 +104,20 @@ const SOPs = () => {
     setEditorOpen(true);
   };
 
+  const handleEditSystemSOP = (sop: SOPItem) => {
+    setEditingSystemSOP(sop);
+    setSystemEditorOpen(true);
+  };
+
   const handleEditorClose = () => {
     setEditorOpen(false);
     setEditingSOP(null);
+    refresh();
+  };
+
+  const handleSystemEditorClose = () => {
+    setSystemEditorOpen(false);
+    setEditingSystemSOP(null);
     refresh();
   };
 
@@ -168,14 +182,17 @@ const SOPs = () => {
               title={sop.title}
               content={sop.content}
               source={sop.source}
+              systemKey={sop.systemKey}
               isAcknowledged={sop.isAcknowledged}
               ackRequired={sop.ackRequired}
               version={sop.version}
               ackEpoch={sop.ackEpoch}
               canEdit={isOrgAdmin && sop.source === "org"}
+              canEditSystem={isOrgAdmin && sop.source === "system"}
               itemNumber={index + 1}
               onStartQuiz={() => handleStartMiniQuiz(sop)}
               onEdit={() => handleEditSOP(sop)}
+              onEditSystem={() => handleEditSystemSOP(sop)}
               onAckSuccess={refresh}
             />
           ))
@@ -201,13 +218,24 @@ const SOPs = () => {
         itemKey={currentSOP?.id}
       />
 
-      {editingSOP && (
+      {editingSOP && editingSOP.source === "org" && (
         <OrgSOPEditor
           open={editorOpen}
           onClose={handleEditorClose}
           sopId={editingSOP.id}
           currentTitle={editingSOP.title}
           currentContent={editingSOP.content}
+        />
+      )}
+
+      {editingSystemSOP && (
+        <SystemSOPEditor
+          open={systemEditorOpen}
+          onClose={handleSystemEditorClose}
+          sopId={editingSystemSOP.id}
+          systemKey={editingSystemSOP.systemKey}
+          currentTitle={editingSystemSOP.title}
+          currentContent={editingSystemSOP.content}
         />
       )}
     </div>
