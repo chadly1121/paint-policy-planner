@@ -130,7 +130,7 @@ const CertificateGenerator = ({ completedSections, totalSections }: CertificateG
       doc.setFont("helvetica", "bold");
       doc.setFontSize(20);
       doc.setTextColor(60, 60, 60);
-      doc.text("Roll On Painting Employee Manual", centerX, 145, { align: "center" });
+      doc.text("SOPEDU Training Portal", centerX, 145, { align: "center" });
 
       // Sections completed
       doc.setFont("helvetica", "normal");
@@ -196,7 +196,7 @@ const CertificateGenerator = ({ completedSections, totalSections }: CertificateG
             Congratulations!
           </DialogTitle>
           <DialogDescription>
-            You've completed all sections of the Employee Manual. Download your certificate of completion.
+            You've completed all sections of the training. Download your certificate of completion.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-6">

@@ -17,7 +17,7 @@ const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
-  const title = pageTitles[location.pathname] || "Employee Manual";
+  const title = pageTitles[location.pathname] || "SOPEDU";
 
   return (
     <div className="min-h-screen bg-background">
