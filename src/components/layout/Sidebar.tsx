@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrg } from "@/contexts/OrganizationContext";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   const { isAdmin } = useAuth();
+  const { org } = useOrg();
   const [searchQuery, setSearchQuery] = useState("");
 
   const navItems = [
@@ -53,14 +55,24 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex items-center gap-3 border-b border-sidebar-border px-6 py-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary">
-            <PaintBucket className="h-5 w-5 text-sidebar-primary-foreground" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent overflow-hidden">
+            {org?.logo_url ? (
+              <img
+                src={org.logo_url}
+                alt={org.name || t("common.companyName")}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <PaintBucket className="h-5 w-5 text-sidebar-primary" />
+            )}
           </div>
           <div>
             <h1 className="font-serif text-lg font-bold text-sidebar-foreground">
-              {t("common.companyName")}
+              {org?.name || t("common.companyName")}
             </h1>
-            <p className="text-xs text-sidebar-foreground/60">{t("common.employeeManual")}</p>
+            <p className="text-xs text-sidebar-foreground/60">
+              {org?.tagline || t("common.employeeManual")}
+            </p>
           </div>
         </div>
 
