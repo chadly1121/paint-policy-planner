@@ -7,6 +7,8 @@ export type OrgRole = "admin" | "foreman" | "painter" | "office" | "other";
 interface Organization {
   id: string;
   name: string;
+  logo_url: string | null;
+  tagline: string | null;
   created_at: string;
 }
 

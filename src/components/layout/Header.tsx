@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrg } from "@/contexts/OrganizationContext";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
@@ -21,6 +22,7 @@ interface HeaderProps {
 
 const Header = ({ isSidebarOpen, onToggleSidebar, title }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const { org } = useOrg();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -48,9 +50,25 @@ const Header = ({ isSidebarOpen, onToggleSidebar, title }: HeaderProps) => {
               <Menu className="h-5 w-5" />
             )}
           </Button>
-          <h1 className="font-serif text-xl font-semibold text-foreground">
-            {title}
-          </h1>
+          
+          {/* Org Logo & Name */}
+          {org?.logo_url && (
+            <img
+              src={org.logo_url}
+              alt={org.name}
+              className="h-8 w-8 rounded object-contain"
+            />
+          )}
+          <div className="flex flex-col">
+            <h1 className="font-serif text-xl font-semibold text-foreground leading-tight">
+              {title}
+            </h1>
+            {org?.tagline && (
+              <p className="text-xs text-muted-foreground leading-tight hidden sm:block">
+                {org.tagline}
+              </p>
+            )}
+          </div>
         </div>
         
         <div className="flex items-center gap-3">

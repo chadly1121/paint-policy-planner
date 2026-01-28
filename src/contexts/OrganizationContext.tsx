@@ -4,6 +4,8 @@ import { useOrganization, OrgRole } from "@/hooks/useOrganization";
 interface Organization {
   id: string;
   name: string;
+  logo_url: string | null;
+  tagline: string | null;
   created_at: string;
 }
 

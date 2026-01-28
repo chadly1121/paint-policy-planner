@@ -39,12 +39,14 @@ import {
   RefreshCw,
   Globe,
   BarChart3,
-  FileEdit
+  FileEdit,
+  Building2
 } from "lucide-react";
 import { z } from "zod";
 import { languages } from "@/components/LanguageSelector";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import ContentSettingsCard from "@/components/admin/ContentSettingsCard";
+import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
 
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
@@ -367,10 +369,14 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Analytics
+          </TabsTrigger>
+          <TabsTrigger value="branding" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            Branding
           </TabsTrigger>
           <TabsTrigger value="content" className="flex items-center gap-2">
             <FileEdit className="h-4 w-4" />
@@ -393,6 +399,10 @@ const Admin = () => {
 
         <TabsContent value="analytics">
           <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="branding">
+          <OrgBrandingCard />
         </TabsContent>
 
         <TabsContent value="content">
