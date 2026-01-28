@@ -222,6 +222,13 @@ const DocumentImporter = () => {
     return response.data.data as ProcessedDocument;
   };
 
+  // Sanitize text for PostgreSQL - remove null characters that cause errors
+  const sanitizeForPostgres = (text: string): string => {
+    // Remove null characters (\u0000) which PostgreSQL text columns cannot store
+    // Also remove other problematic Unicode characters
+    return text.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+  };
+
   // Extract title from filename (remove extension and clean up)
   const extractTitleFromFilename = (filename: string): string => {
     // Remove file extension
@@ -487,8 +494,12 @@ const DocumentImporter = () => {
     typeOverride?: ContentType,
     sourceFileUrl?: string
   ): Promise<Error | null> => {
+    // Sanitize content to remove null characters and other problematic Unicode
+    const sanitizedContent = sanitizeForPostgres(content.trim());
+    const sanitizedTitle = sanitizeForPostgres(title.trim());
+    
     const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
-    const contentWithFooter = content.trim() + complianceFooter;
+    const contentWithFooter = sanitizedContent + complianceFooter;
     const sourceKey = `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     let error: Error | null = null;
@@ -496,23 +507,23 @@ const DocumentImporter = () => {
 
     switch (typeToSave) {
       case "sop":
-        const sopResult = await createOrgSop(title.trim(), contentWithFooter, sourceFileUrl);
+        const sopResult = await createOrgSop(sanitizedTitle, contentWithFooter, sourceFileUrl);
         error = sopResult.error;
         break;
       case "policy":
-        const policyResult = await upsertCompanyPolicy(sourceKey, title.trim(), contentWithFooter);
+        const policyResult = await upsertCompanyPolicy(sourceKey, sanitizedTitle, contentWithFooter);
         error = policyResult.error as Error | null;
         break;
       case "training":
-        const trainingResult = await upsertCompanyTrainingContent(sourceKey, title.trim(), contentWithFooter);
+        const trainingResult = await upsertCompanyTrainingContent(sourceKey, sanitizedTitle, contentWithFooter);
         error = trainingResult.error as Error | null;
         break;
       case "safety":
-        const safetyResult = await upsertCompanySafetyContent(sourceKey, title.trim(), contentWithFooter);
+        const safetyResult = await upsertCompanySafetyContent(sourceKey, sanitizedTitle, contentWithFooter);
         error = safetyResult.error as Error | null;
         break;
       case "disciplinary":
-        const disciplinaryResult = await upsertCompanyDisciplinaryContent(sourceKey, title.trim(), contentWithFooter);
+        const disciplinaryResult = await upsertCompanyDisciplinaryContent(sourceKey, sanitizedTitle, contentWithFooter);
         error = disciplinaryResult.error as Error | null;
         break;
     }
