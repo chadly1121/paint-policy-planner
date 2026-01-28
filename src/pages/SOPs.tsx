@@ -21,6 +21,7 @@ interface SOPItem {
   title: string;
   content: string;
   videoUrl: string | null;
+  sourceFileUrl: string | null;
   source: string;
   systemKey: string | null;
   version: number;
@@ -48,7 +49,7 @@ const SOPs = () => {
     (p) => p.section_key === SECTION_KEY && p.completed
   ) ?? false;
 
-  // Map assigned SOPs to component format, enriching with video_url from full sops list
+  // Map assigned SOPs to component format, enriching with video_url and source_file_url from full sops list
   const sopItems: SOPItem[] = useMemo(() => 
     assignedSops.map((sop) => {
       const fullSop = sops.find(s => s.id === sop.sop_id);
@@ -57,6 +58,7 @@ const SOPs = () => {
         title: sop.title,
         content: sop.content_md,
         videoUrl: fullSop?.video_url ?? null,
+        sourceFileUrl: fullSop?.source_file_url ?? null,
         source: sop.source,
         systemKey: sop.system_key,
         version: sop.version,
@@ -187,6 +189,7 @@ const SOPs = () => {
               title={sop.title}
               content={sop.content}
               videoUrl={sop.videoUrl}
+              sourceFileUrl={sop.sourceFileUrl}
               source={sop.source}
               systemKey={sop.systemKey}
               isAcknowledged={sop.isAcknowledged}
@@ -233,6 +236,7 @@ const SOPs = () => {
           currentTitle={editingSOP.title}
           currentContent={editingSOP.content}
           currentVideoUrl={editingSOP.videoUrl}
+          currentSourceFileUrl={editingSOP.sourceFileUrl}
         />
       )}
 

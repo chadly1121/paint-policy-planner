@@ -269,7 +269,7 @@ export const useOrgSops = () => {
 
   const updateSop = async (
     sopId: string,
-    updates: { title?: string; content_md?: string; last_change_summary?: string; video_url?: string | null }
+    updates: { title?: string; content_md?: string; last_change_summary?: string; video_url?: string | null; source_file_url?: string | null }
   ): Promise<{ error: Error | null }> => {
     if (!user?.id || !orgUser?.id) {
       return { error: new Error("Not authenticated") };
