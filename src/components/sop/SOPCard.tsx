@@ -13,14 +13,17 @@ interface SOPCardProps {
   title: string;
   content: string;
   source: string;
+  systemKey: string | null;
   isAcknowledged: boolean;
   ackRequired: boolean;
   version: number;
   ackEpoch: number;
   canEdit: boolean;
+  canEditSystem: boolean;
   itemNumber?: number;
   onStartQuiz: () => void;
   onEdit?: () => void;
+  onEditSystem?: () => void;
   onAckSuccess?: () => void;
 }
 
@@ -29,14 +32,17 @@ const SOPCard = ({
   title, 
   content, 
   source,
+  systemKey,
   isAcknowledged, 
   ackRequired,
   version,
   ackEpoch,
   canEdit,
+  canEditSystem,
   itemNumber,
   onStartQuiz, 
   onEdit,
+  onEditSystem,
   onAckSuccess
 }: SOPCardProps) => {
   const { t } = useTranslation();
@@ -164,8 +170,15 @@ const SOPCard = ({
               )}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {canEdit && onEdit && (
+              {/* Edit button for org SOPs */}
+              {canEdit && onEdit && source === "org" && (
                 <Button size="sm" variant="ghost" onClick={onEdit} className="text-muted-foreground hover:text-primary">
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
+              {/* Edit button for system SOPs - creates a custom fork */}
+              {canEditSystem && onEditSystem && source === "system" && (
+                <Button size="sm" variant="ghost" onClick={onEditSystem} className="text-muted-foreground hover:text-primary" title="Customize this SOP">
                   <Pencil className="h-3 w-3" />
                 </Button>
               )}
