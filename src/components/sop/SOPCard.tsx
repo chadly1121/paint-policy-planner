@@ -45,28 +45,83 @@ const SOPCard = ({
   const [isOpen, setIsOpen] = useState(false); // Start collapsed to reduce scrolling
   const [acknowledging, setAcknowledging] = useState(false);
 
-  // Format content with proper line breaks
+  // Enhanced content formatting for both system and uploaded content
   const formattedContent = content.split('\n').map((line, idx) => {
-    if (line.startsWith('•')) {
-      return <li key={idx} className="ml-4">{line.substring(1).trim()}</li>;
+    const trimmedLine = line.trim();
+    
+    // Markdown H2 headers (## Header)
+    if (trimmedLine.startsWith('## ')) {
+      return <h3 key={idx} className="font-semibold mt-4 mb-2 text-primary text-base">{trimmedLine.substring(3)}</h3>;
     }
-    if (line.match(/^\d+\./)) {
-      return <li key={idx} className="ml-4 list-decimal">{line.substring(line.indexOf('.') + 1).trim()}</li>;
+    // Markdown H3 headers (### Header)
+    if (trimmedLine.startsWith('### ')) {
+      return <h4 key={idx} className="font-semibold mt-3 mb-1 text-primary text-sm">{trimmedLine.substring(4)}</h4>;
     }
-    if (line.trim() === '') {
+    // Markdown H1 headers (# Header) - treat like H2 for consistency
+    if (trimmedLine.startsWith('# ') && !trimmedLine.startsWith('## ')) {
+      return <h3 key={idx} className="font-semibold mt-4 mb-2 text-primary text-base">{trimmedLine.substring(2)}</h3>;
+    }
+    // Bullet points (• or * or -)
+    if (trimmedLine.startsWith('•') || trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
+      const bulletContent = trimmedLine.startsWith('•') 
+        ? trimmedLine.substring(1).trim() 
+        : trimmedLine.substring(2).trim();
+      return (
+        <li key={idx} className="ml-4 text-muted-foreground flex items-start gap-2">
+          <span className="text-primary mt-1.5">•</span>
+          <span>{formatInlineText(bulletContent)}</span>
+        </li>
+      );
+    }
+    // Numbered lists (1. item)
+    if (trimmedLine.match(/^\d+\.\s/)) {
+      const numberMatch = trimmedLine.match(/^(\d+)\.\s(.*)$/);
+      if (numberMatch) {
+        return (
+          <li key={idx} className="ml-4 text-muted-foreground flex items-start gap-2">
+            <span className="text-primary font-medium min-w-[1.5rem]">{numberMatch[1]}.</span>
+            <span>{formatInlineText(numberMatch[2])}</span>
+          </li>
+        );
+      }
+    }
+    // Empty lines
+    if (trimmedLine === '') {
       return <br key={idx} />;
     }
-    if (line.startsWith('---')) {
+    // Horizontal rules
+    if (trimmedLine.startsWith('---')) {
       return <hr key={idx} className="my-3 border-border" />;
     }
-    if (line.startsWith('⚠️')) {
-      return <p key={idx} className="text-amber-600 dark:text-amber-400 text-sm font-medium mt-2">{line}</p>;
+    // Warning text
+    if (trimmedLine.startsWith('⚠️')) {
+      return <p key={idx} className="text-amber-600 dark:text-amber-400 text-sm font-medium mt-2">{trimmedLine}</p>;
     }
-    if (line.toUpperCase() === line && line.length > 3) {
-      return <h4 key={idx} className="font-semibold mt-3 mb-1 text-primary">{line}</h4>;
+    // ALL CAPS headers (legacy system style)
+    if (trimmedLine.toUpperCase() === trimmedLine && trimmedLine.length > 3 && /^[A-Z\s]+$/.test(trimmedLine)) {
+      return <h4 key={idx} className="font-semibold mt-3 mb-1 text-primary">{trimmedLine}</h4>;
     }
-    return <p key={idx} className="mb-1">{line}</p>;
+    // Bold text lines (**text**)
+    if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+      return <p key={idx} className="font-semibold text-foreground mb-1">{trimmedLine.slice(2, -2)}</p>;
+    }
+    // Regular paragraph
+    return <p key={idx} className="mb-1 text-muted-foreground">{formatInlineText(trimmedLine)}</p>;
   });
+
+  // Helper function to format inline markdown (bold, etc.)
+  function formatInlineText(text: string): React.ReactNode {
+    // Handle **bold** text within lines
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    if (parts.length === 1) return text;
+    
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="text-foreground font-medium">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  }
 
   const handleAcknowledge = async () => {
     setAcknowledging(true);
