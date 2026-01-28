@@ -283,6 +283,40 @@ export const useOrgSops = () => {
     }
   };
 
+  const deleteSop = async (sopId: string): Promise<{ error: Error | null }> => {
+    if (!user?.id || !orgUser?.id) {
+      return { error: new Error("Not authenticated") };
+    }
+
+    try {
+      // First delete role assignments
+      await supabase
+        .from("sop_role_assignments")
+        .delete()
+        .eq("sop_id", sopId);
+
+      // Then delete acknowledgments
+      await supabase
+        .from("sop_acks")
+        .delete()
+        .eq("sop_id", sopId);
+
+      // Finally delete the SOP
+      const { error } = await supabase
+        .from("sops")
+        .delete()
+        .eq("id", sopId);
+
+      if (error) throw error;
+
+      await fetchSops();
+      return { error: null };
+    } catch (error) {
+      console.error("Error deleting SOP:", error);
+      return { error: error as Error };
+    }
+  };
+
   // Filter helpers
   const systemSops = sops.filter((s) => s.source === "system");
   const orgSops = sops.filter((s) => s.source === "org" && s.org_id === org?.id);
@@ -304,6 +338,7 @@ export const useOrgSops = () => {
     createOrgSop,
     updateSop,
     archiveSop,
+    deleteSop,
     refresh: fetchSops,
   };
 };
