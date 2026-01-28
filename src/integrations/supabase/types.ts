@@ -958,6 +958,7 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           version: number
+          video_url: string | null
         }
         Insert: {
           ack_epoch?: number
@@ -977,6 +978,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           version?: number
+          video_url?: string | null
         }
         Update: {
           ack_epoch?: number
@@ -996,6 +998,7 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           version?: number
+          video_url?: string | null
         }
         Relationships: [
           {

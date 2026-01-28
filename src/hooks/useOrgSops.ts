@@ -12,6 +12,7 @@ interface SOP {
   title: string;
   status: string;
   content_md: string;
+  video_url: string | null;
   version: number;
   ack_epoch: number;
   ack_required: boolean;
@@ -185,7 +186,8 @@ export const useOrgSops = () => {
   const forkSystemSop = async (
     systemKey: string,
     customTitle?: string,
-    customContent?: string
+    customContent?: string,
+    customVideoUrl?: string | null
   ): Promise<{ sop: SOP | null; error: Error | null }> => {
     if (!user?.id || !org?.id || !orgUser?.id) {
       return { sop: null, error: new Error("Not authenticated or no org") };
@@ -204,6 +206,7 @@ export const useOrgSops = () => {
           source: "org",
           title: customTitle || systemSop.title,
           content_md: customContent || systemSop.content_md,
+          video_url: customVideoUrl !== undefined ? customVideoUrl : systemSop.video_url,
           forked_from_sop_id: systemSop.id,
           created_by: orgUser.id,
           updated_by: orgUser.id,
@@ -259,7 +262,7 @@ export const useOrgSops = () => {
 
   const updateSop = async (
     sopId: string,
-    updates: { title?: string; content_md?: string; last_change_summary?: string }
+    updates: { title?: string; content_md?: string; last_change_summary?: string; video_url?: string | null }
   ): Promise<{ error: Error | null }> => {
     if (!user?.id || !orgUser?.id) {
       return { error: new Error("Not authenticated") };

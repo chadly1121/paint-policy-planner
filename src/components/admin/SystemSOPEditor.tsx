@@ -33,6 +33,7 @@ interface SystemSOPEditorProps {
   systemKey: string | null;
   currentTitle: string;
   currentContent: string;
+  currentVideoUrl?: string | null;
 }
 
 const COMPLIANCE_FOOTER = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
@@ -43,13 +44,15 @@ const SystemSOPEditor = ({
   sopId, 
   systemKey,
   currentTitle, 
-  currentContent 
+  currentContent,
+  currentVideoUrl 
 }: SystemSOPEditorProps) => {
   const { toast } = useToast();
   const { forkSystemSop } = useOrgSops();
   
   const [title, setTitle] = useState(currentTitle);
   const [content, setContent] = useState(currentContent);
+  const [videoUrl, setVideoUrl] = useState(currentVideoUrl || "");
   const [changeSummary, setChangeSummary] = useState("");
   const [saving, setSaving] = useState(false);
   const [showLiabilityWarning, setShowLiabilityWarning] = useState(false);
@@ -58,9 +61,10 @@ const SystemSOPEditor = ({
     if (open) {
       setTitle(currentTitle);
       setContent(currentContent);
+      setVideoUrl(currentVideoUrl || "");
       setChangeSummary("");
     }
-  }, [open, currentTitle, currentContent]);
+  }, [open, currentTitle, currentContent, currentVideoUrl]);
 
   const handleSaveClick = () => {
     if (!title.trim() || !content.trim()) {
@@ -94,7 +98,8 @@ const SystemSOPEditor = ({
     const { error } = await forkSystemSop(
       systemKey,
       title.trim(),
-      contentWithFooter
+      contentWithFooter,
+      videoUrl.trim() || null
     );
     
     if (error) {
@@ -147,6 +152,19 @@ const SystemSOPEditor = ({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="SOP Title"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="video-url">Video URL (optional)</Label>
+              <Input
+                id="video-url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+              />
+              <p className="text-xs text-muted-foreground">
+                YouTube or Vimeo link. Users can watch the video before taking the quiz.
+              </p>
             </div>
 
             <div className="space-y-2">

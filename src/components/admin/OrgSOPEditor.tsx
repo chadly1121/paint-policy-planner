@@ -32,16 +32,18 @@ interface OrgSOPEditorProps {
   sopId: string;
   currentTitle: string;
   currentContent: string;
+  currentVideoUrl?: string | null;
 }
 
 const COMPLIANCE_FOOTER = "\n\n---\n⚠️ This SOP has been customized by the company and may differ from system templates. The company is responsible for compliance.";
 
-const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent }: OrgSOPEditorProps) => {
+const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent, currentVideoUrl }: OrgSOPEditorProps) => {
   const { toast } = useToast();
   const { updateSop, deleteSop } = useOrgSops();
   
   const [title, setTitle] = useState(currentTitle);
   const [content, setContent] = useState(currentContent);
+  const [videoUrl, setVideoUrl] = useState(currentVideoUrl || "");
   const [changeSummary, setChangeSummary] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -53,9 +55,10 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent }: Or
       setTitle(currentTitle);
       // Remove footer when editing
       setContent(currentContent.replace(COMPLIANCE_FOOTER, ""));
+      setVideoUrl(currentVideoUrl || "");
       setChangeSummary("");
     }
-  }, [open, currentTitle, currentContent]);
+  }, [open, currentTitle, currentContent, currentVideoUrl]);
 
   const handleSaveClick = () => {
     if (!title.trim() || !content.trim()) {
@@ -78,6 +81,7 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent }: Or
       title: title.trim(),
       content_md: contentWithFooter,
       last_change_summary: changeSummary.trim() || null,
+      video_url: videoUrl.trim() || null,
     });
     
     if (error) {
@@ -149,6 +153,19 @@ const OrgSOPEditor = ({ open, onClose, sopId, currentTitle, currentContent }: Or
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="SOP Title"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="video-url">Video URL (optional)</Label>
+              <Input
+                id="video-url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+              />
+              <p className="text-xs text-muted-foreground">
+                YouTube or Vimeo link. Users can watch the video before taking the quiz.
+              </p>
             </div>
 
             <div className="space-y-2">

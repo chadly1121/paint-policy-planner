@@ -20,6 +20,7 @@ interface SOPItem {
   id: string;
   title: string;
   content: string;
+  videoUrl: string | null;
   source: string;
   systemKey: string | null;
   version: number;
@@ -40,27 +41,31 @@ const SOPs = () => {
   const [editingSystemSOP, setEditingSystemSOP] = useState<SOPItem | null>(null);
   
   const { progress, refreshData } = useProgress();
-  const { assignedSops, loading, hasAcknowledged, refresh } = useOrgSops();
+  const { sops, assignedSops, loading, hasAcknowledged, refresh } = useOrgSops();
   const { isOrgAdmin } = useOrg();
 
   const isSectionCompleted = progress?.some(
     (p) => p.section_key === SECTION_KEY && p.completed
   ) ?? false;
 
-  // Map assigned SOPs to component format
+  // Map assigned SOPs to component format, enriching with video_url from full sops list
   const sopItems: SOPItem[] = useMemo(() => 
-    assignedSops.map((sop) => ({
-      id: sop.sop_id,
-      title: sop.title,
-      content: sop.content_md,
-      source: sop.source,
-      systemKey: sop.system_key,
-      version: sop.version,
-      ackEpoch: sop.ack_epoch,
-      ackRequired: sop.ack_required,
-      isAcknowledged: sop.is_acknowledged,
-    })),
-  [assignedSops]);
+    assignedSops.map((sop) => {
+      const fullSop = sops.find(s => s.id === sop.sop_id);
+      return {
+        id: sop.sop_id,
+        title: sop.title,
+        content: sop.content_md,
+        videoUrl: fullSop?.video_url ?? null,
+        source: sop.source,
+        systemKey: sop.system_key,
+        version: sop.version,
+        ackEpoch: sop.ack_epoch,
+        ackRequired: sop.ack_required,
+        isAcknowledged: sop.is_acknowledged,
+      };
+    }),
+  [assignedSops, sops]);
 
   const completedSOPs = sopItems.filter((sop) => sop.isAcknowledged).length;
   const totalSOPs = sopItems.length;
@@ -181,6 +186,7 @@ const SOPs = () => {
               sopId={sop.id}
               title={sop.title}
               content={sop.content}
+              videoUrl={sop.videoUrl}
               source={sop.source}
               systemKey={sop.systemKey}
               isAcknowledged={sop.isAcknowledged}
@@ -226,6 +232,7 @@ const SOPs = () => {
           sopId={editingSOP.id}
           currentTitle={editingSOP.title}
           currentContent={editingSOP.content}
+          currentVideoUrl={editingSOP.videoUrl}
         />
       )}
 
@@ -237,6 +244,7 @@ const SOPs = () => {
           systemKey={editingSystemSOP.systemKey}
           currentTitle={editingSystemSOP.title}
           currentContent={editingSystemSOP.content}
+          currentVideoUrl={editingSystemSOP.videoUrl}
         />
       )}
     </div>
