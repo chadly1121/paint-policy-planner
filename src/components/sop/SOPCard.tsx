@@ -40,7 +40,7 @@ const SOPCard = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const { acknowledgeSop } = useOrgSops();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true); // Start expanded so content is readable
   const [acknowledging, setAcknowledging] = useState(false);
 
   // Format content with proper line breaks
