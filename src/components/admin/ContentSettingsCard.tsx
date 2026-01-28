@@ -4,22 +4,28 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Settings, AlertTriangle, FileEdit, Loader2, CheckCircle } from "lucide-react";
+import { Settings, AlertTriangle, FileEdit, Loader2, CheckCircle, BookOpen, Shield, AlertCircle, ClipboardList } from "lucide-react";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useDisclaimerAcceptance } from "@/hooks/useDisclaimerAcceptance";
 import { useToast } from "@/hooks/use-toast";
 import DisclaimerModal from "@/components/admin/DisclaimerModal";
 import { format } from "date-fns";
 
+type SettingField = 'enable_custom_sops' | 'enable_custom_policies' | 'enable_custom_training' | 'enable_custom_safety' | 'enable_custom_disciplinary';
+
 const ContentSettingsCard = () => {
-  const { settings, loading, updateSettings, enableCustomSOPs, enableCustomPolicies } = useCompanySettings();
+  const { 
+    settings, loading, updateSettings, 
+    enableCustomSOPs, enableCustomPolicies, 
+    enableCustomTraining, enableCustomSafety, enableCustomDisciplinary 
+  } = useCompanySettings();
   const { hasAccepted, acceptance, loading: disclaimerLoading } = useDisclaimerAcceptance();
   const { toast } = useToast();
   const [updating, setUpdating] = useState<string | null>(null);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
-  const [pendingToggle, setPendingToggle] = useState<{ field: 'enable_custom_sops' | 'enable_custom_policies'; value: boolean } | null>(null);
+  const [pendingToggle, setPendingToggle] = useState<{ field: SettingField; value: boolean } | null>(null);
 
-  const handleToggle = async (field: 'enable_custom_sops' | 'enable_custom_policies', value: boolean) => {
+  const handleToggle = async (field: SettingField, value: boolean) => {
     // If enabling and disclaimer not accepted, show modal first
     if (value && !hasAccepted) {
       setPendingToggle({ field, value });
@@ -30,7 +36,7 @@ const ContentSettingsCard = () => {
     await performToggle(field, value);
   };
 
-  const performToggle = async (field: 'enable_custom_sops' | 'enable_custom_policies', value: boolean) => {
+  const performToggle = async (field: SettingField, value: boolean) => {
     setUpdating(field);
     const { error } = await updateSettings({ [field]: value });
     
@@ -87,7 +93,7 @@ const ContentSettingsCard = () => {
           <Badge variant="outline" className="ml-2">Admin</Badge>
         </CardTitle>
         <CardDescription>
-          Enable custom editing of SOPs and policies. System templates remain intact as backups.
+          Enable custom editing of SOPs, policies, training, safety protocols, and disciplinary procedures.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -107,15 +113,15 @@ const ContentSettingsCard = () => {
           </AlertDescription>
         </Alert>
 
-        <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div className="space-y-0.5">
               <Label htmlFor="custom-sops" className="flex items-center gap-2 text-base font-medium">
-                <FileEdit className="h-4 w-4" />
-                Enable Custom Editing of SOPs
+                <ClipboardList className="h-4 w-4" />
+                SOPs
               </Label>
               <p className="text-sm text-muted-foreground">
-                Fork and customize Standard Operating Procedures for your company
+                Standard Operating Procedures
               </p>
             </div>
             <Switch
@@ -130,10 +136,10 @@ const ContentSettingsCard = () => {
             <div className="space-y-0.5">
               <Label htmlFor="custom-policies" className="flex items-center gap-2 text-base font-medium">
                 <FileEdit className="h-4 w-4" />
-                Enable Custom Editing of Policies
+                Policies
               </Label>
               <p className="text-sm text-muted-foreground">
-                Fork and customize Company Policies for your company
+                Company Policies
               </p>
             </div>
             <Switch
@@ -141,6 +147,60 @@ const ContentSettingsCard = () => {
               checked={enableCustomPolicies}
               onCheckedChange={(checked) => handleToggle('enable_custom_policies', checked)}
               disabled={updating === 'enable_custom_policies'}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="custom-training" className="flex items-center gap-2 text-base font-medium">
+                <BookOpen className="h-4 w-4" />
+                Training
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Training Requirements
+              </p>
+            </div>
+            <Switch
+              id="custom-training"
+              checked={enableCustomTraining}
+              onCheckedChange={(checked) => handleToggle('enable_custom_training', checked)}
+              disabled={updating === 'enable_custom_training'}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="custom-safety" className="flex items-center gap-2 text-base font-medium">
+                <Shield className="h-4 w-4" />
+                Safety
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Safety Protocols
+              </p>
+            </div>
+            <Switch
+              id="custom-safety"
+              checked={enableCustomSafety}
+              onCheckedChange={(checked) => handleToggle('enable_custom_safety', checked)}
+              disabled={updating === 'enable_custom_safety'}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4 md:col-span-2">
+            <div className="space-y-0.5">
+              <Label htmlFor="custom-disciplinary" className="flex items-center gap-2 text-base font-medium">
+                <AlertCircle className="h-4 w-4" />
+                Disciplinary
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Disciplinary Procedures
+              </p>
+            </div>
+            <Switch
+              id="custom-disciplinary"
+              checked={enableCustomDisciplinary}
+              onCheckedChange={(checked) => handleToggle('enable_custom_disciplinary', checked)}
+              disabled={updating === 'enable_custom_disciplinary'}
             />
           </div>
         </div>

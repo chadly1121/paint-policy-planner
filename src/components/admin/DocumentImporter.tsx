@@ -27,6 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrgSops } from "@/hooks/useOrgSops";
+import { useCompanyContent, ContentType as CompanyContentType } from "@/hooks/useCompanyContent";
 
 interface ProcessedDocument {
   title: string;
@@ -55,7 +56,14 @@ const contentTypeIcons: Record<ContentType, string> = {
 
 const DocumentImporter = () => {
   const { toast } = useToast();
-  const { createOrgSop, refresh } = useOrgSops();
+  const { createOrgSop, refresh: refreshSops } = useOrgSops();
+  const { 
+    upsertCompanyPolicy, 
+    upsertCompanyTrainingContent, 
+    upsertCompanySafetyContent, 
+    upsertCompanyDisciplinaryContent,
+    refreshContent 
+  } = useCompanyContent();
   
   const [inputMode, setInputMode] = useState<"file" | "paste">("file");
   const [file, setFile] = useState<File | null>(null);
@@ -222,21 +230,48 @@ const DocumentImporter = () => {
     setSaving(true);
 
     try {
-      // Add compliance footer for org SOPs
+      // Add compliance footer for org content
       const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
       const contentWithFooter = editedContent.trim() + complianceFooter;
+      const sourceKey = `imported-${Date.now()}`;
 
-      const { error } = await createOrgSop(editedTitle.trim(), contentWithFooter);
+      let error: Error | null = null;
+
+      switch (contentType) {
+        case "sop":
+          const sopResult = await createOrgSop(editedTitle.trim(), contentWithFooter);
+          error = sopResult.error;
+          await refreshSops();
+          break;
+        case "policy":
+          const policyResult = await upsertCompanyPolicy(sourceKey, editedTitle.trim(), contentWithFooter);
+          error = policyResult.error as Error | null;
+          await refreshContent();
+          break;
+        case "training":
+          const trainingResult = await upsertCompanyTrainingContent(sourceKey, editedTitle.trim(), contentWithFooter);
+          error = trainingResult.error as Error | null;
+          await refreshContent();
+          break;
+        case "safety":
+          const safetyResult = await upsertCompanySafetyContent(sourceKey, editedTitle.trim(), contentWithFooter);
+          error = safetyResult.error as Error | null;
+          await refreshContent();
+          break;
+        case "disciplinary":
+          const disciplinaryResult = await upsertCompanyDisciplinaryContent(sourceKey, editedTitle.trim(), contentWithFooter);
+          error = disciplinaryResult.error as Error | null;
+          await refreshContent();
+          break;
+      }
 
       if (error) {
         throw error;
       }
 
-      await refresh();
-
       toast({
         title: "Content saved!",
-        description: `"${editedTitle}" has been added to your organization's ${contentTypeLabels[contentType]}s`,
+        description: `"${editedTitle}" has been added to your ${contentTypeLabels[contentType]}`,
       });
 
       // Reset form
@@ -465,7 +500,7 @@ const DocumentImporter = () => {
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save to Organization {contentTypeLabels[contentType]}s
+                  Save {contentTypeLabels[contentType]}
                 </>
               )}
             </Button>

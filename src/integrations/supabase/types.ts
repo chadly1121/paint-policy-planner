@@ -144,6 +144,48 @@ export type Database = {
           },
         ]
       }
+      company_disciplinary: {
+        Row: {
+          change_summary: string | null
+          content: string
+          created_at: string
+          edited_by: string | null
+          id: string
+          is_active: boolean
+          source_disciplinary_key: string
+          title: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          change_summary?: string | null
+          content: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          source_disciplinary_key: string
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          change_summary?: string | null
+          content?: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          source_disciplinary_key?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       company_policies: {
         Row: {
           change_summary: string | null
@@ -186,27 +228,78 @@ export type Database = {
         }
         Relationships: []
       }
+      company_safety: {
+        Row: {
+          change_summary: string | null
+          content: string
+          created_at: string
+          edited_by: string | null
+          id: string
+          is_active: boolean
+          source_safety_key: string
+          title: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          change_summary?: string | null
+          content: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          source_safety_key: string
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          change_summary?: string | null
+          content?: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          source_safety_key?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       company_settings: {
         Row: {
           created_at: string
+          enable_custom_disciplinary: boolean
           enable_custom_policies: boolean
+          enable_custom_safety: boolean
           enable_custom_sops: boolean
+          enable_custom_training: boolean
           id: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          enable_custom_disciplinary?: boolean
           enable_custom_policies?: boolean
+          enable_custom_safety?: boolean
           enable_custom_sops?: boolean
+          enable_custom_training?: boolean
           id?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          enable_custom_disciplinary?: boolean
           enable_custom_policies?: boolean
+          enable_custom_safety?: boolean
           enable_custom_sops?: boolean
+          enable_custom_training?: boolean
           id?: string
           updated_at?: string
           user_id?: string
@@ -248,6 +341,48 @@ export type Database = {
           id?: string
           is_active?: boolean
           source_sop_key?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      company_training: {
+        Row: {
+          change_summary: string | null
+          content: string
+          created_at: string
+          edited_by: string | null
+          id: string
+          is_active: boolean
+          source_training_key: string
+          title: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          change_summary?: string | null
+          content: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          source_training_key: string
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          change_summary?: string | null
+          content?: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          source_training_key?: string
           title?: string
           updated_at?: string
           user_id?: string

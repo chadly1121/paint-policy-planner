@@ -7,6 +7,9 @@ interface CompanySettings {
   user_id: string;
   enable_custom_sops: boolean;
   enable_custom_policies: boolean;
+  enable_custom_training: boolean;
+  enable_custom_safety: boolean;
+  enable_custom_disciplinary: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -43,7 +46,7 @@ export const useCompanySettings = () => {
     fetchSettings();
   }, [fetchSettings]);
 
-  const updateSettings = async (updates: Partial<Pick<CompanySettings, 'enable_custom_sops' | 'enable_custom_policies'>>) => {
+  const updateSettings = async (updates: Partial<Pick<CompanySettings, 'enable_custom_sops' | 'enable_custom_policies' | 'enable_custom_training' | 'enable_custom_safety' | 'enable_custom_disciplinary'>>) => {
     if (!user?.id || !isAdmin) return { error: new Error("Unauthorized") };
 
     try {
@@ -87,5 +90,8 @@ export const useCompanySettings = () => {
     refreshSettings: fetchSettings,
     enableCustomSOPs: settings?.enable_custom_sops ?? false,
     enableCustomPolicies: settings?.enable_custom_policies ?? false,
+    enableCustomTraining: settings?.enable_custom_training ?? false,
+    enableCustomSafety: settings?.enable_custom_safety ?? false,
+    enableCustomDisciplinary: settings?.enable_custom_disciplinary ?? false,
   };
 };
