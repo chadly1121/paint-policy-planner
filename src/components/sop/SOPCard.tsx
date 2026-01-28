@@ -4,7 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useOrgSops } from "@/hooks/useOrgSops";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +30,7 @@ interface SOPCardProps {
   ackEpoch: number;
   canEdit: boolean;
   canEditSystem: boolean;
+  canHideSystem: boolean;
   itemNumber?: number;
   onStartQuiz: () => void;
   onEdit?: () => void;
@@ -39,6 +50,7 @@ const SOPCard = ({
   ackEpoch,
   canEdit,
   canEditSystem,
+  canHideSystem,
   itemNumber,
   onStartQuiz, 
   onEdit,
@@ -47,9 +59,11 @@ const SOPCard = ({
 }: SOPCardProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { acknowledgeSop } = useOrgSops();
-  const [isOpen, setIsOpen] = useState(false); // Start collapsed to reduce scrolling
+  const { acknowledgeSop, hideSystemSop } = useOrgSops();
+  const [isOpen, setIsOpen] = useState(false);
   const [acknowledging, setAcknowledging] = useState(false);
+  const [showHideDialog, setShowHideDialog] = useState(false);
+  const [hiding, setHiding] = useState(false);
 
   // Enhanced content formatting for both system and uploaded content
   const formattedContent = content.split('\n').map((line, idx) => {
@@ -148,7 +162,53 @@ const SOPCard = ({
     setAcknowledging(false);
   };
 
+  const handleHideSystem = async () => {
+    if (!systemKey) return;
+    setHiding(true);
+    const { error } = await hideSystemSop(systemKey);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to hide SOP",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "SOP Hidden",
+        description: "This system SOP has been hidden from your organization.",
+      });
+      onAckSuccess?.();
+    }
+    setHiding(false);
+    setShowHideDialog(false);
+  };
+
   return (
+    <>
+      <AlertDialog open={showHideDialog} onOpenChange={setShowHideDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hide System SOP?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                This will hide the system SOP <strong>"{title}"</strong> from all users in your organization.
+              </p>
+              <p className="text-amber-600 dark:text-amber-400">
+                ⚠️ <strong>Important:</strong> If you have a custom SOP that replaces this content, hiding the system version prevents conflicts or duplicates.
+              </p>
+              <p>
+                You can restore hidden SOPs from the Admin settings at any time.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleHideSystem} disabled={hiding}>
+              {hiding ? "Hiding..." : "Hide SOP"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     <Card className={`transition-all ${isAcknowledged ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/10' : 'border-border'}`}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CardHeader className="pb-2">
@@ -182,9 +242,21 @@ const SOPCard = ({
                   <Pencil className="h-3 w-3" />
                 </Button>
               )}
-              {ackRequired && !isAcknowledged && (
+              {/* Hide button for system SOPs */}
+              {canHideSystem && source === "system" && systemKey && (
                 <Button 
                   size="sm" 
+                  variant="ghost" 
+                  onClick={() => setShowHideDialog(true)} 
+                  className="text-muted-foreground hover:text-destructive" 
+                  title="Hide this system SOP"
+                >
+                  <EyeOff className="h-3 w-3" />
+                </Button>
+              )}
+              {ackRequired && !isAcknowledged && (
+                <Button 
+                  size="sm"
                   variant="outline" 
                   onClick={handleAcknowledge}
                   disabled={acknowledging}
@@ -240,6 +312,7 @@ const SOPCard = ({
         </CollapsibleContent>
       </Collapsible>
     </Card>
+    </>
   );
 };
 

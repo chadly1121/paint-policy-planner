@@ -417,6 +417,45 @@ export type Database = {
         }
         Relationships: []
       }
+      org_hidden_sops: {
+        Row: {
+          hidden_at: string
+          hidden_by: string | null
+          id: string
+          org_id: string
+          system_key: string
+        }
+        Insert: {
+          hidden_at?: string
+          hidden_by?: string | null
+          id?: string
+          org_id: string
+          system_key: string
+        }
+        Update: {
+          hidden_at?: string
+          hidden_by?: string | null
+          id?: string
+          org_id?: string
+          system_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_hidden_sops_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_hidden_sops_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_users: {
         Row: {
           created_at: string
