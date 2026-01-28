@@ -12,6 +12,75 @@ interface ProcessedContent {
   summary: string;
 }
 
+async function detectContentType(documentText: string, fileName?: string): Promise<string> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    throw new Error("LOVABLE_API_KEY not configured");
+  }
+
+  const detectionPrompt = `Analyze this document and determine which category it best fits into. Choose EXACTLY ONE of these categories:
+
+- sop: Standard Operating Procedure - step-by-step instructions for operational tasks, workflows, processes
+- policy: Company Policy - rules, guidelines, expectations for employee behavior, HR policies
+- training: Training Material - educational content, skill development, onboarding materials
+- safety: Safety Protocol - workplace safety procedures, hazard prevention, PPE requirements
+- disciplinary: Disciplinary Procedure - misconduct handling, progressive discipline, termination policies
+
+Consider:
+- SOPs focus on "how to do" specific tasks
+- Policies focus on "what is allowed/required" rules
+- Training focuses on teaching/learning content
+- Safety focuses on preventing injuries and hazards
+- Disciplinary focuses on consequences and corrective actions
+
+Return ONLY the category keyword (sop, policy, training, safety, or disciplinary).`;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: detectionPrompt },
+        { 
+          role: "user", 
+          content: `Filename: ${fileName || "unknown"}\n\nDocument content (first 5000 chars):\n${documentText.substring(0, 5000)}` 
+        },
+      ],
+      max_tokens: 50,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Content detection failed:", response.status);
+    return "sop"; // Default fallback
+  }
+
+  const data = await response.json();
+  const detected = data.choices?.[0]?.message?.content?.trim().toLowerCase() || "sop";
+  
+  // Validate the detected type
+  const validTypes = ["sop", "policy", "training", "safety", "disciplinary"];
+  if (validTypes.includes(detected)) {
+    console.log(`Auto-detected content type: ${detected}`);
+    return detected;
+  }
+  
+  // Try to extract valid type from response
+  for (const type of validTypes) {
+    if (detected.includes(type)) {
+      console.log(`Extracted content type: ${type}`);
+      return type;
+    }
+  }
+  
+  console.log("Could not detect type, defaulting to sop");
+  return "sop";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,11 +95,24 @@ serve(async (req) => {
       });
     }
 
-    const { documentText, contentType, fileName } = await req.json();
+    const { documentText, contentType, fileName, autoDetect } = await req.json();
 
-    if (!documentText || !contentType) {
+    if (!documentText) {
       return new Response(
-        JSON.stringify({ error: "Document text and content type are required" }),
+        JSON.stringify({ error: "Document text is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // If autoDetect is true and no contentType provided, detect it first
+    let detectedType = contentType;
+    if (autoDetect && !contentType) {
+      detectedType = await detectContentType(documentText, fileName);
+    }
+
+    if (!detectedType) {
+      return new Response(
+        JSON.stringify({ error: "Content type is required or enable auto-detection" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -52,7 +134,7 @@ serve(async (req) => {
       disciplinary: "Disciplinary Procedure - guidelines for handling employee misconduct",
     };
 
-    const systemPrompt = `You are an expert document processor for an employee manual system. Your task is to take raw document content and transform it into a well-structured ${contentTypeDescriptions[contentType] || contentType}.
+    const systemPrompt = `You are an expert document processor for an employee manual system. Your task is to take raw document content and transform it into a well-structured ${contentTypeDescriptions[detectedType] || detectedType}.
 
 IMPORTANT FORMATTING RULES:
 1. Use proper markdown formatting with clear headings (## for main sections, ### for subsections)
@@ -64,8 +146,8 @@ IMPORTANT FORMATTING RULES:
 7. Include an overview/purpose section at the beginning if not present
 8. Add any necessary safety warnings or compliance notes where appropriate
 
-CONTENT STRUCTURE FOR ${contentType.toUpperCase()}:
-${contentType === "sop" ? `
+CONTENT STRUCTURE FOR ${detectedType.toUpperCase()}:
+${detectedType === "sop" ? `
 - Purpose/Overview
 - Scope (who this applies to)
 - Materials/Equipment Needed (if applicable)
@@ -73,7 +155,7 @@ ${contentType === "sop" ? `
 - Safety Considerations
 - Quality Standards
 - Documentation Requirements` : ""}
-${contentType === "policy" ? `
+${detectedType === "policy" ? `
 - Policy Statement
 - Purpose
 - Scope
@@ -82,7 +164,7 @@ ${contentType === "policy" ? `
 - Responsibilities
 - Consequences of Non-Compliance
 - Related Policies` : ""}
-${contentType === "training" ? `
+${detectedType === "training" ? `
 - Learning Objectives
 - Introduction
 - Key Concepts
@@ -90,7 +172,7 @@ ${contentType === "training" ? `
 - Best Practices
 - Summary/Key Takeaways
 - Assessment Questions (if applicable)` : ""}
-${contentType === "safety" ? `
+${detectedType === "safety" ? `
 - Purpose
 - Hazard Identification
 - Required PPE
@@ -98,7 +180,7 @@ ${contentType === "safety" ? `
 - Emergency Procedures
 - Reporting Requirements
 - Training Requirements` : ""}
-${contentType === "disciplinary" ? `
+${detectedType === "disciplinary" ? `
 - Purpose
 - Scope
 - Types of Misconduct
@@ -124,7 +206,7 @@ Return a JSON object with:
           { role: "system", content: systemPrompt },
           { 
             role: "user", 
-            content: `Please process this document (filename: ${fileName || "unknown"}) into a properly formatted ${contentType}:\n\n${documentText.substring(0, 50000)}` 
+            content: `Please process this document (filename: ${fileName || "unknown"}) into a properly formatted ${detectedType}:\n\n${documentText.substring(0, 50000)}` 
           },
         ],
         tools: [
@@ -212,7 +294,8 @@ Return a JSON object with:
           title: processedContent.title,
           content: processedContent.content,
           summary: processedContent.summary,
-          type: contentType,
+          type: detectedType,
+          autoDetected: autoDetect && !contentType,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -42,6 +42,7 @@ interface ProcessedDocument {
   content: string;
   summary: string;
   type: string;
+  autoDetected?: boolean;
 }
 
 interface BulkFileItem {
@@ -51,12 +52,14 @@ interface BulkFileItem {
   processedDoc?: ProcessedDocument;
   editedTitle?: string;
   editedContent?: string;
+  detectedType?: ContentType;
   error?: string;
 }
 
-type ContentType = "sop" | "policy" | "training" | "safety" | "disciplinary";
+type ContentType = "sop" | "policy" | "training" | "safety" | "disciplinary" | "auto";
 
 const contentTypeLabels: Record<ContentType, string> = {
+  auto: "🤖 Auto-Detect (AI determines type)",
   sop: "Standard Operating Procedure (SOP)",
   policy: "Company Policy",
   training: "Training Material",
@@ -65,6 +68,7 @@ const contentTypeLabels: Record<ContentType, string> = {
 };
 
 const contentTypeIcons: Record<ContentType, string> = {
+  auto: "🤖",
   sop: "📋",
   policy: "📜",
   training: "📚",
@@ -90,7 +94,7 @@ const DocumentImporter = () => {
   const [inputMode, setInputMode] = useState<"file" | "paste">("file");
   const [file, setFile] = useState<File | null>(null);
   const [pastedText, setPastedText] = useState("");
-  const [contentType, setContentType] = useState<ContentType>("sop");
+  const [contentType, setContentType] = useState<ContentType>("auto");
   const [processing, setProcessing] = useState(false);
   const [processedDoc, setProcessedDoc] = useState<ProcessedDocument | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
@@ -182,17 +186,21 @@ const DocumentImporter = () => {
     return await file.text();
   };
 
-  const processFileWithAI = async (textContent: string, fileName: string): Promise<ProcessedDocument> => {
+  const processFileWithAI = async (textContent: string, fileName: string, overrideType?: ContentType): Promise<ProcessedDocument> => {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       throw new Error("Not authenticated");
     }
 
+    const typeToUse = overrideType || contentType;
+    const isAutoDetect = typeToUse === "auto";
+
     const response = await supabase.functions.invoke("process-document", {
       body: {
         documentText: textContent,
-        contentType,
+        contentType: isAutoDetect ? null : typeToUse,
         fileName,
+        autoDetect: isAutoDetect,
       },
     });
 
@@ -311,7 +319,8 @@ const DocumentImporter = () => {
           throw new Error("Content too short (min 50 characters)");
         }
 
-        const processed = await processFileWithAI(textContent, fileItem.file.name);
+        const processed = await processFileWithAI(textContent, fileItem.file.name, "auto");
+        const detectedType = (processed.type || "sop") as ContentType;
 
         setBulkFiles((prev) =>
           prev.map((f) =>
@@ -322,6 +331,7 @@ const DocumentImporter = () => {
                   processedDoc: processed,
                   editedTitle: processed.title,
                   editedContent: processed.content,
+                  detectedType: detectedType,
                 }
               : f
           )
@@ -358,14 +368,15 @@ const DocumentImporter = () => {
     });
   };
 
-  const saveContent = async (title: string, content: string): Promise<Error | null> => {
+  const saveContent = async (title: string, content: string, typeOverride?: ContentType): Promise<Error | null> => {
     const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
     const contentWithFooter = content.trim() + complianceFooter;
     const sourceKey = `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     let error: Error | null = null;
+    const typeToSave = typeOverride || (contentType === "auto" ? "sop" : contentType);
 
-    switch (contentType) {
+    switch (typeToSave) {
       case "sop":
         const sopResult = await createOrgSop(title.trim(), contentWithFooter);
         error = sopResult.error;
@@ -404,21 +415,24 @@ const DocumentImporter = () => {
     setSaving(true);
 
     try {
-      const error = await saveContent(editedTitle, editedContent);
+      const typeForSave = processedDoc?.type as ContentType || (contentType === "auto" ? "sop" : contentType);
+      const error = await saveContent(editedTitle, editedContent, typeForSave);
 
       if (error) {
         throw error;
       }
 
-      if (contentType === "sop") {
+      const savedType = processedDoc?.type as ContentType || (contentType === "auto" ? "sop" : contentType);
+      if (savedType === "sop") {
         await refreshSops();
       } else {
         await refreshContent();
       }
 
+      const savedTypeLabel = contentTypeLabels[savedType] || savedType;
       toast({
         title: "Content saved!",
-        description: `"${editedTitle}" has been added to your ${contentTypeLabels[contentType]}`,
+        description: `"${editedTitle}" has been added to your ${savedTypeLabel}`,
       });
 
       // Reset form
@@ -453,14 +467,18 @@ const DocumentImporter = () => {
     setBulkSaving(true);
     let savedCount = 0;
     let errorCount = 0;
+    const savedTypes = new Set<string>();
 
     for (const fileItem of processedFiles) {
       if (!fileItem.editedTitle || !fileItem.editedContent) continue;
 
       try {
-        const error = await saveContent(fileItem.editedTitle, fileItem.editedContent);
+        // Use the detected type for this specific file
+        const typeForFile = fileItem.detectedType || "sop";
+        const error = await saveContent(fileItem.editedTitle, fileItem.editedContent, typeForFile);
         if (error) throw error;
 
+        savedTypes.add(typeForFile);
         setBulkFiles((prev) =>
           prev.map((f) =>
             f.id === fileItem.id ? { ...f, status: "saved" as const } : f
@@ -473,10 +491,11 @@ const DocumentImporter = () => {
       }
     }
 
-    // Refresh data
-    if (contentType === "sop") {
+    // Refresh data for all saved types
+    if (savedTypes.has("sop")) {
       await refreshSops();
-    } else {
+    }
+    if (savedTypes.has("policy") || savedTypes.has("training") || savedTypes.has("safety") || savedTypes.has("disciplinary")) {
       await refreshContent();
     }
 
@@ -788,15 +807,22 @@ const DocumentImporter = () => {
                             ) : (
                               <p className="font-medium text-sm truncate">{fileItem.file.name}</p>
                             )}
-                            <p className="text-xs text-muted-foreground">
-                              {fileItem.error || (
-                                fileItem.status === "saved" 
-                                  ? "Saved successfully" 
-                                  : fileItem.status === "processed"
-                                  ? fileItem.processedDoc?.summary?.slice(0, 60) + "..."
-                                  : `${(fileItem.file.size / 1024).toFixed(1)} KB`
+                            <div className="flex items-center gap-2 mt-1">
+                              {(fileItem.status === "processed" || fileItem.status === "saved") && fileItem.detectedType && (
+                                <Badge variant="outline" className="text-xs">
+                                  {contentTypeIcons[fileItem.detectedType]} {fileItem.detectedType.toUpperCase()}
+                                </Badge>
                               )}
-                            </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {fileItem.error || (
+                                  fileItem.status === "saved" 
+                                    ? "Saved successfully" 
+                                    : fileItem.status === "processed"
+                                    ? fileItem.processedDoc?.summary?.slice(0, 50) + "..."
+                                    : `${(fileItem.file.size / 1024).toFixed(1)} KB`
+                                )}
+                              </p>
+                            </div>
                           </div>
 
                           {/* Remove Button */}
