@@ -1,3 +1,4 @@
+// SOPs page - displays assigned SOPs with acknowledgment tracking
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -106,6 +107,8 @@ const SOPs = () => {
     refresh();
   };
 
+  // Show loading state via conditional rendering (not early return) 
+  // to ensure consistent hook count across renders
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
