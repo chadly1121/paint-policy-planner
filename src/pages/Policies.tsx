@@ -119,13 +119,15 @@ const Policies = () => {
 
       <div className="space-y-3">
         {filteredItems.length > 0 ? (
-          filteredItems.map((item) => (
+          filteredItems.map((item, index) => (
             <SectionItemCard
               key={item.key}
               itemKey={item.key}
               title={item.title}
               content={item.content}
               isCompleted={isItemCompleted(item.key)}
+              itemNumber={index + 1}
+              sectionPrefix="POLICY"
               onStartQuiz={() => handleStartMiniQuiz(item)}
             />
           ))

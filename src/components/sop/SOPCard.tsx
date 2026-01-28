@@ -18,6 +18,7 @@ interface SOPCardProps {
   version: number;
   ackEpoch: number;
   canEdit: boolean;
+  itemNumber?: number;
   onStartQuiz: () => void;
   onEdit?: () => void;
   onAckSuccess?: () => void;
@@ -33,6 +34,7 @@ const SOPCard = ({
   version,
   ackEpoch,
   canEdit,
+  itemNumber,
   onStartQuiz, 
   onEdit,
   onAckSuccess
@@ -94,7 +96,12 @@ const SOPCard = ({
               {isAcknowledged && (
                 <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
               )}
-              <CardTitle className="text-base font-medium truncate">{title}</CardTitle>
+              <CardTitle className="text-base font-medium truncate">
+                {itemNumber !== undefined && (
+                  <span className="text-muted-foreground font-mono mr-2">SOP-{String(itemNumber).padStart(3, '0')}</span>
+                )}
+                {title}
+              </CardTitle>
               {source === "org" ? (
                 <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
               ) : (
