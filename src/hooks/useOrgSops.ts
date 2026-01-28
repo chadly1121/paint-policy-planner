@@ -21,6 +21,7 @@ interface SOP {
   updated_at: string;
   last_change_summary: string | null;
   forked_from_sop_id: string | null;
+  source_file_url: string | null;
 }
 
 interface SOPAck {
@@ -228,23 +229,27 @@ export const useOrgSops = () => {
 
   const createOrgSop = async (
     title: string,
-    content: string
+    content: string,
+    sourceFileUrl?: string
   ): Promise<{ sop: SOP | null; error: Error | null }> => {
     if (!user?.id || !org?.id || !orgUser?.id) {
       return { sop: null, error: new Error("Not authenticated or no org") };
     }
 
     try {
+      const insertData = {
+        org_id: org.id,
+        source: "org" as const,
+        title,
+        content_md: content,
+        created_by: orgUser.id,
+        updated_by: orgUser.id,
+        source_file_url: sourceFileUrl || null,
+      };
+
       const { data, error } = await supabase
         .from("sops")
-        .insert({
-          org_id: org.id,
-          source: "org",
-          title,
-          content_md: content,
-          created_by: orgUser.id,
-          updated_by: orgUser.id,
-        })
+        .insert(insertData)
         .select()
         .single();
 

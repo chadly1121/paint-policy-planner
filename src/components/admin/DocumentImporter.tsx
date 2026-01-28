@@ -30,12 +30,14 @@ import {
   Files,
   CheckCircle2,
   XCircle,
-  Clock
+  Clock,
+  HardDrive
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrgSops } from "@/hooks/useOrgSops";
 import { useCompanyContent, ContentType as CompanyContentType } from "@/hooks/useCompanyContent";
+import { useOrg } from "@/contexts/OrganizationContext";
 
 interface ProcessedDocument {
   title: string;
@@ -43,6 +45,7 @@ interface ProcessedDocument {
   summary: string;
   type: string;
   autoDetected?: boolean;
+  sourceFileUrl?: string;
 }
 
 interface BulkFileItem {
@@ -80,6 +83,7 @@ type FormatMode = "ai" | "original";
 
 const DocumentImporter = () => {
   const { toast } = useToast();
+  const { org } = useOrg();
   const { createOrgSop, refresh: refreshSops } = useOrgSops();
   const { 
     upsertCompanyPolicy, 
@@ -225,6 +229,44 @@ const DocumentImporter = () => {
     // Remove common prefixes like PD-20200627-01 - 
     const cleanedTitle = withoutExt.replace(/^[A-Z]{1,3}-\d+-\d+\s*-\s*/i, "");
     return cleanedTitle.trim() || withoutExt;
+  };
+
+  // Upload original file to storage
+  const uploadOriginalFile = async (fileToUpload: File): Promise<string | null> => {
+    if (!org?.id) {
+      console.error("No org ID available for file upload");
+      return null;
+    }
+
+    try {
+      const fileExt = fileToUpload.name.split('.').pop() || 'bin';
+      const timestamp = Date.now();
+      const safeName = fileToUpload.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `org_${org.id}/uploads/${timestamp}_${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('org-documents')
+        .upload(filePath, fileToUpload, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("File upload error:", uploadError);
+        throw uploadError;
+      }
+
+      // Get the public URL for the file
+      const { data: urlData } = supabase.storage
+        .from('org-documents')
+        .getPublicUrl(filePath);
+
+      console.log("File uploaded successfully:", filePath);
+      return urlData?.publicUrl || filePath;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      return null;
+    }
   };
 
   const handleProcess = async () => {
@@ -401,7 +443,12 @@ const DocumentImporter = () => {
     });
   };
 
-  const saveContent = async (title: string, content: string, typeOverride?: ContentType): Promise<Error | null> => {
+  const saveContent = async (
+    title: string, 
+    content: string, 
+    typeOverride?: ContentType,
+    sourceFileUrl?: string
+  ): Promise<Error | null> => {
     const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
     const contentWithFooter = content.trim() + complianceFooter;
     const sourceKey = `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -411,7 +458,7 @@ const DocumentImporter = () => {
 
     switch (typeToSave) {
       case "sop":
-        const sopResult = await createOrgSop(title.trim(), contentWithFooter);
+        const sopResult = await createOrgSop(title.trim(), contentWithFooter, sourceFileUrl);
         error = sopResult.error;
         break;
       case "policy":
@@ -448,8 +495,19 @@ const DocumentImporter = () => {
     setSaving(true);
 
     try {
+      let sourceFileUrl: string | undefined;
+
+      // Upload original file to storage if in "Keep Original" mode and we have a file
+      if (formatMode === "original" && file && inputMode === "file") {
+        toast({
+          title: "Uploading file...",
+          description: "Storing original document",
+        });
+        sourceFileUrl = (await uploadOriginalFile(file)) || undefined;
+      }
+
       const typeForSave = processedDoc?.type as ContentType || (contentType === "auto" ? "sop" : contentType);
-      const error = await saveContent(editedTitle, editedContent, typeForSave);
+      const error = await saveContent(editedTitle, editedContent, typeForSave, sourceFileUrl);
 
       if (error) {
         throw error;
@@ -463,9 +521,10 @@ const DocumentImporter = () => {
       }
 
       const savedTypeLabel = contentTypeLabels[savedType] || savedType;
+      const fileStoredMsg = sourceFileUrl ? " Original file stored in Drive." : "";
       toast({
         title: "Content saved!",
-        description: `"${editedTitle}" has been added to your ${savedTypeLabel}`,
+        description: `"${editedTitle}" has been added to your ${savedTypeLabel}.${fileStoredMsg}`,
       });
 
       // Reset form
@@ -634,7 +693,7 @@ const DocumentImporter = () => {
                 size="sm"
                 className="flex-1"
               >
-                <FileText className="h-4 w-4 mr-2" />
+                <HardDrive className="h-4 w-4 mr-2" />
                 Keep Original
               </Button>
               <Button
@@ -650,7 +709,7 @@ const DocumentImporter = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               {formatMode === "original" 
-                ? "Document will be saved exactly as uploaded - no changes to content or structure" 
+                ? "Document saved exactly as uploaded. Original file stored in SOPed Drive for reference." 
                 : "AI will reformat and structure the document according to best practices"}
             </p>
           </div>

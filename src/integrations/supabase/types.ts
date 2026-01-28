@@ -952,6 +952,7 @@ export type Database = {
           last_change_summary: string | null
           org_id: string | null
           source: string
+          source_file_url: string | null
           status: string
           system_key: string | null
           title: string
@@ -972,6 +973,7 @@ export type Database = {
           last_change_summary?: string | null
           org_id?: string | null
           source: string
+          source_file_url?: string | null
           status?: string
           system_key?: string | null
           title: string
@@ -992,6 +994,7 @@ export type Database = {
           last_change_summary?: string | null
           org_id?: string | null
           source?: string
+          source_file_url?: string | null
           status?: string
           system_key?: string | null
           title?: string
