@@ -76,6 +76,8 @@ const contentTypeIcons: Record<ContentType, string> = {
   disciplinary: "⚖️",
 };
 
+type FormatMode = "ai" | "original";
+
 const DocumentImporter = () => {
   const { toast } = useToast();
   const { createOrgSop, refresh: refreshSops } = useOrgSops();
@@ -94,7 +96,8 @@ const DocumentImporter = () => {
   const [inputMode, setInputMode] = useState<"file" | "paste">("file");
   const [file, setFile] = useState<File | null>(null);
   const [pastedText, setPastedText] = useState("");
-  const [contentType, setContentType] = useState<ContentType>("auto");
+  const [contentType, setContentType] = useState<ContentType>("sop");
+  const [formatMode, setFormatMode] = useState<FormatMode>("original");
   const [processing, setProcessing] = useState(false);
   const [processedDoc, setProcessedDoc] = useState<ProcessedDocument | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
@@ -215,6 +218,15 @@ const DocumentImporter = () => {
     return response.data.data as ProcessedDocument;
   };
 
+  // Extract title from filename (remove extension and clean up)
+  const extractTitleFromFilename = (filename: string): string => {
+    // Remove file extension
+    const withoutExt = filename.replace(/\.[^/.]+$/, "");
+    // Remove common prefixes like PD-20200627-01 - 
+    const cleanedTitle = withoutExt.replace(/^[A-Z]{1,3}-\d+-\d+\s*-\s*/i, "");
+    return cleanedTitle.trim() || withoutExt;
+  };
+
   const handleProcess = async () => {
     let textContent = "";
     let fileName = "";
@@ -266,15 +278,36 @@ const DocumentImporter = () => {
     setProcessedDoc(null);
 
     try {
-      const processed = await processFileWithAI(textContent, fileName);
-      setProcessedDoc(processed);
-      setEditedTitle(processed.title);
-      setEditedContent(processed.content);
+      // If "original" format mode, skip AI processing entirely
+      if (formatMode === "original") {
+        const extractedTitle = extractTitleFromFilename(fileName);
+        const processed: ProcessedDocument = {
+          title: extractedTitle,
+          content: textContent, // Keep exact original content
+          summary: "Imported with original formatting preserved",
+          type: contentType === "auto" ? "sop" : contentType,
+          autoDetected: false,
+        };
+        setProcessedDoc(processed);
+        setEditedTitle(processed.title);
+        setEditedContent(processed.content);
 
-      toast({
-        title: "Document processed!",
-        description: `"${processed.title}" is ready for review`,
-      });
+        toast({
+          title: "Document ready!",
+          description: `"${processed.title}" preserved with original formatting`,
+        });
+      } else {
+        // AI processing mode
+        const processed = await processFileWithAI(textContent, fileName);
+        setProcessedDoc(processed);
+        setEditedTitle(processed.title);
+        setEditedContent(processed.content);
+
+        toast({
+          title: "Document processed!",
+          description: `"${processed.title}" is ready for review`,
+        });
+      }
     } catch (error) {
       console.error("Processing error:", error);
       toast({
@@ -575,7 +608,7 @@ const DocumentImporter = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(contentTypeLabels) as ContentType[]).map((type) => (
+                {(Object.keys(contentTypeLabels) as ContentType[]).filter(t => formatMode === "ai" || t !== "auto").map((type) => (
                   <SelectItem key={type} value={type}>
                     <span className="flex items-center gap-2">
                       <span>{contentTypeIcons[type]}</span>
@@ -585,6 +618,41 @@ const DocumentImporter = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Format Mode Selection */}
+          <div className="space-y-2">
+            <Label>Formatting Mode</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={formatMode === "original" ? "secondary" : "ghost"}
+                onClick={() => {
+                  setFormatMode("original");
+                  if (contentType === "auto") setContentType("sop");
+                }}
+                size="sm"
+                className="flex-1"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Keep Original
+              </Button>
+              <Button
+                type="button"
+                variant={formatMode === "ai" ? "secondary" : "ghost"}
+                onClick={() => setFormatMode("ai")}
+                size="sm"
+                className="flex-1"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Format
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {formatMode === "original" 
+                ? "Document will be saved exactly as uploaded - no changes to content or structure" 
+                : "AI will reformat and structure the document according to best practices"}
+            </p>
           </div>
 
           {/* SINGLE MODE */}
@@ -681,12 +749,21 @@ const DocumentImporter = () => {
                   {processing ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing with AI...
+                      {formatMode === "original" ? "Preparing..." : "Processing with AI..."}
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Process with AI
+                      {formatMode === "original" ? (
+                        <>
+                          <FileText className="h-4 w-4 mr-2" />
+                          Import Original
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Process with AI
+                        </>
+                      )}
                     </>
                   )}
                 </Button>
