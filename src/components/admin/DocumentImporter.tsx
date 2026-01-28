@@ -814,8 +814,8 @@ const DocumentImporter = () => {
                     <>
                       {formatMode === "original" ? (
                         <>
-                          <FileText className="h-4 w-4 mr-2" />
-                          Import Original
+                          <HardDrive className="h-4 w-4 mr-2" />
+                          Process & Keep Original
                         </>
                       ) : (
                         <>
