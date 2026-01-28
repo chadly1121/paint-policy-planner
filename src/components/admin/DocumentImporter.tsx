@@ -541,7 +541,7 @@ const DocumentImporter = () => {
             AI Document Importer
           </CardTitle>
           <CardDescription>
-            Upload or paste existing documents and let AI format them for your employee manual
+            Upload or paste existing documents and let AI format them for your training portal
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

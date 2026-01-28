@@ -245,7 +245,7 @@ const Auth = () => {
               </div>
             </div>
             <CardTitle className="text-2xl font-serif">{t("common.companyName")}</CardTitle>
-            <CardDescription>Sign in to access your employee manual</CardDescription>
+            <CardDescription>Sign in to access your training portal</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -325,7 +325,7 @@ const Auth = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-center text-muted-foreground">
-              You can now sign in with your credentials to access the employee manual.
+              You can now sign in with your credentials to access the training portal.
             </p>
             <Button onClick={resetSignup} className="w-full">
               Continue to Sign In
@@ -445,7 +445,7 @@ const Auth = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-serif">Create Your Account</CardTitle>
-          <CardDescription>Get started with the employee manual</CardDescription>
+          <CardDescription>Get started with SOPEDU</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleStep1Continue} className="space-y-4">
