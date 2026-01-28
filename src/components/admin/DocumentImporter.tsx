@@ -322,6 +322,7 @@ const DocumentImporter = () => {
     try {
       // If "original" format mode, skip AI processing entirely
       if (formatMode === "original") {
+        // In "Keep Original" mode, immediately create the SOP/content (no separate Save step)
         const extractedTitle = extractTitleFromFilename(fileName);
         const processed: ProcessedDocument = {
           title: extractedTitle,
@@ -330,14 +331,51 @@ const DocumentImporter = () => {
           type: contentType === "auto" ? "sop" : contentType,
           autoDetected: false,
         };
-        setProcessedDoc(processed);
-        setEditedTitle(processed.title);
-        setEditedContent(processed.content);
 
+        let sourceFileUrl: string | undefined;
+
+        // Upload original file when provided
+        if (inputMode === "file" && file) {
+          toast({
+            title: "Uploading file...",
+            description: "Storing original document",
+          });
+          const uploaded = await uploadOriginalFile(file);
+          if (uploaded) {
+            sourceFileUrl = uploaded;
+          } else {
+            // Still create the SOP even if storage upload fails, but warn the user
+            toast({
+              variant: "destructive",
+              title: "File upload failed",
+              description: "Creating the SOP without storing the original file.",
+            });
+          }
+        }
+
+        const typeForSave = processed.type as ContentType;
+        const saveError = await saveContent(processed.title, processed.content, typeForSave, sourceFileUrl);
+        if (saveError) throw saveError;
+
+        if (typeForSave === "sop") {
+          await refreshSops();
+        } else {
+          await refreshContent();
+        }
+
+        const savedTypeLabel = contentTypeLabels[typeForSave] || typeForSave;
+        const fileStoredMsg = sourceFileUrl ? " Original file stored in Drive." : "";
         toast({
-          title: "Document ready!",
-          description: `"${processed.title}" preserved with original formatting`,
+          title: "Content created!",
+          description: `"${processed.title}" has been added to your ${savedTypeLabel}.${fileStoredMsg}`,
         });
+
+        // Reset form
+        setFile(null);
+        setPastedText("");
+        setProcessedDoc(null);
+        setEditedTitle("");
+        setEditedContent("");
       } else {
         // AI processing mode
         const processed = await processFileWithAI(textContent, fileName);
