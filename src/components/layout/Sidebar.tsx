@@ -11,6 +11,7 @@ import {
   PaintBucket,
   ShieldCheck,
   Settings,
+  UserCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -29,6 +30,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   const navItems = [
     { path: "/", label: t("nav.dashboard"), icon: Home },
+    { path: "/profile", label: "My Profile", icon: UserCircle },
     { path: "/sops", label: t("nav.sops"), icon: ClipboardList },
     { path: "/safety", label: t("nav.safetyProtocols"), icon: Shield },
     { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },

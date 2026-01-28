@@ -15,6 +15,7 @@ import Disciplinary from "./pages/Disciplinary";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import ComplianceGuidance from "./pages/ComplianceGuidance";
@@ -50,14 +51,16 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/compliance-guidance" element={<ComplianceGuidance />} />
               <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-                <Route path="/" element={<Index />} />
-                <Route path="/sops" element={<SOPs />} />
-                <Route path="/safety" element={<Safety />} />
-                <Route path="/policies" element={<Policies />} />
-                <Route path="/training" element={<Training />} />
-                <Route path="/disciplinary" element={<Disciplinary />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/admin" element={<Admin />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:userId" element={<Profile />} />
+              <Route path="/sops" element={<SOPs />} />
+              <Route path="/safety" element={<Safety />} />
+              <Route path="/policies" element={<Policies />} />
+              <Route path="/training" element={<Training />} />
+              <Route path="/disciplinary" element={<Disciplinary />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/admin" element={<Admin />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
