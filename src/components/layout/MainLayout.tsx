@@ -17,7 +17,7 @@ const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
-  const title = pageTitles[location.pathname] || "SOPEDU";
+  const title = pageTitles[location.pathname] || "soped.ai";
 
   return (
     <div className="min-h-screen bg-background">
