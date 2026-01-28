@@ -11,10 +11,11 @@ interface SectionItemCardProps {
   title: string;
   content: string;
   isCompleted: boolean;
+  source?: "system" | "custom";
   onStartQuiz: () => void;
 }
 
-const SectionItemCard = ({ itemKey, title, content, isCompleted, onStartQuiz }: SectionItemCardProps) => {
+const SectionItemCard = ({ itemKey, title, content, isCompleted, source = "system", onStartQuiz }: SectionItemCardProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,6 +46,11 @@ const SectionItemCard = ({ itemKey, title, content, isCompleted, onStartQuiz }: 
                 <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
               )}
               <CardTitle className="text-base font-medium truncate">{title}</CardTitle>
+              {source === "custom" ? (
+                <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
+              ) : (
+                <Badge variant="outline" className="text-xs flex-shrink-0">🛡️ System</Badge>
+              )}
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {isCompleted ? (
