@@ -43,12 +43,48 @@ async function sendEmail(to: string, subject: string, html: string) {
     }),
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to send email: ${error}`);
+  const rawBody = await response.text();
+  let parsedBody: unknown = rawBody;
+  try {
+    parsedBody = rawBody ? JSON.parse(rawBody) : null;
+  } catch {
+    // Keep raw text
   }
 
-  return response.json();
+  if (!response.ok) {
+    const message =
+      typeof parsedBody === "object" && parsedBody !== null
+        ? // Resend tends to return { statusCode, name, message }
+          // deno-lint-ignore no-explicit-any
+          ((parsedBody as any).message as string | undefined) ?? JSON.stringify(parsedBody)
+        : String(parsedBody);
+
+    // Resend "testing mode" limitation: avoid breaking the app flow.
+    // We still return a structured result so the caller can surface a friendly warning.
+    if (
+      response.status === 403 &&
+      message.toLowerCase().includes("you can only send testing emails")
+    ) {
+      console.warn("Resend blocked email (domain not verified). Skipping send.", {
+        to,
+        subject,
+        status: response.status,
+      });
+      return {
+        skipped: true,
+        status: response.status,
+        error: message,
+      };
+    }
+
+    throw new Error(`Failed to send email: ${typeof parsedBody === "string" ? parsedBody : JSON.stringify(parsedBody)}`);
+  }
+
+  return {
+    skipped: false,
+    // Return whatever Resend responded with for debugging/visibility.
+    body: parsedBody,
+  };
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -227,11 +263,30 @@ serve(async (req: Request): Promise<Response> => {
 
     console.log(`Sending email to ${profile.email}`);
 
-    const emailResponse = await sendEmail(profile.email, subject, html);
+    const emailResult = await sendEmail(profile.email, subject, html);
 
-    console.log("Email sent successfully:", emailResponse);
+    if (emailResult?.skipped) {
+      // IMPORTANT: Return 200 so the client doesn't treat this as a hard failure.
+      // This happens when Resend is still in testing mode and the domain isn't verified.
+      return new Response(
+        JSON.stringify({
+          success: true,
+          emailSkipped: true,
+          reason: "resend_domain_not_verified",
+          message:
+            "Email sending is currently blocked by Resend testing-mode limits. Verify a sending domain in Resend and use a From address on that domain to send to other recipients.",
+          error: emailResult.error,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
+    console.log("Email sent successfully:", emailResult);
+
+    return new Response(JSON.stringify({ success: true, emailResponse: emailResult }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
