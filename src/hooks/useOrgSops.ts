@@ -190,7 +190,7 @@ export const useOrgSops = () => {
     customContent?: string,
     customVideoUrl?: string | null
   ): Promise<{ sop: SOP | null; error: Error | null }> => {
-    if (!user?.id || !org?.id || !orgUser?.id) {
+    if (!user?.id || !org?.id) {
       return { sop: null, error: new Error("Not authenticated or no org") };
     }
 
@@ -209,8 +209,8 @@ export const useOrgSops = () => {
           content_md: customContent || systemSop.content_md,
           video_url: customVideoUrl !== undefined ? customVideoUrl : systemSop.video_url,
           forked_from_sop_id: systemSop.id,
-          created_by: orgUser.id,
-          updated_by: orgUser.id,
+          created_by: orgUser?.id ?? null,
+          updated_by: orgUser?.id ?? null,
         })
         .select()
         .single();
@@ -232,7 +232,9 @@ export const useOrgSops = () => {
     content: string,
     sourceFileUrl?: string
   ): Promise<{ sop: SOP | null; error: Error | null }> => {
-    if (!user?.id || !org?.id || !orgUser?.id) {
+    // Note: orgUser may still be loading when actions happen quickly (e.g., imports).
+    // created_by/updated_by are nullable, so we can proceed as long as we have user + org.
+    if (!user?.id || !org?.id) {
       return { sop: null, error: new Error("Not authenticated or no org") };
     }
 
@@ -242,8 +244,8 @@ export const useOrgSops = () => {
         source: "org" as const,
         title,
         content_md: content,
-        created_by: orgUser.id,
-        updated_by: orgUser.id,
+        created_by: orgUser?.id ?? null,
+        updated_by: orgUser?.id ?? null,
         source_file_url: sourceFileUrl || null,
       };
 
