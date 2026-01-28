@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff, Video } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,11 +17,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useOrgSops } from "@/hooks/useOrgSops";
 import { useToast } from "@/hooks/use-toast";
+import VideoEmbed from "@/components/video/VideoEmbed";
 
 interface SOPCardProps {
   sopId: string;
   title: string;
   content: string;
+  videoUrl?: string | null;
   source: string;
   systemKey: string | null;
   isAcknowledged: boolean;
@@ -42,6 +44,7 @@ const SOPCard = ({
   sopId, 
   title, 
   content, 
+  videoUrl,
   source,
   systemKey,
   isAcknowledged, 
@@ -223,6 +226,12 @@ const SOPCard = ({
                 )}
                 {title}
               </CardTitle>
+              {videoUrl && (
+                <Badge variant="outline" className="text-xs flex-shrink-0 border-blue-500/50 text-blue-600 dark:text-blue-400">
+                  <Video className="h-3 w-3 mr-1" />
+                  Video
+                </Badge>
+              )}
               {source === "org" ? (
                 <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
               ) : (
@@ -285,6 +294,9 @@ const SOPCard = ({
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="pt-0">
+            {videoUrl && (
+              <VideoEmbed url={videoUrl} title={title} />
+            )}
             <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
               {formattedContent}
             </div>
