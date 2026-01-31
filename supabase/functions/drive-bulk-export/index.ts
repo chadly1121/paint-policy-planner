@@ -161,6 +161,7 @@ interface MigrationResult {
   success: boolean;
   driveFileId?: string;
   error?: string;
+  wasAlreadyMigrated?: boolean;
 }
 
 serve(async (req) => {
@@ -297,6 +298,7 @@ serve(async (req) => {
                 title: sop.title,
                 success: true,
                 driveFileId: sop.drive_file_id,
+                wasAlreadyMigrated: true,
               });
               continue;
             }
@@ -307,6 +309,7 @@ serve(async (req) => {
                 id: sop.id,
                 title: sop.title,
                 success: true,
+                wasAlreadyMigrated: false,
               });
               continue;
             }
@@ -334,6 +337,7 @@ serve(async (req) => {
                 title: sop.title,
                 success: true,
                 driveFileId,
+                wasAlreadyMigrated: false,
               });
             } catch (error) {
               results.push({
@@ -374,6 +378,7 @@ serve(async (req) => {
                 title: doc.title,
                 success: true,
                 driveFileId: doc.drive_file_id,
+                wasAlreadyMigrated: true,
               });
               continue;
             }
@@ -384,6 +389,7 @@ serve(async (req) => {
                 id: doc.id,
                 title: doc.title,
                 success: true,
+                wasAlreadyMigrated: false,
               });
               continue;
             }
@@ -411,6 +417,7 @@ serve(async (req) => {
                 title: doc.title,
                 success: true,
                 driveFileId,
+                wasAlreadyMigrated: false,
               });
             } catch (error) {
               results.push({
@@ -434,7 +441,7 @@ serve(async (req) => {
 
     const successCount = results.filter(r => r.success).length;
     const failCount = results.filter(r => !r.success).length;
-    const alreadyMigrated = results.filter(r => r.success && r.driveFileId && !dry_run).length;
+    const alreadyMigrated = results.filter(r => r.success && r.wasAlreadyMigrated === true).length;
 
     return new Response(JSON.stringify({
       success: true,
