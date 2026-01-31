@@ -281,17 +281,54 @@ serve(async (req) => {
 
       // Handle SOPs (different table structure)
       if (moduleType === 'sops') {
-        const { data: sops } = await supabase
+        // First, get org-specific SOPs
+        const { data: orgSops } = await supabase
           .from('sops')
-          .select('id, title, content_md, drive_file_id, org_id')
+          .select('id, title, content_md, drive_file_id, org_id, source')
           .eq('org_id', orgUser.org_id)
           .eq('source', 'org')
           .eq('status', 'active');
 
-        if (sops) {
-          for (const sop of sops) {
-            // Skip if already has drive_file_id
-            if (sop.drive_file_id) {
+        // Also get system SOPs (to copy into org's folder)
+        const { data: systemSops } = await supabase
+          .from('sops')
+          .select('id, title, content_md, drive_file_id, org_id, source, system_key')
+          .is('org_id', null)
+          .eq('source', 'system')
+          .eq('status', 'active');
+
+        // Combine both lists
+        const allSops = [...(orgSops || []), ...(systemSops || [])];
+
+        if (allSops.length > 0) {
+          for (const sop of allSops) {
+            const isSystemSop = sop.source === 'system';
+            
+            // For system SOPs, check if we already created an org copy
+            // We track this by checking if there's an org SOP forked from this system SOP
+            if (isSystemSop) {
+              const { data: existingFork } = await supabase
+                .from('sops')
+                .select('id, drive_file_id')
+                .eq('org_id', orgUser.org_id)
+                .eq('forked_from_sop_id', sop.id)
+                .single();
+
+              if (existingFork?.drive_file_id) {
+                results.push({
+                  table: 'sops (system→org)',
+                  id: sop.id,
+                  title: `[System] ${sop.title}`,
+                  success: true,
+                  driveFileId: existingFork.drive_file_id,
+                  wasAlreadyMigrated: true,
+                });
+                continue;
+              }
+            }
+
+            // Skip org SOPs that already have drive_file_id
+            if (!isSystemSop && sop.drive_file_id) {
               results.push({
                 table: 'sops',
                 id: sop.id,
@@ -305,9 +342,9 @@ serve(async (req) => {
 
             if (dry_run) {
               results.push({
-                table: 'sops',
+                table: isSystemSop ? 'sops (system→org)' : 'sops',
                 id: sop.id,
-                title: sop.title,
+                title: isSystemSop ? `[System] ${sop.title}` : sop.title,
                 success: true,
                 wasAlreadyMigrated: false,
               });
@@ -322,28 +359,50 @@ serve(async (req) => {
                 sop.content_md
               );
 
-              // Update the record with drive_file_id
-              await supabase
-                .from('sops')
-                .update({ 
-                  drive_file_id: driveFileId,
-                  source_file_url: webViewLink 
-                })
-                .eq('id', sop.id);
+              if (isSystemSop) {
+                // Create a forked org SOP that points to the Drive file
+                const { error: insertError } = await supabase
+                  .from('sops')
+                  .insert({
+                    org_id: orgUser.org_id,
+                    source: 'org',
+                    title: sop.title,
+                    content_md: sop.content_md,
+                    drive_file_id: driveFileId,
+                    source_file_url: webViewLink,
+                    forked_from_sop_id: sop.id,
+                    status: 'active',
+                    created_by: orgUser.id,
+                    updated_by: orgUser.id,
+                  });
+
+                if (insertError) {
+                  throw new Error(`Failed to create org copy: ${insertError.message}`);
+                }
+              } else {
+                // Update existing org SOP with drive_file_id
+                await supabase
+                  .from('sops')
+                  .update({ 
+                    drive_file_id: driveFileId,
+                    source_file_url: webViewLink 
+                  })
+                  .eq('id', sop.id);
+              }
 
               results.push({
-                table: 'sops',
+                table: isSystemSop ? 'sops (system→org)' : 'sops',
                 id: sop.id,
-                title: sop.title,
+                title: isSystemSop ? `[System] ${sop.title}` : sop.title,
                 success: true,
                 driveFileId,
                 wasAlreadyMigrated: false,
               });
             } catch (error) {
               results.push({
-                table: 'sops',
+                table: isSystemSop ? 'sops (system→org)' : 'sops',
                 id: sop.id,
-                title: sop.title,
+                title: isSystemSop ? `[System] ${sop.title}` : sop.title,
                 success: false,
                 error: error instanceof Error ? error.message : 'Unknown error',
               });
