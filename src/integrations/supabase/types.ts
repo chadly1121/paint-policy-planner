@@ -417,6 +417,64 @@ export type Database = {
         }
         Relationships: []
       }
+      org_drive_folders: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          drive_folder_id: string
+          drive_folder_name: string
+          folder_type: string
+          id: string
+          org_id: string
+          parent_folder_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          drive_folder_id: string
+          drive_folder_name: string
+          folder_type: string
+          id?: string
+          org_id: string
+          parent_folder_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          drive_folder_id?: string
+          drive_folder_name?: string
+          folder_type?: string
+          id?: string
+          org_id?: string
+          parent_folder_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_drive_folders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_drive_folders_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_drive_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "org_drive_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_hidden_sops: {
         Row: {
           hidden_at: string
@@ -1068,6 +1126,77 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_drive_tokens: {
+        Row: {
+          access_token_encrypted: string
+          created_at: string | null
+          google_email: string
+          google_subject: string
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          last_refresh_at: string | null
+          last_refresh_error: string | null
+          last_used_at: string | null
+          org_id: string
+          provider: string
+          refresh_token_encrypted: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          token_expires_at: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token_encrypted: string
+          created_at?: string | null
+          google_email: string
+          google_subject: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          last_refresh_at?: string | null
+          last_refresh_error?: string | null
+          last_used_at?: string | null
+          org_id: string
+          provider?: string
+          refresh_token_encrypted: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          token_expires_at: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token_encrypted?: string
+          created_at?: string | null
+          google_email?: string
+          google_subject?: string
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          last_refresh_at?: string | null
+          last_refresh_error?: string | null
+          last_used_at?: string | null
+          org_id?: string
+          provider?: string
+          refresh_token_encrypted?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          token_expires_at?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_drive_tokens_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
         ]
