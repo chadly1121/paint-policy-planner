@@ -65,6 +65,25 @@ async function getValidAccessToken(tokenRecord: any, supabase: any): Promise<str
   return await decryptToken(tokenRecord.access_token_encrypted);
 }
 
+// Check if MIME type can be converted to Google Docs
+function isConvertibleToGoogleDoc(mimeType: string): boolean {
+  const convertibleTypes = [
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+    'application/msword', // DOC
+    'application/pdf',
+    'text/plain',
+    'text/markdown',
+    'text/html',
+    'application/rtf',
+  ];
+  return convertibleTypes.includes(mimeType);
+}
+
+// Check if already a Google Doc
+function isGoogleDoc(mimeType: string): boolean {
+  return mimeType === 'application/vnd.google-apps.document';
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -94,7 +113,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { source_file_id, target_folder_type, new_name } = body;
+    const { source_file_id, target_folder_type, new_name, module_type } = body;
 
     if (!source_file_id || !target_folder_type) {
       return new Response(JSON.stringify({ error: 'source_file_id and target_folder_type required' }), {
@@ -106,7 +125,7 @@ serve(async (req) => {
     // Get user's org
     const { data: orgUser, error: orgError } = await userSupabase
       .from('org_users')
-      .select('org_id, role')
+      .select('org_id, role, id')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .single();
@@ -158,7 +177,7 @@ serve(async (req) => {
 
     // Get source file metadata
     const metadataResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${source_file_id}?fields=name,mimeType`,
+      `https://www.googleapis.com/drive/v3/files/${source_file_id}?fields=name,mimeType,webViewLink`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
 
@@ -169,46 +188,175 @@ serve(async (req) => {
     const sourceMetadata = await metadataResponse.json();
     console.log('Source file:', sourceMetadata.name, sourceMetadata.mimeType);
 
-    // Copy file to target folder
-    const copyResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${source_file_id}/copy`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: new_name || sourceMetadata.name,
-          parents: [targetFolder.drive_folder_id],
-        }),
+    let finalFileId: string;
+    let finalFileName: string;
+    let wasConverted = false;
+    let originalFileId: string | null = null;
+
+    if (isGoogleDoc(sourceMetadata.mimeType)) {
+      // Already a Google Doc - just copy to target folder
+      const copyResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${source_file_id}/copy`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: new_name || sourceMetadata.name,
+            parents: [targetFolder.drive_folder_id],
+          }),
+        }
+      );
+
+      if (!copyResponse.ok) {
+        const error = await copyResponse.text();
+        throw new Error(`Failed to copy file: ${error}`);
       }
-    );
 
-    if (!copyResponse.ok) {
-      const error = await copyResponse.text();
-      throw new Error(`Failed to copy file: ${error}`);
-    }
+      const copiedFile = await copyResponse.json();
+      finalFileId = copiedFile.id;
+      finalFileName = copiedFile.name;
+      console.log('Google Doc copied:', finalFileId, finalFileName);
 
-    const copiedFile = await copyResponse.json();
-    console.log('File copied:', copiedFile.id, copiedFile.name);
+    } else if (isConvertibleToGoogleDoc(sourceMetadata.mimeType)) {
+      // DOCX/PDF/etc - Copy original as reference, then create converted Google Doc
+      console.log('Converting non-Google format to Google Doc...');
+      
+      // Step 1: Copy original to target folder (keep as reference)
+      const copyOriginalResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${source_file_id}/copy`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: `[Original] ${sourceMetadata.name}`,
+            parents: [targetFolder.drive_folder_id],
+          }),
+        }
+      );
 
-    // If source was not a Google Doc, convert it
-    let finalFileId = copiedFile.id;
-    let finalMimeType = copiedFile.mimeType;
+      if (copyOriginalResponse.ok) {
+        const originalCopy = await copyOriginalResponse.json();
+        originalFileId = originalCopy.id;
+        console.log('Original file preserved:', originalFileId);
+      }
 
-    // If it's a non-Google format, we may need to extract content
-    let extractedContent = null;
-    if (copiedFile.mimeType === 'application/vnd.google-apps.document') {
-      // Export as plain text for content extraction
-      const contentResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${copiedFile.id}/export?mimeType=text/plain`,
+      // Step 2: Download source content and upload as Google Doc (conversion)
+      // For DOCX and similar, we can use Google Drive's import conversion
+      const downloadResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${source_file_id}?alt=media`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      
-      if (contentResponse.ok) {
-        extractedContent = await contentResponse.text();
+
+      if (!downloadResponse.ok) {
+        throw new Error('Failed to download source file for conversion');
       }
+
+      const fileContent = await downloadResponse.arrayBuffer();
+      const cleanName = (new_name || sourceMetadata.name).replace(/\.(docx?|pdf|rtf|txt|md|html?)$/i, '');
+
+      // Upload with conversion to Google Docs format
+      // Using resumable upload with convert=true
+      const initUploadResponse = await fetch(
+        `https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&convert=true`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'X-Upload-Content-Type': sourceMetadata.mimeType,
+            'X-Upload-Content-Length': fileContent.byteLength.toString(),
+          },
+          body: JSON.stringify({
+            name: cleanName,
+            mimeType: 'application/vnd.google-apps.document',
+            parents: [targetFolder.drive_folder_id],
+          }),
+        }
+      );
+
+      if (!initUploadResponse.ok) {
+        // Fallback: try multipart upload with conversion
+        const boundary = 'foo_bar_baz';
+        const metadata = JSON.stringify({
+          name: cleanName,
+          mimeType: 'application/vnd.google-apps.document',
+          parents: [targetFolder.drive_folder_id],
+        });
+
+        const multipartResponse = await fetch(
+          `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': `multipart/related; boundary=${boundary}`,
+            },
+            body: `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: ${sourceMetadata.mimeType}\r\n\r\n${new TextDecoder().decode(fileContent)}\r\n--${boundary}--`,
+          }
+        );
+
+        if (!multipartResponse.ok) {
+          const error = await multipartResponse.text();
+          throw new Error(`Failed to convert file: ${error}`);
+        }
+
+        const convertedFile = await multipartResponse.json();
+        finalFileId = convertedFile.id;
+        finalFileName = convertedFile.name;
+      } else {
+        // Complete resumable upload
+        const uploadUrl = initUploadResponse.headers.get('Location');
+        if (!uploadUrl) {
+          throw new Error('No upload URL returned');
+        }
+
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': sourceMetadata.mimeType,
+            'Content-Length': fileContent.byteLength.toString(),
+          },
+          body: fileContent,
+        });
+
+        if (!uploadResponse.ok) {
+          const error = await uploadResponse.text();
+          throw new Error(`Failed to upload converted file: ${error}`);
+        }
+
+        const convertedFile = await uploadResponse.json();
+        finalFileId = convertedFile.id;
+        finalFileName = convertedFile.name;
+      }
+
+      wasConverted = true;
+      console.log('File converted to Google Doc:', finalFileId, finalFileName);
+
+    } else {
+      return new Response(JSON.stringify({ 
+        error: `Unsupported file type: ${sourceMetadata.mimeType}. Please select a Google Doc, DOCX, PDF, or text file.` 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get the web view link for the final file
+    const finalMetadataResponse = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${finalFileId}?fields=webViewLink`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    
+    let webViewLink = null;
+    if (finalMetadataResponse.ok) {
+      const finalMeta = await finalMetadataResponse.json();
+      webViewLink = finalMeta.webViewLink;
     }
 
     // Update last_used_at
@@ -220,11 +368,14 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       file_id: finalFileId,
-      file_name: copiedFile.name,
-      mime_type: finalMimeType,
-      source_file_id,
+      file_name: finalFileName,
+      web_view_link: webViewLink,
+      target_folder_id: targetFolder.drive_folder_id,
       target_folder_type,
-      extracted_content: extractedContent ? extractedContent.substring(0, 5000) : null,
+      was_converted: wasConverted,
+      original_file_id: originalFileId,
+      original_mime_type: sourceMetadata.mimeType,
+      module_type: module_type || 'sop',
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

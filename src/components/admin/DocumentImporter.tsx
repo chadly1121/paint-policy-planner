@@ -1,11 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -16,53 +14,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { 
-  Upload, 
-  FileText, 
   Loader2, 
-  Sparkles, 
   Check, 
-  AlertTriangle,
-  FileUp,
-  Clipboard,
+  AlertCircle,
   RefreshCw,
   Save,
   X,
-  Files,
   CheckCircle2,
   XCircle,
   Clock,
-  HardDrive
+  FolderOpen,
+  Plus,
+  ExternalLink,
+  FileUp,
+  Info
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrgSops } from "@/hooks/useOrgSops";
-import { useCompanyContent, ContentType as CompanyContentType } from "@/hooks/useCompanyContent";
 import { useOrg } from "@/contexts/OrganizationContext";
+import { useDriveConnection } from "@/hooks/useDriveConnection";
 
-interface ProcessedDocument {
-  title: string;
-  content: string;
-  summary: string;
-  type: string;
-  autoDetected?: boolean;
-  sourceFileUrl?: string;
-}
-
-interface BulkFileItem {
+interface ImportedFile {
   id: string;
-  file: File;
-  status: "pending" | "processing" | "processed" | "error" | "saved";
-  processedDoc?: ProcessedDocument;
+  source_file_id: string;
+  file_name: string;
+  drive_file_id: string;
+  web_view_link: string | null;
+  was_converted: boolean;
+  original_file_id: string | null;
+  module_type: string;
+  status: "pending" | "importing" | "imported" | "saving" | "saved" | "error";
   editedTitle?: string;
-  editedContent?: string;
-  detectedType?: ContentType;
   error?: string;
 }
 
-type ContentType = "sop" | "policy" | "training" | "safety" | "disciplinary" | "auto";
+type ModuleType = "sop" | "policy" | "training" | "safety" | "disciplinary";
 
-const contentTypeLabels: Record<ContentType, string> = {
-  auto: "🤖 Auto-Detect (AI determines type)",
+const moduleTypeLabels: Record<ModuleType, string> = {
   sop: "Standard Operating Procedure (SOP)",
   policy: "Company Policy",
   training: "Training Material",
@@ -70,8 +59,7 @@ const contentTypeLabels: Record<ContentType, string> = {
   disciplinary: "Disciplinary Procedure",
 };
 
-const contentTypeIcons: Record<ContentType, string> = {
-  auto: "🤖",
+const moduleTypeIcons: Record<ModuleType, string> = {
   sop: "📋",
   policy: "📜",
   training: "📚",
@@ -79,648 +67,406 @@ const contentTypeIcons: Record<ContentType, string> = {
   disciplinary: "⚖️",
 };
 
-type FormatMode = "ai" | "original";
+// Map module types to folder types
+const moduleFolderMap: Record<ModuleType, string> = {
+  sop: "sops",
+  policy: "policies", 
+  training: "training",
+  safety: "safety",
+  disciplinary: "disciplinary",
+};
 
 const DocumentImporter = () => {
   const { toast } = useToast();
   const { org } = useOrg();
   const { createOrgSop, refresh: refreshSops } = useOrgSops();
-  const { 
-    upsertCompanyPolicy, 
-    upsertCompanyTrainingContent, 
-    upsertCompanySafetyContent, 
-    upsertCompanyDisciplinaryContent,
-    refreshContent 
-  } = useCompanyContent();
+  const { isConnected, hasFolders } = useDriveConnection();
   
-  // Mode: single or bulk
-  const [uploadMode, setUploadMode] = useState<"single" | "bulk">("single");
-  
-  // Single mode state
-  const [inputMode, setInputMode] = useState<"file" | "paste">("file");
-  const [file, setFile] = useState<File | null>(null);
-  const [pastedText, setPastedText] = useState("");
-  const [contentType, setContentType] = useState<ContentType>("sop");
-  const [formatMode, setFormatMode] = useState<FormatMode>("original");
-  const [processing, setProcessing] = useState(false);
-  const [processedDoc, setProcessedDoc] = useState<ProcessedDocument | null>(null);
-  const [editedTitle, setEditedTitle] = useState("");
-  const [editedContent, setEditedContent] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [moduleType, setModuleType] = useState<ModuleType>("sop");
+  const [importedFiles, setImportedFiles] = useState<ImportedFile[]>([]);
+  const [isPickerLoading, setIsPickerLoading] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newDocTitle, setNewDocTitle] = useState("");
 
-  // Bulk mode state
-  const [bulkFiles, setBulkFiles] = useState<BulkFileItem[]>([]);
-  const [bulkProcessing, setBulkProcessing] = useState(false);
-  const [bulkProgress, setBulkProgress] = useState(0);
-  const [bulkSaving, setBulkSaving] = useState(false);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      // Check file size (max 10MB)
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        toast({
-          variant: "destructive",
-          title: "File too large",
-          description: "Maximum file size is 10MB",
-        });
+  // Load Google Picker API
+  const loadPickerApi = async (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (window.google?.picker) {
+        resolve();
         return;
       }
-      setFile(selectedFile);
-      setProcessedDoc(null);
-    }
+
+      const script = document.createElement("script");
+      script.src = "https://apis.google.com/js/api.js";
+      script.onload = () => {
+        window.gapi?.load("picker", () => resolve());
+      };
+      script.onerror = () => reject(new Error("Failed to load Google Picker API"));
+      document.head.appendChild(script);
+    });
   };
 
-  const handleBulkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
-
-    const newFiles: BulkFileItem[] = [];
-    const errors: string[] = [];
-
-    Array.from(selectedFiles).forEach((file) => {
-      if (file.size > 10 * 1024 * 1024) {
-        errors.push(`${file.name} is too large (max 10MB)`);
+  // Get picker access token via GIS
+  const getPickerAccessToken = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        reject(new Error("Google Client ID not configured"));
         return;
       }
-      newFiles.push({
-        id: `${file.name}-${Date.now()}-${Math.random()}`,
-        file,
-        status: "pending",
-      });
-    });
 
-    if (errors.length > 0) {
+      const tokenClient = window.google?.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "https://www.googleapis.com/auth/drive.readonly",
+        callback: (response) => {
+          if (response.error) {
+            reject(new Error(response.error));
+          } else if (response.access_token) {
+            resolve(response.access_token);
+          } else {
+            reject(new Error("No access token received"));
+          }
+        },
+      });
+
+      if (!tokenClient) {
+        reject(new Error("Failed to initialize token client"));
+        return;
+      }
+
+      tokenClient.requestAccessToken({ prompt: "" });
+    });
+  };
+
+  const handleImportFromDrive = async () => {
+    if (!isConnected || !hasFolders) {
       toast({
         variant: "destructive",
-        title: "Some files skipped",
-        description: errors.join(", "),
-      });
-    }
-
-    setBulkFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const removeBulkFile = (id: string) => {
-    setBulkFiles((prev) => prev.filter((f) => f.id !== id));
-  };
-
-  const extractTextFromFile = async (file: File): Promise<string> => {
-    const fileType = file.type;
-    const fileName = file.name.toLowerCase();
-
-    // Text-based files
-    if (
-      fileType.includes("text") ||
-      fileName.endsWith(".txt") ||
-      fileName.endsWith(".md") ||
-      fileName.endsWith(".csv")
-    ) {
-      return await file.text();
-    }
-
-    // For PDF, DOCX, etc. - read as text (basic extraction)
-    if (fileName.endsWith(".pdf")) {
-      const text = await file.text();
-      if (text.includes("%PDF")) {
-        throw new Error(
-          "PDF binary detected. Please use text files or paste content directly."
-        );
-      }
-      return text;
-    }
-
-    return await file.text();
-  };
-
-  const processFileWithAI = async (textContent: string, fileName: string, overrideType?: ContentType): Promise<ProcessedDocument> => {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      throw new Error("Not authenticated");
-    }
-
-    const typeToUse = overrideType || contentType;
-    const isAutoDetect = typeToUse === "auto";
-
-    const response = await supabase.functions.invoke("process-document", {
-      body: {
-        documentText: textContent,
-        contentType: isAutoDetect ? null : typeToUse,
-        fileName,
-        autoDetect: isAutoDetect,
-      },
-    });
-
-    if (response.error) {
-      throw new Error(response.error.message || "Processing failed");
-    }
-
-    if (!response.data?.success) {
-      throw new Error(response.data?.error || "Processing failed");
-    }
-
-    return response.data.data as ProcessedDocument;
-  };
-
-  // Sanitize text for PostgreSQL - remove null characters that cause errors
-  const sanitizeForPostgres = (text: string): string => {
-    // Remove null characters (\u0000) which PostgreSQL text columns cannot store
-    // Also remove other problematic Unicode characters
-    return text.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
-  };
-
-  // Extract title from filename (remove extension and clean up)
-  const extractTitleFromFilename = (filename: string): string => {
-    // Remove file extension
-    const withoutExt = filename.replace(/\.[^/.]+$/, "");
-    // Remove common prefixes like PD-20200627-01 - 
-    const cleanedTitle = withoutExt.replace(/^[A-Z]{1,3}-\d+-\d+\s*-\s*/i, "");
-    return cleanedTitle.trim() || withoutExt;
-  };
-
-  // Upload original file to storage
-  const uploadOriginalFile = async (fileToUpload: File): Promise<string | null> => {
-    if (!org?.id) {
-      console.error("No org ID available for file upload");
-      return null;
-    }
-
-    try {
-      const fileExt = fileToUpload.name.split('.').pop() || 'bin';
-      const timestamp = Date.now();
-      const safeName = fileToUpload.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = `org_${org.id}/uploads/${timestamp}_${safeName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('org-documents')
-        .upload(filePath, fileToUpload, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("File upload error:", uploadError);
-        throw uploadError;
-      }
-
-      // Get the public URL for the file
-      const { data: urlData } = supabase.storage
-        .from('org-documents')
-        .getPublicUrl(filePath);
-
-      console.log("File uploaded successfully:", filePath);
-      return urlData?.publicUrl || filePath;
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      return null;
-    }
-  };
-
-  const handleProcess = async () => {
-    let textContent = "";
-    let fileName = "";
-
-    if (inputMode === "file") {
-      if (!file) {
-        toast({
-          variant: "destructive",
-          title: "No file selected",
-          description: "Please select a file to import",
-        });
-        return;
-      }
-      
-      try {
-        textContent = await extractTextFromFile(file);
-        fileName = file.name;
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "File read error",
-          description: error instanceof Error ? error.message : "Could not read file",
-        });
-        return;
-      }
-    } else {
-      if (!pastedText.trim()) {
-        toast({
-          variant: "destructive",
-          title: "No content",
-          description: "Please paste some text content to import",
-        });
-        return;
-      }
-      textContent = pastedText;
-      fileName = "pasted-content";
-    }
-
-    if (textContent.length < 50) {
-      toast({
-        variant: "destructive",
-        title: "Content too short",
-        description: "Please provide more content (at least 50 characters)",
+        title: "Drive not connected",
+        description: "Please connect Google Drive and create folder structure first.",
       });
       return;
     }
 
-    setProcessing(true);
-    setProcessedDoc(null);
+    setIsPickerLoading(true);
 
     try {
-      // If "original" format mode, skip AI processing entirely
-      if (formatMode === "original") {
-        // In "Keep Original" mode, immediately create the SOP/content (no separate Save step)
-        const extractedTitle = extractTitleFromFilename(fileName);
-        const processed: ProcessedDocument = {
-          title: extractedTitle,
-          content: textContent, // Keep exact original content
-          summary: "Imported with original formatting preserved",
-          type: contentType === "auto" ? "sop" : contentType,
-          autoDetected: false,
-        };
+      await loadPickerApi();
+      const accessToken = await getPickerAccessToken();
 
-        let sourceFileUrl: string | undefined;
-
-        // Upload original file when provided
-        if (inputMode === "file" && file) {
-          toast({
-            title: "Uploading file...",
-            description: "Storing original document",
-          });
-          const uploaded = await uploadOriginalFile(file);
-          if (uploaded) {
-            sourceFileUrl = uploaded;
-          } else {
-            // Still create the SOP even if storage upload fails, but warn the user
-            toast({
-              variant: "destructive",
-              title: "File upload failed",
-              description: "Creating the SOP without storing the original file.",
-            });
-          }
-        }
-
-        const typeForSave = processed.type as ContentType;
-        const saveError = await saveContent(processed.title, processed.content, typeForSave, sourceFileUrl);
-        if (saveError) throw saveError;
-
-        if (typeForSave === "sop") {
-          await refreshSops();
-        } else {
-          await refreshContent();
-        }
-
-        const savedTypeLabel = contentTypeLabels[typeForSave] || typeForSave;
-        const fileStoredMsg = sourceFileUrl ? " Original file stored in Drive." : "";
-        toast({
-          title: "Content created!",
-          description: `"${processed.title}" has been added to your ${savedTypeLabel}.${fileStoredMsg}`,
-        });
-
-        // Reset form
-        setFile(null);
-        setPastedText("");
-        setProcessedDoc(null);
-        setEditedTitle("");
-        setEditedContent("");
-      } else {
-        // AI processing mode
-        const processed = await processFileWithAI(textContent, fileName);
-        setProcessedDoc(processed);
-        setEditedTitle(processed.title);
-        setEditedContent(processed.content);
-
-        toast({
-          title: "Document processed!",
-          description: `"${processed.title}" is ready for review`,
-        });
+      if (!window.google?.picker) {
+        throw new Error("Google Picker not loaded");
       }
+
+      const picker = new window.google.picker.PickerBuilder()
+        .addView(
+          new window.google.picker.DocsView()
+            .setIncludeFolders(false)
+            .setSelectFolderEnabled(false)
+            .setMimeTypes(
+              "application/vnd.google-apps.document," +
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document," +
+              "application/msword," +
+              "application/pdf," +
+              "text/plain"
+            )
+        )
+        .setOAuthToken(accessToken)
+        .setCallback(handlePickerCallback)
+        .enableFeature(window.google.picker.Feature.MULTISELECT_ENABLED)
+        .setTitle("Select documents to import")
+        .build();
+
+      picker.setVisible(true);
     } catch (error) {
-      console.error("Processing error:", error);
+      console.error("Picker error:", error);
       toast({
         variant: "destructive",
-        title: "Processing failed",
+        title: "Failed to open file picker",
         description: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
-      setProcessing(false);
+      setIsPickerLoading(false);
     }
   };
 
-  const handleBulkProcess = async () => {
-    const pendingFiles = bulkFiles.filter((f) => f.status === "pending");
-    if (pendingFiles.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No files to process",
-        description: "Add files to process first",
-      });
-      return;
+  const handlePickerCallback = async (data: google.picker.PickerResponse) => {
+    if (data.action !== "picked") return;
+
+    const selectedDocs = data.docs || [];
+    if (selectedDocs.length === 0) return;
+
+    // Add files to the import queue
+    const newFiles: ImportedFile[] = selectedDocs.map((doc) => ({
+      id: `${doc.id}-${Date.now()}`,
+      source_file_id: doc.id,
+      file_name: doc.name,
+      drive_file_id: "",
+      web_view_link: null,
+      was_converted: false,
+      original_file_id: null,
+      module_type: moduleType,
+      status: "pending" as const,
+      editedTitle: doc.name.replace(/\.(docx?|pdf|txt|md)$/i, ""),
+    }));
+
+    setImportedFiles((prev) => [...prev, ...newFiles]);
+
+    // Process each file
+    for (const file of newFiles) {
+      await processImportFile(file);
     }
+  };
 
-    setBulkProcessing(true);
-    setBulkProgress(0);
+  const processImportFile = async (file: ImportedFile) => {
+    setImportedFiles((prev) =>
+      prev.map((f) => (f.id === file.id ? { ...f, status: "importing" as const } : f))
+    );
 
-    const total = pendingFiles.length;
-    let completed = 0;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-    for (const fileItem of pendingFiles) {
-      // Update status to processing
-      setBulkFiles((prev) =>
+      const response = await supabase.functions.invoke("drive-import", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {
+          source_file_id: file.source_file_id,
+          target_folder_type: moduleFolderMap[moduleType],
+          new_name: file.editedTitle,
+          module_type: moduleType,
+        },
+      });
+
+      if (response.error) throw response.error;
+
+      setImportedFiles((prev) =>
         prev.map((f) =>
-          f.id === fileItem.id ? { ...f, status: "processing" as const } : f
+          f.id === file.id
+            ? {
+                ...f,
+                status: "imported" as const,
+                drive_file_id: response.data.file_id,
+                web_view_link: response.data.web_view_link,
+                was_converted: response.data.was_converted,
+                original_file_id: response.data.original_file_id,
+                editedTitle: response.data.file_name,
+              }
+            : f
         )
       );
 
-      try {
-        const textContent = await extractTextFromFile(fileItem.file);
-        
-        if (textContent.length < 50) {
-          throw new Error("Content too short (min 50 characters)");
-        }
-
-        const processed = await processFileWithAI(textContent, fileItem.file.name, "auto");
-        const detectedType = (processed.type || "sop") as ContentType;
-
-        setBulkFiles((prev) =>
-          prev.map((f) =>
-            f.id === fileItem.id
-              ? {
-                  ...f,
-                  status: "processed" as const,
-                  processedDoc: processed,
-                  editedTitle: processed.title,
-                  editedContent: processed.content,
-                  detectedType: detectedType,
-                }
-              : f
-          )
-        );
-      } catch (error) {
-        console.error(`Error processing ${fileItem.file.name}:`, error);
-        setBulkFiles((prev) =>
-          prev.map((f) =>
-            f.id === fileItem.id
-              ? {
-                  ...f,
-                  status: "error" as const,
-                  error: error instanceof Error ? error.message : "Unknown error",
-                }
-              : f
-          )
-        );
-      }
-
-      completed++;
-      setBulkProgress(Math.round((completed / total) * 100));
+      toast({
+        title: "File imported",
+        description: `"${response.data.file_name}" copied to your ${moduleType.toUpperCase()} folder${response.data.was_converted ? " (converted to Google Doc)" : ""}`,
+      });
+    } catch (error) {
+      console.error("Import error:", error);
+      setImportedFiles((prev) =>
+        prev.map((f) =>
+          f.id === file.id
+            ? {
+                ...f,
+                status: "error" as const,
+                error: error instanceof Error ? error.message : "Import failed",
+              }
+            : f
+        )
+      );
     }
-
-    setBulkProcessing(false);
-
-    const successCount = bulkFiles.filter((f) => f.status === "processed").length + 
-                        pendingFiles.filter((_, i) => i < completed).filter((f) => 
-                          bulkFiles.find((b) => b.id === f.id)?.status === "processed"
-                        ).length;
-    
-    toast({
-      title: "Bulk processing complete",
-      description: `${completed} files processed`,
-    });
   };
 
-  const saveContent = async (
-    title: string, 
-    content: string, 
-    typeOverride?: ContentType,
-    sourceFileUrl?: string
-  ): Promise<Error | null> => {
-    // Sanitize content to remove null characters and other problematic Unicode
-    const sanitizedContent = sanitizeForPostgres(content.trim());
-    const sanitizedTitle = sanitizeForPostgres(title.trim());
-    
-    const complianceFooter = "\n\n---\n⚠️ This content has been imported and customized by the organization. The organization is responsible for ensuring compliance with applicable laws and regulations.";
-    const contentWithFooter = sanitizedContent + complianceFooter;
-    const sourceKey = `imported-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-    let error: Error | null = null;
-    const typeToSave = typeOverride || (contentType === "auto" ? "sop" : contentType);
-
-    switch (typeToSave) {
-      case "sop":
-        const sopResult = await createOrgSop(sanitizedTitle, contentWithFooter, sourceFileUrl);
-        error = sopResult.error;
-        break;
-      case "policy":
-        const policyResult = await upsertCompanyPolicy(sourceKey, sanitizedTitle, contentWithFooter);
-        error = policyResult.error as Error | null;
-        break;
-      case "training":
-        const trainingResult = await upsertCompanyTrainingContent(sourceKey, sanitizedTitle, contentWithFooter);
-        error = trainingResult.error as Error | null;
-        break;
-      case "safety":
-        const safetyResult = await upsertCompanySafetyContent(sourceKey, sanitizedTitle, contentWithFooter);
-        error = safetyResult.error as Error | null;
-        break;
-      case "disciplinary":
-        const disciplinaryResult = await upsertCompanyDisciplinaryContent(sourceKey, sanitizedTitle, contentWithFooter);
-        error = disciplinaryResult.error as Error | null;
-        break;
-    }
-
-    return error;
-  };
-
-  const handleSave = async () => {
-    if (!editedTitle.trim() || !editedContent.trim()) {
+  const handleCreateNewDoc = async () => {
+    if (!newDocTitle.trim()) {
       toast({
         variant: "destructive",
-        title: "Missing content",
-        description: "Title and content are required",
+        title: "Title required",
+        description: "Please enter a title for the new document",
       });
       return;
     }
 
-    setSaving(true);
+    setIsCreating(true);
 
     try {
-      let sourceFileUrl: string | undefined;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-      // Upload original file to storage if in "Keep Original" mode and we have a file
-      if (formatMode === "original" && file && inputMode === "file") {
-        toast({
-          title: "Uploading file...",
-          description: "Storing original document",
-        });
-        sourceFileUrl = (await uploadOriginalFile(file)) || undefined;
-      }
-
-      const typeForSave = processedDoc?.type as ContentType || (contentType === "auto" ? "sop" : contentType);
-      const error = await saveContent(editedTitle, editedContent, typeForSave, sourceFileUrl);
-
-      if (error) {
-        throw error;
-      }
-
-      const savedType = processedDoc?.type as ContentType || (contentType === "auto" ? "sop" : contentType);
-      if (savedType === "sop") {
-        await refreshSops();
-      } else {
-        await refreshContent();
-      }
-
-      const savedTypeLabel = contentTypeLabels[savedType] || savedType;
-      const fileStoredMsg = sourceFileUrl ? " Original file stored in Drive." : "";
-      toast({
-        title: "Content saved!",
-        description: `"${editedTitle}" has been added to your ${savedTypeLabel}.${fileStoredMsg}`,
+      const response = await supabase.functions.invoke("drive-create-test-doc", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {
+          title: newDocTitle,
+          content: `# ${newDocTitle}\n\n_Start writing your ${moduleTypeLabels[moduleType]} here..._`,
+          folder_type: moduleFolderMap[moduleType],
+        },
       });
 
-      // Reset form
-      setFile(null);
-      setPastedText("");
-      setProcessedDoc(null);
-      setEditedTitle("");
-      setEditedContent("");
+      if (response.error) throw response.error;
+
+      toast({
+        title: "Document created",
+        description: `"${newDocTitle}" created in Google Drive`,
+      });
+
+      // Add to imported files list
+      setImportedFiles((prev) => [
+        {
+          id: `new-${Date.now()}`,
+          source_file_id: response.data.file_id,
+          file_name: newDocTitle,
+          drive_file_id: response.data.file_id,
+          web_view_link: response.data.web_view_link,
+          was_converted: false,
+          original_file_id: null,
+          module_type: moduleType,
+          status: "imported" as const,
+          editedTitle: newDocTitle,
+        },
+        ...prev,
+      ]);
+
+      setNewDocTitle("");
+    } catch (error) {
+      console.error("Create error:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to create document",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleSaveToDatabase = async (file: ImportedFile) => {
+    if (!file.drive_file_id) {
+      toast({
+        variant: "destructive",
+        title: "No file ID",
+        description: "File must be imported to Drive first",
+      });
+      return;
+    }
+
+    setImportedFiles((prev) =>
+      prev.map((f) => (f.id === file.id ? { ...f, status: "saving" as const } : f))
+    );
+
+    try {
+      // For SOPs, create the database record with drive_file_id as source_file_url
+      if (file.module_type === "sop") {
+        // Store the web_view_link as the source_file_url so admins can access the doc
+        const result = await createOrgSop(
+          file.editedTitle || file.file_name,
+          `_This document is stored in Google Drive._\n\n[Open in Google Docs](${file.web_view_link || '#'})`,
+          file.web_view_link || undefined
+        );
+
+        if (result.error) throw result.error;
+        await refreshSops();
+      }
+
+      setImportedFiles((prev) =>
+        prev.map((f) => (f.id === file.id ? { ...f, status: "saved" as const } : f))
+      );
+
+      toast({
+        title: "Saved to database",
+        description: `"${file.editedTitle}" registered as ${moduleTypeLabels[file.module_type as ModuleType]}`,
+      });
     } catch (error) {
       console.error("Save error:", error);
+      setImportedFiles((prev) =>
+        prev.map((f) =>
+          f.id === file.id
+            ? { ...f, status: "error" as const, error: "Failed to save" }
+            : f
+        )
+      );
       toast({
         variant: "destructive",
         title: "Save failed",
         description: error instanceof Error ? error.message : "Unknown error",
       });
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleBulkSave = async () => {
-    const processedFiles = bulkFiles.filter((f) => f.status === "processed");
-    if (processedFiles.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "No files to save",
-        description: "Process files first before saving",
-      });
-      return;
+  const handleSaveAll = async () => {
+    const importedNotSaved = importedFiles.filter((f) => f.status === "imported");
+    for (const file of importedNotSaved) {
+      await handleSaveToDatabase(file);
     }
-
-    setBulkSaving(true);
-    let savedCount = 0;
-    let errorCount = 0;
-    const savedTypes = new Set<string>();
-
-    for (const fileItem of processedFiles) {
-      if (!fileItem.editedTitle || !fileItem.editedContent) continue;
-
-      try {
-        // Use the detected type for this specific file
-        const typeForFile = fileItem.detectedType || "sop";
-        const error = await saveContent(fileItem.editedTitle, fileItem.editedContent, typeForFile);
-        if (error) throw error;
-
-        savedTypes.add(typeForFile);
-        setBulkFiles((prev) =>
-          prev.map((f) =>
-            f.id === fileItem.id ? { ...f, status: "saved" as const } : f
-          )
-        );
-        savedCount++;
-      } catch (error) {
-        console.error(`Error saving ${fileItem.editedTitle}:`, error);
-        errorCount++;
-      }
-    }
-
-    // Refresh data for all saved types
-    if (savedTypes.has("sop")) {
-      await refreshSops();
-    }
-    if (savedTypes.has("policy") || savedTypes.has("training") || savedTypes.has("safety") || savedTypes.has("disciplinary")) {
-      await refreshContent();
-    }
-
-    setBulkSaving(false);
-
-    toast({
-      title: "Bulk save complete",
-      description: `${savedCount} saved, ${errorCount} errors`,
-    });
   };
 
-  const handleReset = () => {
-    setFile(null);
-    setPastedText("");
-    setProcessedDoc(null);
-    setEditedTitle("");
-    setEditedContent("");
+  const removeFile = (id: string) => {
+    setImportedFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const handleBulkReset = () => {
-    setBulkFiles([]);
-    setBulkProgress(0);
-  };
-
-  const updateBulkFileTitle = (id: string, title: string) => {
-    setBulkFiles((prev) =>
+  const updateFileTitle = (id: string, title: string) => {
+    setImportedFiles((prev) =>
       prev.map((f) => (f.id === id ? { ...f, editedTitle: title } : f))
     );
   };
 
-  const processedCount = bulkFiles.filter((f) => f.status === "processed").length;
-  const savedCount = bulkFiles.filter((f) => f.status === "saved").length;
-  const errorCount = bulkFiles.filter((f) => f.status === "error").length;
-  const pendingCount = bulkFiles.filter((f) => f.status === "pending").length;
+  const importedCount = importedFiles.filter((f) => f.status === "imported").length;
+  const savedCount = importedFiles.filter((f) => f.status === "saved").length;
+  const errorCount = importedFiles.filter((f) => f.status === "error").length;
+  const pendingCount = importedFiles.filter((f) => f.status === "pending" || f.status === "importing").length;
 
-  return (
-    <div className="space-y-6">
-      {/* Import Card */}
+  // Show connection requirement
+  if (!isConnected || !hasFolders) {
+    return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI Document Importer
+            <FolderOpen className="h-5 w-5 text-primary" />
+            Document Importer
           </CardTitle>
           <CardDescription>
-            Upload or paste existing documents and let AI format them for your training portal
+            Import or create SOPs as Google Docs
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {!isConnected 
+                ? "Please connect your Google Drive account in the Drive tab before importing documents."
+                : "Please create the folder structure in the Drive tab before importing documents."
+              }
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Main Import Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FolderOpen className="h-5 w-5 text-primary" />
+            Document Importer
+          </CardTitle>
+          <CardDescription>
+            Import or create SOPs as Google Docs. Files are stored in Google Drive and synced automatically.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Upload Mode Toggle */}
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={uploadMode === "single" ? "default" : "outline"}
-              onClick={() => setUploadMode("single")}
-              className="flex-1"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Single File
-            </Button>
-            <Button
-              type="button"
-              variant={uploadMode === "bulk" ? "default" : "outline"}
-              onClick={() => setUploadMode("bulk")}
-              className="flex-1"
-            >
-              <Files className="h-4 w-4 mr-2" />
-              Bulk Upload
-            </Button>
-          </div>
-
-          {/* Content Type Selection */}
+          {/* Module Type Selection */}
           <div className="space-y-2">
-            <Label>Content Type</Label>
-            <Select value={contentType} onValueChange={(v) => setContentType(v as ContentType)}>
+            <Label>Document Type</Label>
+            <Select value={moduleType} onValueChange={(v) => setModuleType(v as ModuleType)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(contentTypeLabels) as ContentType[]).filter(t => formatMode === "ai" || t !== "auto").map((type) => (
+                {(Object.keys(moduleTypeLabels) as ModuleType[]).map((type) => (
                   <SelectItem key={type} value={type}>
                     <span className="flex items-center gap-2">
-                      <span>{contentTypeIcons[type]}</span>
-                      <span>{contentTypeLabels[type]}</span>
+                      <span>{moduleTypeIcons[type]}</span>
+                      <span>{moduleTypeLabels[type]}</span>
                     </span>
                   </SelectItem>
                 ))}
@@ -728,433 +474,229 @@ const DocumentImporter = () => {
             </Select>
           </div>
 
-          {/* Format Mode Selection */}
-          <div className="space-y-2">
-            <Label>Formatting Mode</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={formatMode === "original" ? "secondary" : "ghost"}
-                onClick={() => {
-                  setFormatMode("original");
-                  if (contentType === "auto") setContentType("sop");
-                }}
-                size="sm"
-                className="flex-1"
+          {/* Primary Actions */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Import from Drive */}
+            <div className="space-y-3 p-4 border rounded-lg">
+              <div className="flex items-center gap-2">
+                <FileUp className="h-5 w-5 text-primary" />
+                <h4 className="font-medium">Import from Google Drive</h4>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Select existing documents from your Drive. DOCX/PDF files will be converted to Google Docs.
+              </p>
+              <Button 
+                onClick={handleImportFromDrive} 
+                disabled={isPickerLoading}
+                className="w-full"
               >
-                <HardDrive className="h-4 w-4 mr-2" />
-                Keep Original
-              </Button>
-              <Button
-                type="button"
-                variant={formatMode === "ai" ? "secondary" : "ghost"}
-                onClick={() => setFormatMode("ai")}
-                size="sm"
-                className="flex-1"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Format
+                {isPickerLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Opening Picker...
+                  </>
+                ) : (
+                  <>
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Select from Drive
+                  </>
+                )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {formatMode === "original" 
-                ? "Document saved exactly as uploaded. Original file stored in SOPed Drive for reference." 
-                : "AI will reformat and structure the document according to best practices"}
-            </p>
+
+            {/* Create New */}
+            <div className="space-y-3 p-4 border rounded-lg">
+              <div className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-primary" />
+                <h4 className="font-medium">Create New {moduleType.toUpperCase()}</h4>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Create a blank Google Doc in your organization's folder.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Document title..."
+                  value={newDocTitle}
+                  onChange={(e) => setNewDocTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateNewDoc()}
+                />
+                <Button 
+                  onClick={handleCreateNewDoc} 
+                  disabled={isCreating || !newDocTitle.trim()}
+                >
+                  {isCreating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
 
-          {/* SINGLE MODE */}
-          {uploadMode === "single" && (
-            <>
-              {/* Input Mode Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={inputMode === "file" ? "secondary" : "ghost"}
-                  onClick={() => setInputMode("file")}
-                  size="sm"
-                  className="flex-1"
-                >
-                  <FileUp className="h-4 w-4 mr-2" />
-                  Upload File
-                </Button>
-                <Button
-                  type="button"
-                  variant={inputMode === "paste" ? "secondary" : "ghost"}
-                  onClick={() => setInputMode("paste")}
-                  size="sm"
-                  className="flex-1"
-                >
-                  <Clipboard className="h-4 w-4 mr-2" />
-                  Paste Text
-                </Button>
-              </div>
-
-              {/* File Upload */}
-              {inputMode === "file" && (
-                <div className="space-y-2">
-                  <Label>Select File</Label>
-                  <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                    <input
-                      type="file"
-                      id="file-upload"
-                      className="hidden"
-                      accept=".txt,.md,.pdf,.doc,.docx,.csv"
-                      onChange={handleFileChange}
-                    />
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      {file ? (
-                        <div className="flex items-center justify-center gap-2 text-primary">
-                          <FileText className="h-8 w-8" />
-                          <div className="text-left">
-                            <p className="font-medium">{file.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {(file.size / 1024).toFixed(1)} KB
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-muted-foreground">
-                          <Upload className="h-8 w-8 mx-auto mb-2" />
-                          <p>Click to upload or drag and drop</p>
-                          <p className="text-sm">TXT, MD, PDF, DOC, DOCX (max 10MB)</p>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                  <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
-                      For best results with PDF/DOCX files, copy and paste the text content directly using the "Paste Text" option.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
-
-              {/* Paste Text */}
-              {inputMode === "paste" && (
-                <div className="space-y-2">
-                  <Label>Paste Content</Label>
-                  <Textarea
-                    value={pastedText}
-                    onChange={(e) => setPastedText(e.target.value)}
-                    placeholder="Paste your document content here..."
-                    className="min-h-[200px] font-mono text-sm"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {pastedText.length} characters
-                  </p>
-                </div>
-              )}
-
-              {/* Process Button */}
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleProcess}
-                  disabled={processing || (inputMode === "file" && !file) || (inputMode === "paste" && !pastedText.trim())}
-                  className="flex-1"
-                >
-                  {processing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {formatMode === "original" ? "Preparing..." : "Processing with AI..."}
-                    </>
-                  ) : (
-                    <>
-                      {formatMode === "original" ? (
-                        <>
-                          <HardDrive className="h-4 w-4 mr-2" />
-                          Process & Keep Original
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Process with AI
-                        </>
-                      )}
-                    </>
-                  )}
-                </Button>
-                {(file || pastedText || processedDoc) && (
-                  <Button variant="outline" onClick={handleReset}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Reset
-                  </Button>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* BULK MODE */}
-          {uploadMode === "bulk" && (
-            <>
-              {/* Bulk File Upload */}
-              <div className="space-y-2">
-                <Label>Select Multiple Files</Label>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                  <input
-                    type="file"
-                    id="bulk-file-upload"
-                    className="hidden"
-                    accept=".txt,.md,.pdf,.doc,.docx,.csv"
-                    multiple
-                    onChange={handleBulkFileChange}
-                  />
-                  <label htmlFor="bulk-file-upload" className="cursor-pointer">
-                    <div className="text-muted-foreground">
-                      <Files className="h-8 w-8 mx-auto mb-2" />
-                      <p>Click to select multiple files</p>
-                      <p className="text-sm">TXT, MD, PDF, DOC, DOCX (max 10MB each)</p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* File List */}
-              {bulkFiles.length > 0 && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Files ({bulkFiles.length})</Label>
-                    <div className="flex gap-2 text-xs">
-                      {pendingCount > 0 && (
-                        <Badge variant="outline">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {pendingCount} pending
-                        </Badge>
-                      )}
-                      {processedCount > 0 && (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          <Check className="h-3 w-3 mr-1" />
-                          {processedCount} processed
-                        </Badge>
-                      )}
-                      {savedCount > 0 && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          {savedCount} saved
-                        </Badge>
-                      )}
-                      {errorCount > 0 && (
-                        <Badge variant="destructive">
-                          <XCircle className="h-3 w-3 mr-1" />
-                          {errorCount} errors
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <ScrollArea className="h-[300px] border rounded-lg">
-                    <div className="p-3 space-y-2">
-                      {bulkFiles.map((fileItem) => (
-                        <div
-                          key={fileItem.id}
-                          className={`flex items-center gap-3 p-3 rounded-lg border ${
-                            fileItem.status === "saved"
-                              ? "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800"
-                              : fileItem.status === "processed"
-                              ? "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800"
-                              : fileItem.status === "error"
-                              ? "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800"
-                              : fileItem.status === "processing"
-                              ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800"
-                              : "bg-muted/30"
-                          }`}
-                        >
-                          {/* Status Icon */}
-                          <div className="shrink-0">
-                            {fileItem.status === "pending" && (
-                              <Clock className="h-5 w-5 text-muted-foreground" />
-                            )}
-                            {fileItem.status === "processing" && (
-                              <Loader2 className="h-5 w-5 text-amber-600 animate-spin" />
-                            )}
-                            {fileItem.status === "processed" && (
-                              <Check className="h-5 w-5 text-blue-600" />
-                            )}
-                            {fileItem.status === "saved" && (
-                              <CheckCircle2 className="h-5 w-5 text-green-600" />
-                            )}
-                            {fileItem.status === "error" && (
-                              <XCircle className="h-5 w-5 text-red-600" />
-                            )}
-                          </div>
-
-                          {/* File Info */}
-                          <div className="flex-1 min-w-0">
-                            {fileItem.status === "processed" || fileItem.status === "saved" ? (
-                              <Input
-                                value={fileItem.editedTitle || ""}
-                                onChange={(e) => updateBulkFileTitle(fileItem.id, e.target.value)}
-                                className="h-8 text-sm"
-                                placeholder="Document title"
-                                disabled={fileItem.status === "saved"}
-                              />
-                            ) : (
-                              <p className="font-medium text-sm truncate">{fileItem.file.name}</p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1">
-                              {(fileItem.status === "processed" || fileItem.status === "saved") && fileItem.detectedType && (
-                                <Badge variant="outline" className="text-xs">
-                                  {contentTypeIcons[fileItem.detectedType]} {fileItem.detectedType.toUpperCase()}
-                                </Badge>
-                              )}
-                              <p className="text-xs text-muted-foreground truncate">
-                                {fileItem.error || (
-                                  fileItem.status === "saved" 
-                                    ? "Saved successfully" 
-                                    : fileItem.status === "processed"
-                                    ? fileItem.processedDoc?.summary?.slice(0, 50) + "..."
-                                    : `${(fileItem.file.size / 1024).toFixed(1)} KB`
-                                )}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Remove Button */}
-                          {fileItem.status !== "saved" && fileItem.status !== "processing" && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="shrink-0 h-8 w-8"
-                              onClick={() => removeBulkFile(fileItem.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-
-                  {/* Progress Bar */}
-                  {bulkProcessing && (
-                    <div className="space-y-2">
-                      <Progress value={bulkProgress} className="h-2" />
-                      <p className="text-sm text-center text-muted-foreground">
-                        Processing... {bulkProgress}%
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Bulk Action Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleBulkProcess}
-                  disabled={bulkProcessing || pendingCount === 0}
-                  className="flex-1"
-                >
-                  {bulkProcessing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Process All ({pendingCount})
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={handleBulkSave}
-                  disabled={bulkSaving || processedCount === 0}
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  {bulkSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save All ({processedCount})
-                    </>
-                  )}
-                </Button>
-                {bulkFiles.length > 0 && (
-                  <Button variant="outline" onClick={handleBulkReset}>
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-
-              <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
-                  For best results, use plain text (.txt) or markdown (.md) files. PDF and DOCX files may not extract properly.
-                </AlertDescription>
-              </Alert>
-            </>
-          )}
+          {/* Info Notice */}
+          <Alert className="border-info bg-info/10">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              Google Docs are the recommended format. DOCX/PDF files will be converted on import, with originals kept as reference.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
 
-      {/* Preview & Edit Card (Single Mode Only) */}
-      {uploadMode === "single" && processedDoc && (
-        <Card className="border-primary/50">
+      {/* Imported Files List */}
+      {importedFiles.length > 0 && (
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Check className="h-5 w-5 text-primary" />
-              Review & Edit
-            </CardTitle>
-            <CardDescription>
-              Review the AI-formatted content and make any adjustments before saving
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Imported Documents</CardTitle>
+              <div className="flex gap-2 text-xs">
+                {pendingCount > 0 && (
+                  <Badge variant="outline">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {pendingCount} processing
+                  </Badge>
+                )}
+                {importedCount > 0 && (
+                  <Badge variant="secondary">
+                    <Check className="h-3 w-3 mr-1" />
+                    {importedCount} ready
+                  </Badge>
+                )}
+                {savedCount > 0 && (
+                  <Badge variant="default" className="bg-success text-success-foreground">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    {savedCount} saved
+                  </Badge>
+                )}
+                {errorCount > 0 && (
+                  <Badge variant="destructive">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    {errorCount} errors
+                  </Badge>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Summary */}
-            <Alert>
-              <AlertDescription>
-                <strong>AI Summary:</strong> {processedDoc.summary}
-              </AlertDescription>
-            </Alert>
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-2">
+                {importedFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${
+                      file.status === "saved"
+                        ? "bg-success/10 border-success/30"
+                        : file.status === "imported"
+                        ? "bg-primary/10 border-primary/30"
+                        : file.status === "error"
+                        ? "bg-destructive/10 border-destructive/30"
+                        : file.status === "importing" || file.status === "saving"
+                        ? "bg-warning/10 border-warning/30"
+                        : "bg-muted/30"
+                    }`}
+                  >
+                    {/* Status Icon */}
+                    <div className="shrink-0">
+                      {(file.status === "pending" || file.status === "importing" || file.status === "saving") && (
+                        <Loader2 className="h-5 w-5 text-warning animate-spin" />
+                      )}
+                      {file.status === "imported" && (
+                        <Check className="h-5 w-5 text-primary" />
+                      )}
+                      {file.status === "saved" && (
+                        <CheckCircle2 className="h-5 w-5 text-success" />
+                      )}
+                      {file.status === "error" && (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
 
-            {/* Title */}
-            <div className="space-y-2">
-              <Label>Title</Label>
-              <Input
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                placeholder="Document title"
-              />
-            </div>
+                    {/* File Info */}
+                    <div className="flex-1 min-w-0">
+                      {file.status === "imported" ? (
+                        <Input
+                          value={file.editedTitle || ""}
+                          onChange={(e) => updateFileTitle(file.id, e.target.value)}
+                          className="h-8 text-sm"
+                          placeholder="Document title"
+                        />
+                      ) : (
+                        <p className="font-medium text-sm truncate">{file.editedTitle || file.file_name}</p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {moduleTypeIcons[file.module_type as ModuleType]} {file.module_type.toUpperCase()}
+                        </Badge>
+                        {file.was_converted && (
+                          <Badge variant="secondary" className="text-xs">
+                            Converted
+                          </Badge>
+                        )}
+                        {file.error && (
+                          <span className="text-xs text-destructive">{file.error}</span>
+                        )}
+                        {file.status === "saved" && (
+                          <span className="text-xs text-success">Saved to database</span>
+                        )}
+                      </div>
+                    </div>
 
-            {/* Content */}
-            <div className="space-y-2">
-              <Label>Content (Markdown)</Label>
-              <Textarea
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="min-h-[400px] font-mono text-sm"
-              />
-            </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {file.web_view_link && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => window.open(file.web_view_link!, "_blank")}
+                          title="Open in Google Docs"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {file.status === "imported" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSaveToDatabase(file)}
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          Save
+                        </Button>
+                      )}
+                      {file.status !== "saving" && file.status !== "importing" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => removeFile(file.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
 
-            {/* Compliance Notice */}
-            <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
-              <p className="font-medium mb-1">Auto-appended compliance notice:</p>
-              <p className="italic">
-                "This content has been imported and customized by the organization. The organization is responsible for ensuring compliance."
-              </p>
-            </div>
-
-            {/* Save Button */}
-            <Button onClick={handleSave} disabled={saving} className="w-full">
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
+            {/* Bulk Actions */}
+            {importedCount > 0 && (
+              <div className="flex gap-2 pt-2 border-t">
+                <Button onClick={handleSaveAll} className="flex-1">
                   <Save className="h-4 w-4 mr-2" />
-                  Save to {contentTypeLabels[contentType]}
-                </>
-              )}
-            </Button>
+                  Save All ({importedCount})
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setImportedFiles([])}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
