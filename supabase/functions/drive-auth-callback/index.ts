@@ -156,48 +156,57 @@ serve(async (req) => {
       // Check for existing token from same Google account
       const { data: existingUserToken } = await supabase
         .from('user_drive_tokens')
-        .select('id')
+        .select('id, is_primary')
         .eq('user_id', user_id)
         .eq('google_subject', googleUser.id)
         .single();
 
-      const tokenData = {
-        user_id,
-        org_id,
-        google_subject: googleUser.id,
-        google_email: googleUser.email,
-        access_token_encrypted: accessTokenEncrypted,
-        refresh_token_encrypted: refreshTokenEncrypted,
-        token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-        is_primary: isPrimary,
-        is_active: true,
-        last_refresh_at: new Date().toISOString(),
-        revoked_at: null,
-        revoke_reason: null,
-        last_refresh_error: null,
-      };
-
       if (existingUserToken) {
-        // Update existing token
+        // Update existing token - PRESERVE original is_primary status
         const { error: updateError } = await supabase
           .from('user_drive_tokens')
-          .update(tokenData)
+          .update({
+            access_token_encrypted: accessTokenEncrypted,
+            refresh_token_encrypted: refreshTokenEncrypted,
+            token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+            is_active: true,
+            last_refresh_at: new Date().toISOString(),
+            revoked_at: null,
+            revoke_reason: null,
+            last_refresh_error: null,
+          })
           .eq('id', existingUserToken.id);
 
         if (updateError) {
           console.error('Failed to update token:', updateError);
           throw new Error('Failed to store tokens');
         }
+        
+        // Use the existing is_primary value for logging
+        console.log('Token updated for user:', user_id, 'primary:', existingUserToken.is_primary);
       } else {
         // Insert new token
         const { error: insertError } = await supabase
           .from('user_drive_tokens')
-          .insert(tokenData);
+          .insert({
+            user_id,
+            org_id,
+            google_subject: googleUser.id,
+            google_email: googleUser.email,
+            access_token_encrypted: accessTokenEncrypted,
+            refresh_token_encrypted: refreshTokenEncrypted,
+            token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+            is_primary: isPrimary,
+            is_active: true,
+            last_refresh_at: new Date().toISOString(),
+          });
 
         if (insertError) {
           console.error('Failed to insert token:', insertError);
           throw new Error('Failed to store tokens');
         }
+        
+        console.log('Token created for user:', user_id, 'primary:', isPrimary);
       }
 
       console.log('Token stored successfully for user:', user_id, 'primary:', isPrimary);
