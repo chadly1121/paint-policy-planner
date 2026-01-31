@@ -456,6 +456,44 @@ export type Database = {
           },
         ]
       }
+      org_settings: {
+        Row: {
+          cert_reminder_days_first: number
+          cert_reminder_days_urgent: number
+          cert_reminder_frequency_days: number
+          created_at: string
+          id: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          cert_reminder_days_first?: number
+          cert_reminder_days_urgent?: number
+          cert_reminder_frequency_days?: number
+          created_at?: string
+          id?: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          cert_reminder_days_first?: number
+          cert_reminder_days_urgent?: number
+          cert_reminder_frequency_days?: number
+          created_at?: string
+          id?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_settings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_users: {
         Row: {
           created_at: string
