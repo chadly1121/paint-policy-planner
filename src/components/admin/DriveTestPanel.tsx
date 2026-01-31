@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDriveConnection } from '@/hooks/useDriveConnection';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -14,8 +17,13 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
-  FileUp
+  FileUp,
+  Link,
+  Send,
+  ChevronDown
 } from 'lucide-react';
+
+type SendFormat = 'gdoc' | 'docx' | 'pdf';
 
 export function DriveTestPanel() {
   const { isConnected, hasFolders, primaryToken } = useDriveConnection();
@@ -23,14 +31,18 @@ export function DriveTestPanel() {
   const [isExporting, setIsExporting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [testFileId, setTestFileId] = useState<string | null>(null);
-  const [exportedFile, setExportedFile] = useState<string | null>(null);
   const [emailTo, setEmailTo] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [sharePermission, setSharePermission] = useState<'view' | 'edit' | 'comment'>('view');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [sendMenuOpen, setSendMenuOpen] = useState(false);
 
   const clearMessages = () => {
     setError(null);
     setSuccess(null);
+    setShareLink(null);
   };
 
   const handleCreateTestDoc = async () => {
@@ -41,7 +53,6 @@ export function DriveTestPanel() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
-      // Create a test Google Doc via Drive API
       const response = await supabase.functions.invoke('drive-create-test-doc', {
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: { 
@@ -86,7 +97,6 @@ export function DriveTestPanel() {
 
       if (response.error) throw response.error;
       
-      setExportedFile(response.data.file_name);
       setSuccess(`Exported to ${format.toUpperCase()}: ${response.data.file_name} (${response.data.size_bytes} bytes)`);
 
       // Trigger download
@@ -117,7 +127,7 @@ export function DriveTestPanel() {
     }
   };
 
-  const handleSendEmail = async () => {
+  const handleSendDocument = async (format: SendFormat) => {
     if (!testFileId) {
       setError('Create a test document first');
       return;
@@ -129,35 +139,105 @@ export function DriveTestPanel() {
 
     clearMessages();
     setIsSending(true);
+    setSendMenuOpen(false);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
-      const response = await supabase.functions.invoke('drive-export', {
+      if (format === 'gdoc') {
+        // Share Google Doc via link
+        const response = await supabase.functions.invoke('drive-share', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: { 
+            file_id: testFileId,
+            permission: sharePermission,
+            send_email: true,
+            email_to: emailTo,
+            email_subject: 'Test Document from SOPed',
+            email_message: emailMessage || undefined
+          }
+        });
+
+        if (response.error) throw response.error;
+        
+        if (response.data.email_sent) {
+          setSuccess(`Google Doc shared with ${sharePermission} access. Email sent to ${emailTo}`);
+          setShareLink(response.data.share_link);
+        } else {
+          setError(response.data.email_error || 'Failed to send email');
+          if (response.data.share_link) {
+            setShareLink(response.data.share_link);
+          }
+        }
+      } else {
+        // Export and send as attachment (DOCX or PDF)
+        const response = await supabase.functions.invoke('drive-export', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: { 
+            file_id: testFileId,
+            format,
+            send_email: true,
+            email_to: emailTo,
+            email_subject: 'Test Document from SOPed'
+          }
+        });
+
+        if (response.error) throw response.error;
+        
+        if (response.data.email_sent) {
+          setSuccess(`${format.toUpperCase()} sent successfully to ${emailTo}`);
+        } else {
+          setError(response.data.email_error || 'Failed to send email');
+        }
+      }
+      
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to send document';
+      setError(message);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleGenerateShareLink = async () => {
+    if (!testFileId) {
+      setError('Create a test document first');
+      return;
+    }
+
+    clearMessages();
+    setIsSending(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await supabase.functions.invoke('drive-share', {
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: { 
           file_id: testFileId,
-          format: 'docx',
-          send_email: true,
-          email_to: emailTo,
-          email_subject: 'Test Document from SOPed'
+          permission: sharePermission
         }
       });
 
       if (response.error) throw response.error;
       
-      if (response.data.email_sent) {
-        setSuccess(`Email sent successfully to ${emailTo}`);
-      } else {
-        setError(response.data.email_error || 'Failed to send email');
-      }
+      setShareLink(response.data.share_link);
+      setSuccess(`Share link generated with ${sharePermission} access`);
       
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to send email';
+      const message = err instanceof Error ? err.message : 'Failed to generate share link';
       setError(message);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      setSuccess('Link copied to clipboard!');
     }
   };
 
@@ -207,7 +287,7 @@ export function DriveTestPanel() {
           Drive Integration Test
         </CardTitle>
         <CardDescription>
-          Test document creation, export, and email functionality
+          Test document creation, export, sharing, and email functionality
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -255,7 +335,7 @@ export function DriveTestPanel() {
         <div className="space-y-3">
           <h4 className="font-medium">Step 2: Export Document</h4>
           <p className="text-sm text-muted-foreground">
-            Export the test document to DOCX or PDF format
+            Export the test document to DOCX or PDF format (download only)
           </p>
           <div className="flex gap-2">
             <Button 
@@ -268,7 +348,7 @@ export function DriveTestPanel() {
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              Export as DOCX
+              Download DOCX
             </Button>
             <Button 
               variant="outline"
@@ -280,22 +360,68 @@ export function DriveTestPanel() {
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              Export as PDF
+              Download PDF
             </Button>
           </div>
         </div>
 
         <Separator />
 
-        {/* Step 3: Send Email */}
+        {/* Step 3: Share Link */}
         <div className="space-y-3">
-          <h4 className="font-medium">Step 3: Send via Email</h4>
+          <h4 className="font-medium">Step 3: Generate Share Link</h4>
           <p className="text-sm text-muted-foreground">
-            Send the document as a DOCX attachment via email
+            Create a shareable link to the Google Doc with selected permissions
           </p>
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label htmlFor="emailTo" className="sr-only">Email address</Label>
+          <div className="flex gap-2 items-center">
+            <Select value={sharePermission} onValueChange={(v) => setSharePermission(v as any)}>
+              <SelectTrigger className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="view">View only</SelectItem>
+                <SelectItem value="comment">Can comment</SelectItem>
+                <SelectItem value="edit">Can edit</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button 
+              variant="outline"
+              onClick={handleGenerateShareLink} 
+              disabled={isSending || !testFileId}
+            >
+              {isSending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Link className="h-4 w-4 mr-2" />
+              )}
+              Generate Link
+            </Button>
+          </div>
+          {shareLink && (
+            <div className="flex gap-2 items-center">
+              <Input 
+                value={shareLink} 
+                readOnly 
+                className="flex-1 text-sm"
+              />
+              <Button variant="outline" size="sm" onClick={copyShareLink}>
+                Copy
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Step 4: Send via Email */}
+        <div className="space-y-3">
+          <h4 className="font-medium">Step 4: Send via Email</h4>
+          <p className="text-sm text-muted-foreground">
+            Send the document via email as a Google Doc link or file attachment
+          </p>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="emailTo">Recipient Email</Label>
               <Input
                 id="emailTo"
                 type="email"
@@ -304,17 +430,65 @@ export function DriveTestPanel() {
                 onChange={(e) => setEmailTo(e.target.value)}
               />
             </div>
-            <Button 
-              onClick={handleSendEmail} 
-              disabled={isSending || !testFileId || !emailTo}
-            >
-              {isSending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Mail className="h-4 w-4 mr-2" />
-              )}
-              Send Email
-            </Button>
+            <div>
+              <Label htmlFor="emailMessage">Message (optional, for Google Doc shares)</Label>
+              <Textarea
+                id="emailMessage"
+                placeholder="Add a personal message..."
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Popover open={sendMenuOpen} onOpenChange={setSendMenuOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    disabled={isSending || !testFileId || !emailTo}
+                  >
+                    {isSending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
+                    Send Document
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-2" align="start">
+                  <div className="space-y-1">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => handleSendDocument('gdoc')}
+                    >
+                      <Link className="h-4 w-4 mr-2" />
+                      Share Google Doc Link
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => handleSendDocument('docx')}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Attach as DOCX
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => handleSendDocument('pdf')}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Attach as PDF
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <strong>Share Google Doc:</strong> Sends a link with {sharePermission} access. <br />
+              <strong>Attach as DOCX/PDF:</strong> Exports and sends as email attachment.
+            </p>
           </div>
         </div>
 
