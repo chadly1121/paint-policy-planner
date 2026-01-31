@@ -162,7 +162,10 @@ serve(async (req) => {
         .single();
 
       if (existingUserToken) {
-        // Update existing token - PRESERVE original is_primary status
+        // Update existing token
+        // If no primary token exists for the org, make this one primary
+        const shouldBePrimary = isPrimary || existingUserToken.is_primary;
+        
         const { error: updateError } = await supabase
           .from('user_drive_tokens')
           .update({
@@ -170,6 +173,7 @@ serve(async (req) => {
             refresh_token_encrypted: refreshTokenEncrypted,
             token_expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
             is_active: true,
+            is_primary: shouldBePrimary,
             last_refresh_at: new Date().toISOString(),
             revoked_at: null,
             revoke_reason: null,
@@ -182,8 +186,7 @@ serve(async (req) => {
           throw new Error('Failed to store tokens');
         }
         
-        // Use the existing is_primary value for logging
-        console.log('Token updated for user:', user_id, 'primary:', existingUserToken.is_primary);
+        console.log('Token updated for user:', user_id, 'primary:', shouldBePrimary);
       } else {
         // Insert new token
         const { error: insertError } = await supabase
