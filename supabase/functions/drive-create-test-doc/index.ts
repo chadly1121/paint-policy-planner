@@ -94,7 +94,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { title, content } = body;
+    const { title, content, folder_type } = body;
 
     if (!title) {
       return new Response(JSON.stringify({ error: 'title required' }), {
@@ -139,16 +139,17 @@ serve(async (req) => {
       });
     }
 
-    // Get SOPs folder
-    const { data: sopsFolder, error: folderError } = await supabase
+    // Get target folder (default to 'sops')
+    const targetFolderType = folder_type || 'sops';
+    const { data: targetFolder, error: folderError } = await supabase
       .from('org_drive_folders')
       .select('drive_folder_id')
       .eq('org_id', orgUser.org_id)
-      .eq('folder_type', 'sops')
+      .eq('folder_type', targetFolderType)
       .single();
 
-    if (folderError || !sopsFolder) {
-      return new Response(JSON.stringify({ error: 'SOPs folder not found. Create folders first.' }), {
+    if (folderError || !targetFolder) {
+      return new Response(JSON.stringify({ error: `${targetFolderType} folder not found. Create folders first.` }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -157,7 +158,7 @@ serve(async (req) => {
     const accessToken = await getValidAccessToken(tokenRecord, supabase);
 
     // Create a new Google Doc
-    const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+    const createResponse = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name,mimeType,webViewLink', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -166,7 +167,7 @@ serve(async (req) => {
       body: JSON.stringify({
         name: title,
         mimeType: 'application/vnd.google-apps.document',
-        parents: [sopsFolder.drive_folder_id],
+        parents: [targetFolder.drive_folder_id],
       }),
     });
 
@@ -217,6 +218,8 @@ serve(async (req) => {
       file_id: newDoc.id,
       file_name: newDoc.name,
       mime_type: newDoc.mimeType,
+      web_view_link: newDoc.webViewLink,
+      folder_type: targetFolderType,
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
