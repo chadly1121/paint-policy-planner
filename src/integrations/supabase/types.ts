@@ -149,6 +149,8 @@ export type Database = {
           change_summary: string | null
           content: string
           created_at: string
+          drive_file_id: string | null
+          drive_folder_id: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -162,6 +164,8 @@ export type Database = {
           change_summary?: string | null
           content: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -175,6 +179,8 @@ export type Database = {
           change_summary?: string | null
           content?: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -191,6 +197,8 @@ export type Database = {
           change_summary: string | null
           content: string
           created_at: string
+          drive_file_id: string | null
+          drive_folder_id: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -204,6 +212,8 @@ export type Database = {
           change_summary?: string | null
           content: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -217,6 +227,8 @@ export type Database = {
           change_summary?: string | null
           content?: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -233,6 +245,8 @@ export type Database = {
           change_summary: string | null
           content: string
           created_at: string
+          drive_file_id: string | null
+          drive_folder_id: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -246,6 +260,8 @@ export type Database = {
           change_summary?: string | null
           content: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -259,6 +275,8 @@ export type Database = {
           change_summary?: string | null
           content?: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -353,6 +371,8 @@ export type Database = {
           change_summary: string | null
           content: string
           created_at: string
+          drive_file_id: string | null
+          drive_folder_id: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -366,6 +386,8 @@ export type Database = {
           change_summary?: string | null
           content: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -379,6 +401,8 @@ export type Database = {
           change_summary?: string | null
           content?: string
           created_at?: string
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -1043,6 +1067,7 @@ export type Database = {
           content_md: string
           created_at: string
           created_by: string | null
+          drive_file_id: string | null
           forked_from_sop_id: string | null
           id: string
           last_change_summary: string | null
@@ -1064,6 +1089,7 @@ export type Database = {
           content_md: string
           created_at?: string
           created_by?: string | null
+          drive_file_id?: string | null
           forked_from_sop_id?: string | null
           id?: string
           last_change_summary?: string | null
@@ -1085,6 +1111,7 @@ export type Database = {
           content_md?: string
           created_at?: string
           created_by?: string | null
+          drive_file_id?: string | null
           forked_from_sop_id?: string | null
           id?: string
           last_change_summary?: string | null

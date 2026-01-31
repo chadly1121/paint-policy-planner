@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useDriveConnection } from '@/hooks/useDriveConnection';
 import { DriveTestPanel } from './DriveTestPanel';
+import DriveMigrationPanel from './DriveMigrationPanel';
 import { 
   Cloud, 
   CloudOff, 
@@ -244,6 +245,10 @@ export function DriveConnectionCard() {
         )}
       </CardContent>
     </Card>
+
+    <Separator className="my-6" />
+    
+    <DriveMigrationPanel isConnected={isConnected} hasFolders={hasFolders} />
 
     <Separator className="my-6" />
     
