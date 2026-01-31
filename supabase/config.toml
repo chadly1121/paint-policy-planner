@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.drive-share]
 verify_jwt = false
+
+[functions.drive-bulk-export]
+verify_jwt = false
