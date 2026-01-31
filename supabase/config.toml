@@ -14,3 +14,27 @@ verify_jwt = false
 
 [functions.process-document]
 verify_jwt = false
+
+[functions.drive-auth-init]
+verify_jwt = false
+
+[functions.drive-auth-callback]
+verify_jwt = false
+
+[functions.drive-token-refresh]
+verify_jwt = false
+
+[functions.drive-revoke]
+verify_jwt = false
+
+[functions.drive-create-folders]
+verify_jwt = false
+
+[functions.drive-import]
+verify_jwt = false
+
+[functions.drive-export]
+verify_jwt = false
+
+[functions.drive-create-test-doc]
+verify_jwt = false
