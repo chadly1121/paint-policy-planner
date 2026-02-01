@@ -40,7 +40,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { code, redirect_uri } = body;
+    const { code } = body;
 
     if (!code) {
       return new Response(JSON.stringify({ error: "Authorization code required" }), {
@@ -68,7 +68,9 @@ serve(async (req) => {
         code,
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: redirect_uri || "postmessage",
+        // IMPORTANT: must match the redirect_uri used by GIS initCodeClient popup flow.
+        // Using a dynamic origin here can cause redirect_uri_mismatch.
+        redirect_uri: "postmessage",
         grant_type: "authorization_code",
       }),
     });
