@@ -40,17 +40,12 @@ async function getValidAccessToken(tokenRecord: any, supabase: any): Promise<str
   const now = new Date();
   
   if (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
-    const refreshResponse = await fetch(
-      `${Deno.env.get('SUPABASE_URL')}/functions/v1/drive-token-refresh`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token_id: tokenRecord.id }),
-      }
-    );
-    
-    if (!refreshResponse.ok) {
-      throw new Error('Failed to refresh token');
+    const refreshInvoke = await supabase.functions.invoke('drive-token-refresh', {
+      body: { token_id: tokenRecord.id },
+    });
+
+    if (refreshInvoke.error) {
+      throw new Error(`Failed to refresh token: ${refreshInvoke.error.message}`);
     }
     
     const { data: refreshedToken } = await supabase
@@ -65,27 +60,204 @@ async function getValidAccessToken(tokenRecord: any, supabase: any): Promise<str
   return await decryptToken(tokenRecord.access_token_encrypted);
 }
 
-// Find template file in folder
-async function findTemplateFile(
-  accessToken: string,
-  folderId: string
-): Promise<{ id: string; name: string } | null> {
-  const query = `'${folderId}' in parents and name contains '_TEMPLATE' and mimeType = 'application/vnd.google-apps.document' and trashed = false`;
-  
-  const response = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }
-  );
-  
-  if (!response.ok) {
-    console.error('Failed to search for template:', await response.text());
-    return null;
+function escapeRegExp(input: string) {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getPrefix(folderType: string): string {
+  switch (folderType) {
+    case 'sops':
+      return 'SOP-';
+    case 'policies':
+      return 'CO-POL-';
+    case 'safety':
+      return 'SAFETY-';
+    case 'training':
+      return 'TRAIN-';
+    case 'disciplinary':
+      return 'DISC-';
+    default:
+      return 'DOC-';
   }
-  
-  const data = await response.json();
-  return data.files?.[0] || null;
+}
+
+async function listDocsInFolder(accessToken: string, folderId: string): Promise<Array<{ id: string; name: string }>> {
+  const baseQuery = `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.document' and trashed = false`;
+  const results: Array<{ id: string; name: string }> = [];
+  let pageToken: string | undefined;
+
+  while (true) {
+    const url = new URL('https://www.googleapis.com/drive/v3/files');
+    url.searchParams.set('q', baseQuery);
+    url.searchParams.set('fields', 'nextPageToken,files(id,name)');
+    url.searchParams.set('pageSize', '1000');
+    if (pageToken) url.searchParams.set('pageToken', pageToken);
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!res.ok) {
+      console.error('Failed to list docs:', await res.text());
+      break;
+    }
+
+    const data = await res.json();
+    for (const f of (data.files ?? [])) {
+      if (f?.id && f?.name) results.push({ id: f.id, name: f.name });
+    }
+
+    pageToken = data.nextPageToken;
+    if (!pageToken) break;
+  }
+
+  return results;
+}
+
+// Find template file in folder (case-insensitive match on "_TEMPLATE")
+async function findTemplateFile(accessToken: string, folderId: string): Promise<{ id: string; name: string } | null> {
+  const docs = await listDocsInFolder(accessToken, folderId);
+  const template = docs.find((d) => d.name.toUpperCase().startsWith('_TEMPLATE'));
+  return template ?? null;
+}
+
+async function getNextAutoName(accessToken: string, folderId: string, folderType: string): Promise<string> {
+  const prefix = getPrefix(folderType);
+  const docs = await listDocsInFolder(accessToken, folderId);
+
+  const re = new RegExp(`^${escapeRegExp(prefix)}(\\d+)(?:\\b|\\s|$)`, 'i');
+  let max = 0;
+  for (const doc of docs) {
+    // Ignore templates explicitly
+    if (doc.name.toUpperCase().startsWith('_TEMPLATE')) continue;
+    const m = doc.name.match(re);
+    if (!m) continue;
+    const n = Number(m[1]);
+    if (Number.isFinite(n) && n > max) max = n;
+  }
+
+  return `${prefix}${max + 1}`;
+}
+
+function getStarterOutline(folderType: string): string {
+  switch (folderType) {
+    case 'sops':
+      return [
+        'Purpose',
+        '',
+        'Scope',
+        '',
+        'Responsibilities',
+        '',
+        'Required PPE / Tools',
+        '',
+        'Procedure',
+        '',
+        'Safety Notes',
+        '',
+        'Training / Verification',
+        '',
+        'Revision History',
+        '',
+      ].join('\n');
+    case 'policies':
+      return [
+        'Policy Statement',
+        '',
+        'Scope',
+        '',
+        'Definitions',
+        '',
+        'Policy Details',
+        '',
+        'Responsibilities',
+        '',
+        'Enforcement',
+        '',
+        'Acknowledgment',
+        '',
+      ].join('\n');
+    case 'safety':
+      return [
+        'Purpose',
+        '',
+        'Scope',
+        '',
+        'Hazards',
+        '',
+        'Controls / PPE',
+        '',
+        'Procedure',
+        '',
+        'Emergency Response',
+        '',
+        'Training / Verification',
+        '',
+      ].join('\n');
+    case 'training':
+      return [
+        'Objective',
+        '',
+        'Requirements',
+        '',
+        'Frequency',
+        '',
+        'Materials',
+        '',
+        'Procedure',
+        '',
+        'Records',
+        '',
+      ].join('\n');
+    case 'disciplinary':
+      return [
+        'Purpose',
+        '',
+        'Scope',
+        '',
+        'Definitions',
+        '',
+        'Progressive Discipline Steps',
+        '',
+        'Documentation',
+        '',
+        'Appeals / Review',
+        '',
+      ].join('\n');
+    default:
+      return ['Overview', '', 'Details', '', 'Notes', ''].join('\n');
+  }
+}
+
+async function seedOutlineIfBlank(accessToken: string, docId: string, folderType: string) {
+  // If no template exists, insert a starter outline via Google Docs API.
+  const outline = getStarterOutline(folderType);
+
+  try {
+    const res = await fetch(`https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        requests: [
+          {
+            insertText: {
+              location: { index: 1 },
+              text: outline,
+            },
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      console.warn('Failed to seed outline (continuing):', await res.text());
+    }
+  } catch (e) {
+    console.warn('Failed to seed outline (continuing):', e);
+  }
 }
 
 // Copy a file in Drive
@@ -149,13 +321,6 @@ serve(async (req) => {
     const body = await req.json();
     const { title, folder_type } = body;
 
-    if (!title) {
-      return new Response(JSON.stringify({ error: 'title required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // Get user's org
     const { data: orgUser, error: orgError } = await userSupabase
       .from('org_users')
@@ -213,15 +378,20 @@ serve(async (req) => {
     // Find template in folder
     const template = await findTemplateFile(accessToken, targetFolder.drive_folder_id);
 
+    // Auto-name if no title provided
+    const finalTitle = (title && String(title).trim())
+      ? String(title).trim()
+      : await getNextAutoName(accessToken, targetFolder.drive_folder_id, targetFolderType);
+
     let newDoc: { id: string; name: string; webViewLink: string };
 
     if (template) {
       // Copy template to new document
-      console.log('Found template:', template.name, 'copying to:', title);
-      newDoc = await copyDriveFile(accessToken, template.id, title, targetFolder.drive_folder_id);
+      console.log('Found template:', template.name, 'copying to:', finalTitle);
+      newDoc = await copyDriveFile(accessToken, template.id, finalTitle, targetFolder.drive_folder_id);
     } else {
-      // No template found, create blank doc
-      console.log('No template found, creating blank document');
+      // No template found, create blank doc and seed outline
+      console.log('No template found, creating blank document + seeding outline');
       const createResponse = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink', {
         method: 'POST',
         headers: {
@@ -229,7 +399,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: title,
+          name: finalTitle,
           mimeType: 'application/vnd.google-apps.document',
           parents: [targetFolder.drive_folder_id],
         }),
@@ -241,6 +411,11 @@ serve(async (req) => {
       }
 
       newDoc = await createResponse.json();
+
+      // Best-effort: populate headings so user isn't left with a blank doc.
+      if (newDoc?.id) {
+        await seedOutlineIfBlank(accessToken, newDoc.id, targetFolderType);
+      }
     }
 
     console.log('Created document:', newDoc.id, newDoc.name);

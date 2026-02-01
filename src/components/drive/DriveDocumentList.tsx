@@ -11,6 +11,7 @@ import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { CreateDriveDocumentDialog, type DriveFolderType } from "./CreateDriveDocumentDialog";
 
 interface DriveDocumentListProps {
   moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
@@ -31,17 +32,13 @@ export function DriveDocumentList({
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const { files, loading, error, refresh, folderId } = useDriveFiles(moduleType);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { files, loading, error, refresh } = useDriveFiles(moduleType);
   const { folders } = useDriveConnection();
   const [syncing, setSyncing] = useState(false);
 
   // Get folder info for "Open in Drive" link
   const folderRecord = folders.find(f => f.folder_type === moduleType);
-
-  // Find template file (starts with _TEMPLATE)
-  const templateFile = useMemo(() => {
-    return files.find(file => file.name.startsWith('_TEMPLATE'));
-  }, [files]);
 
   // Filter files by search query and exclude templates from display
   const filteredFiles = useMemo(() => {
@@ -68,11 +65,8 @@ export function DriveDocumentList({
     }
   };
 
-  // Create new doc using edge function (copies template server-side)
-  const createNewFromTemplate = async () => {
-    const docTitle = prompt(`Enter a title for the new ${moduleType.toUpperCase()}:`);
-    if (!docTitle?.trim()) return;
-
+  // Create new doc using backend function (copies template server-side + auto-names)
+  const createNewFromTemplate = async (folderType: DriveFolderType) => {
     setIsCreating(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -81,17 +75,17 @@ export function DriveDocumentList({
       const response = await supabase.functions.invoke("drive-create-from-template", {
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: {
-          title: docTitle.trim(),
-          folder_type: moduleType,
+          folder_type: folderType,
         },
       });
 
       if (response.error) throw response.error;
 
       const fromTemplate = response.data.from_template ? " (from template)" : "";
+      const createdName = response.data.file_name ?? "New document";
       toast({
         title: "Document created",
-        description: `"${docTitle}" created${fromTemplate}`,
+        description: `"${createdName}" created${fromTemplate}`,
       });
 
       // Open in new tab for editing
@@ -154,7 +148,7 @@ export function DriveDocumentList({
               <Button
                 variant="default"
                 size="sm"
-                onClick={createNewFromTemplate}
+                onClick={() => setCreateDialogOpen(true)}
                 disabled={isCreating}
                 className="gap-2"
               >
@@ -246,6 +240,14 @@ export function DriveDocumentList({
           {t("common.noResults")} "{searchQuery}"
         </p>
       )}
+
+      <CreateDriveDocumentDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        defaultFolderType={moduleType as DriveFolderType}
+        isCreating={isCreating}
+        onCreate={createNewFromTemplate}
+      />
     </div>
   );
 }
