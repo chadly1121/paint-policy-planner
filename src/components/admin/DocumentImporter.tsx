@@ -156,33 +156,74 @@ const DocumentImporter = () => {
     return clientId;
   };
 
-  // Get picker access token via GIS
+  // Get picker access token via popup-based OAuth flow
   const getPickerAccessToken = async (): Promise<string> => {
     await loadGisApi();
     const clientId = await getGoogleClientId();
 
     return new Promise((resolve, reject) => {
-
-      const tokenClient = window.google?.accounts.oauth2.initTokenClient({
+      // Use the authorization code flow with popup to bypass iframe restrictions
+      const codeClient = window.google?.accounts.oauth2.initCodeClient?.({
         client_id: clientId,
         scope: "https://www.googleapis.com/auth/drive.readonly",
-        callback: (response) => {
+        ux_mode: "popup",
+        callback: async (response: { code?: string; error?: string }) => {
           if (response.error) {
             reject(new Error(response.error));
-          } else if (response.access_token) {
-            resolve(response.access_token);
-          } else {
-            reject(new Error("No access token received"));
+            return;
+          }
+          if (!response.code) {
+            reject(new Error("No authorization code received"));
+            return;
+          }
+          // Exchange code for token via edge function
+          try {
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+            if (!session) throw new Error("Not authenticated");
+
+            const exchangeRes = await supabase.functions.invoke("picker-token-exchange", {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+              body: { code: response.code, redirect_uri: window.location.origin },
+            });
+
+            if (exchangeRes.error) throw exchangeRes.error;
+            if (!exchangeRes.data?.access_token) throw new Error("Token exchange failed");
+
+            resolve(exchangeRes.data.access_token as string);
+          } catch (err) {
+            reject(err);
           }
         },
       });
 
-      if (!tokenClient) {
-        reject(new Error("Failed to initialize token client"));
+      if (!codeClient) {
+        // Fallback to token client if initCodeClient not available
+        const tokenClient = window.google?.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: "https://www.googleapis.com/auth/drive.readonly",
+          callback: (response: { access_token?: string; error?: string }) => {
+            if (response.error) {
+              reject(new Error(response.error));
+            } else if (response.access_token) {
+              resolve(response.access_token);
+            } else {
+              reject(new Error("No access token received"));
+            }
+          },
+        });
+
+        if (!tokenClient) {
+          reject(new Error("Failed to initialize token client"));
+          return;
+        }
+
+        tokenClient.requestAccessToken({ prompt: "" });
         return;
       }
 
-      tokenClient.requestAccessToken({ prompt: "" });
+      codeClient.requestCode();
     });
   };
 
