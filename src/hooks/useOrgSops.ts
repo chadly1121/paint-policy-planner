@@ -11,7 +11,7 @@ interface SOP {
   system_key: string | null;
   title: string;
   status: string;
-  content_md: string;
+  content_md: string | null;
   video_url: string | null;
   version: number;
   ack_epoch: number;
@@ -22,6 +22,7 @@ interface SOP {
   last_change_summary: string | null;
   forked_from_sop_id: string | null;
   source_file_url: string | null;
+  drive_file_id: string | null;
 }
 
 interface SOPAck {
@@ -35,7 +36,7 @@ interface SOPAck {
 interface AssignedSOP {
   sop_id: string;
   title: string;
-  content_md: string;
+  content_md: string | null;
   version: number;
   ack_epoch: number;
   ack_required: boolean;

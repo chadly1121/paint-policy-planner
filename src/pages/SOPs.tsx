@@ -19,9 +19,10 @@ const SECTION_KEY = "sops";
 interface SOPItem {
   id: string;
   title: string;
-  content: string;
+  content: string | null;
   videoUrl: string | null;
   sourceFileUrl: string | null;
+  driveFileId: string | null;
   source: string;
   systemKey: string | null;
   version: number;
@@ -49,7 +50,7 @@ const SOPs = () => {
     (p) => p.section_key === SECTION_KEY && p.completed
   ) ?? false;
 
-  // Map assigned SOPs to component format, enriching with video_url and source_file_url from full sops list
+  // Map assigned SOPs to component format, enriching with video_url, source_file_url, and drive_file_id from full sops list
   const sopItems: SOPItem[] = useMemo(() => 
     assignedSops.map((sop) => {
       const fullSop = sops.find(s => s.id === sop.sop_id);
@@ -59,6 +60,7 @@ const SOPs = () => {
         content: sop.content_md,
         videoUrl: fullSop?.video_url ?? null,
         sourceFileUrl: fullSop?.source_file_url ?? null,
+        driveFileId: fullSop?.drive_file_id ?? null,
         source: sop.source,
         systemKey: sop.system_key,
         version: sop.version,
@@ -79,12 +81,12 @@ const SOPs = () => {
     return sopItems.filter(
       (item) =>
         item.title.toLowerCase().includes(query) ||
-        item.content.toLowerCase().includes(query)
+        (item.content && item.content.toLowerCase().includes(query))
     );
   }, [searchQuery, sopItems]);
 
   const allSOPContent = useMemo(() => 
-    sopItems.map(item => `${item.title}: ${item.content}`).join('\n\n'),
+    sopItems.map(item => `${item.title}: ${item.content || ''}`).join('\n\n'),
   [sopItems]);
 
   const handleStartMiniQuiz = (sop: SOPItem) => {
@@ -190,6 +192,7 @@ const SOPs = () => {
               content={sop.content}
               videoUrl={sop.videoUrl}
               sourceFileUrl={sop.sourceFileUrl}
+              driveFileId={sop.driveFileId}
               source={sop.source}
               systemKey={sop.systemKey}
               isAcknowledged={sop.isAcknowledged}
