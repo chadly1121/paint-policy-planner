@@ -72,7 +72,7 @@ const QuizModal = ({
     generateQuiz(sectionKey, sectionContent, quizType, itemKey);
   };
 
-  const questionCount = quizType === "mini" ? 2 : quizType === "final" ? 10 : 5;
+  const questionCount = quizType === "mini" ? 5 : quizType === "final" ? 10 : 5;
   const pointsValue = quizType === "mini" ? 10 : 100;
 
   const currentQuestion = questions[currentQuestionIndex];
