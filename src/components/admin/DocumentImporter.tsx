@@ -167,6 +167,9 @@ const DocumentImporter = () => {
         client_id: clientId,
         scope: "https://www.googleapis.com/auth/drive.readonly",
         ux_mode: "popup",
+        // IMPORTANT: for popup code flow, GIS expects the special redirect_uri "postmessage".
+        // Using window.location.origin can trigger redirect_uri_mismatch in some environments.
+        redirect_uri: "postmessage",
         callback: async (response: { code?: string; error?: string }) => {
           if (response.error) {
             reject(new Error(response.error));
@@ -185,7 +188,7 @@ const DocumentImporter = () => {
 
             const exchangeRes = await supabase.functions.invoke("picker-token-exchange", {
               headers: { Authorization: `Bearer ${session.access_token}` },
-              body: { code: response.code, redirect_uri: window.location.origin },
+              body: { code: response.code },
             });
 
             if (exchangeRes.error) throw exchangeRes.error;
