@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Search, RefreshCw, Loader2, FolderOpen, ExternalLink, Plus } from "lucide-react";
+import { Search, RefreshCw, Loader2, FolderOpen, Plus, FilePlus } from "lucide-react";
 import { useDriveFiles, type DriveFile } from "@/hooks/useDriveFiles";
 import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
@@ -34,11 +34,17 @@ export function DriveDocumentList({
   // Get folder info for "Open in Drive" link
   const folderRecord = folders.find(f => f.folder_type === moduleType);
 
-  // Filter files by search query
+  // Find template file (starts with _TEMPLATE)
+  const templateFile = useMemo(() => {
+    return files.find(file => file.name.startsWith('_TEMPLATE'));
+  }, [files]);
+
+  // Filter files by search query and exclude templates from display
   const filteredFiles = useMemo(() => {
-    if (!searchQuery.trim()) return files;
+    const nonTemplateFiles = files.filter(file => !file.name.startsWith('_TEMPLATE'));
+    if (!searchQuery.trim()) return nonTemplateFiles;
     const query = searchQuery.toLowerCase();
-    return files.filter(file => 
+    return nonTemplateFiles.filter(file => 
       file.name.toLowerCase().includes(query)
     );
   }, [files, searchQuery]);
@@ -55,6 +61,17 @@ export function DriveDocumentList({
   const openInDrive = () => {
     if (folderRecord?.drive_folder_id) {
       window.open(`https://drive.google.com/drive/folders/${folderRecord.drive_folder_id}`, '_blank');
+    }
+  };
+
+  // Open template with "Make a Copy" dialog
+  const createNewFromTemplate = () => {
+    if (templateFile) {
+      // Google Docs copy URL opens the "Make a copy" dialog
+      window.open(`https://docs.google.com/document/d/${templateFile.id}/copy`, '_blank');
+    } else {
+      // Fallback: open the folder in Drive
+      openInDrive();
     }
   };
 
@@ -97,6 +114,15 @@ export function DriveDocumentList({
             </div>
             <div className="flex items-center gap-2">
               <Button
+                variant="default"
+                size="sm"
+                onClick={createNewFromTemplate}
+                className="gap-2"
+              >
+                <FilePlus className="h-4 w-4" />
+                Create New
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={handleRefresh}
@@ -119,10 +145,10 @@ export function DriveDocumentList({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Documents in Drive</span>
-              <span className="font-medium">{files.length} files</span>
+              <span className="font-medium">{filteredFiles.length} files</span>
             </div>
             <Progress value={progressPercent} className="h-2" />
           </div>
