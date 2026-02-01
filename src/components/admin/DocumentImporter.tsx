@@ -383,20 +383,21 @@ const DocumentImporter = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const response = await supabase.functions.invoke("drive-create-test-doc", {
+      // Use the new template-based creation function
+      const response = await supabase.functions.invoke("drive-create-from-template", {
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: {
           title: newDocTitle,
-          content: `# ${newDocTitle}\n\n_Start writing your ${moduleTypeLabels[moduleType]} here..._`,
           folder_type: moduleFolderMap[moduleType],
         },
       });
 
       if (response.error) throw response.error;
 
+      const fromTemplate = response.data.from_template ? " (from template)" : "";
       toast({
         title: "Document created",
-        description: `"${newDocTitle}" created in Google Drive`,
+        description: `"${newDocTitle}" created in Google Drive${fromTemplate}`,
       });
 
       // Add to imported files list
@@ -417,6 +418,11 @@ const DocumentImporter = () => {
       ]);
 
       setNewDocTitle("");
+
+      // Open the new doc in a new tab so the user can start editing
+      if (response.data.web_view_link) {
+        window.open(response.data.web_view_link, "_blank");
+      }
     } catch (error) {
       console.error("Create error:", error);
       toast({
