@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.drive-bulk-export]
 verify_jwt = false
+
+[functions.drive-list-files]
+verify_jwt = false
+
+[functions.drive-sync]
+verify_jwt = false
