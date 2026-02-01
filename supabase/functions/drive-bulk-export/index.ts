@@ -421,71 +421,83 @@ serve(async (req) => {
 
       const tableName = tableMap[folderType];
       if (tableName) {
-        const { data: docs } = await supabase
-          .from(tableName)
-          .select('id, title, content, drive_file_id, user_id')
-          .eq('user_id', user.id)
+        // Query by org membership, not just user_id
+        // First get all user_ids in this org
+        const { data: orgMembers } = await supabase
+          .from('org_users')
+          .select('user_id')
+          .eq('org_id', orgUser.org_id)
           .eq('is_active', true);
 
-        if (docs) {
-          for (const doc of docs) {
-            // Skip if already has drive_file_id
-            if (doc.drive_file_id) {
-              results.push({
-                table: tableName,
-                id: doc.id,
-                title: doc.title,
-                success: true,
-                driveFileId: doc.drive_file_id,
-                wasAlreadyMigrated: true,
-              });
-              continue;
-            }
+        const orgUserIds = orgMembers?.map(m => m.user_id) || [];
 
-            if (dry_run) {
-              results.push({
-                table: tableName,
-                id: doc.id,
-                title: doc.title,
-                success: true,
-                wasAlreadyMigrated: false,
-              });
-              continue;
-            }
+        if (orgUserIds.length > 0) {
+          const { data: docs } = await supabase
+            .from(tableName)
+            .select('id, title, content, drive_file_id, user_id')
+            .in('user_id', orgUserIds)
+            .eq('is_active', true);
 
-            try {
-              const { id: driveFileId } = await createGoogleDoc(
-                accessToken,
-                folderId,
-                doc.title,
-                doc.content
-              );
+          if (docs) {
+            for (const doc of docs) {
+              // Skip if already has drive_file_id
+              if (doc.drive_file_id) {
+                results.push({
+                  table: tableName,
+                  id: doc.id,
+                  title: doc.title,
+                  success: true,
+                  driveFileId: doc.drive_file_id,
+                  wasAlreadyMigrated: true,
+                });
+                continue;
+              }
 
-              // Update the record with drive_file_id
-              await supabase
-                .from(tableName)
-                .update({ 
-                  drive_file_id: driveFileId,
-                  drive_folder_id: folderId 
-                })
-                .eq('id', doc.id);
+              if (dry_run) {
+                results.push({
+                  table: tableName,
+                  id: doc.id,
+                  title: doc.title,
+                  success: true,
+                  wasAlreadyMigrated: false,
+                });
+                continue;
+              }
 
-              results.push({
-                table: tableName,
-                id: doc.id,
-                title: doc.title,
-                success: true,
-                driveFileId,
-                wasAlreadyMigrated: false,
-              });
-            } catch (error) {
-              results.push({
-                table: tableName,
-                id: doc.id,
-                title: doc.title,
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error',
-              });
+              try {
+                const { id: driveFileId } = await createGoogleDoc(
+                  accessToken,
+                  folderId,
+                  doc.title,
+                  doc.content
+                );
+
+                // Update the record with drive_file_id
+                await supabase
+                  .from(tableName)
+                  .update({ 
+                    drive_file_id: driveFileId,
+                    drive_folder_id: folderId 
+                  })
+                  .eq('id', doc.id);
+
+                results.push({
+                  table: tableName,
+                  id: doc.id,
+                  title: doc.title,
+                  success: true,
+                  driveFileId,
+                  wasAlreadyMigrated: false,
+                });
+              } catch (error) {
+                results.push({
+                  table: tableName,
+                  id: doc.id,
+                  title: doc.title,
+                  success: false,
+                  error: error instanceof Error ? error.message : 'Unknown error',
+                });
+              }
             }
           }
         }
