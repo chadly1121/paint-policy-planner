@@ -10,6 +10,16 @@ declare namespace google {
       }): {
         requestAccessToken: (options?: { prompt?: string }) => void;
       };
+
+      function initCodeClient(config: {
+        client_id: string;
+        scope: string;
+        ux_mode: "popup" | "redirect";
+        callback: (response: { code?: string; error?: string }) => void;
+        redirect_uri?: string;
+      }): {
+        requestCode: () => void;
+      } | undefined;
     }
   }
 
