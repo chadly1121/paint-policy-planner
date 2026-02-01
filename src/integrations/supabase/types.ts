@@ -147,7 +147,7 @@ export type Database = {
       company_disciplinary: {
         Row: {
           change_summary: string | null
-          content: string
+          content: string | null
           created_at: string
           drive_file_id: string | null
           drive_folder_id: string | null
@@ -162,7 +162,7 @@ export type Database = {
         }
         Insert: {
           change_summary?: string | null
-          content: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -177,7 +177,7 @@ export type Database = {
         }
         Update: {
           change_summary?: string | null
-          content?: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -195,7 +195,7 @@ export type Database = {
       company_policies: {
         Row: {
           change_summary: string | null
-          content: string
+          content: string | null
           created_at: string
           drive_file_id: string | null
           drive_folder_id: string | null
@@ -210,7 +210,7 @@ export type Database = {
         }
         Insert: {
           change_summary?: string | null
-          content: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -225,7 +225,7 @@ export type Database = {
         }
         Update: {
           change_summary?: string | null
-          content?: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -243,7 +243,7 @@ export type Database = {
       company_safety: {
         Row: {
           change_summary: string | null
-          content: string
+          content: string | null
           created_at: string
           drive_file_id: string | null
           drive_folder_id: string | null
@@ -258,7 +258,7 @@ export type Database = {
         }
         Insert: {
           change_summary?: string | null
-          content: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -273,7 +273,7 @@ export type Database = {
         }
         Update: {
           change_summary?: string | null
-          content?: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -369,7 +369,7 @@ export type Database = {
       company_training: {
         Row: {
           change_summary: string | null
-          content: string
+          content: string | null
           created_at: string
           drive_file_id: string | null
           drive_folder_id: string | null
@@ -384,7 +384,7 @@ export type Database = {
         }
         Insert: {
           change_summary?: string | null
-          content: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -399,7 +399,7 @@ export type Database = {
         }
         Update: {
           change_summary?: string | null
-          content?: string
+          content?: string | null
           created_at?: string
           drive_file_id?: string | null
           drive_folder_id?: string | null
@@ -1064,7 +1064,7 @@ export type Database = {
           ack_epoch: number
           ack_required: boolean
           ack_reset_on_change: boolean
-          content_md: string
+          content_md: string | null
           created_at: string
           created_by: string | null
           drive_file_id: string | null
@@ -1086,7 +1086,7 @@ export type Database = {
           ack_epoch?: number
           ack_required?: boolean
           ack_reset_on_change?: boolean
-          content_md: string
+          content_md?: string | null
           created_at?: string
           created_by?: string | null
           drive_file_id?: string | null
@@ -1108,7 +1108,7 @@ export type Database = {
           ack_epoch?: number
           ack_required?: boolean
           ack_reset_on_change?: boolean
-          content_md?: string
+          content_md?: string | null
           created_at?: string
           created_by?: string | null
           drive_file_id?: string | null

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff, Video, Download, FileText } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Play, Pencil, FileCheck, EyeOff, Video, Download, FileText, Loader2, Cloud } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,9 +23,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface SOPCardProps {
   sopId: string;
   title: string;
-  content: string;
+  content: string | null;
   videoUrl?: string | null;
   sourceFileUrl?: string | null;
+  driveFileId?: string | null;
   source: string;
   systemKey: string | null;
   isAcknowledged: boolean;
@@ -48,6 +49,7 @@ const SOPCard = ({
   content, 
   videoUrl,
   sourceFileUrl,
+  driveFileId,
   source,
   systemKey,
   isAcknowledged, 
@@ -71,6 +73,42 @@ const SOPCard = ({
   const [showHideDialog, setShowHideDialog] = useState(false);
   const [hiding, setHiding] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  
+  // Drive content state
+  const [driveContent, setDriveContent] = useState<string | null>(null);
+  const [loadingDriveContent, setLoadingDriveContent] = useState(false);
+  const [driveContentError, setDriveContentError] = useState<string | null>(null);
+
+  // Determine the actual content to display
+  const displayContent = content || driveContent || "";
+  const needsDriveContent = !content && driveFileId && isOpen;
+
+  // Fetch content from Drive when card is opened and content is null
+  useEffect(() => {
+    if (needsDriveContent && !driveContent && !loadingDriveContent) {
+      const fetchDriveContent = async () => {
+        setLoadingDriveContent(true);
+        setDriveContentError(null);
+        try {
+          const { data, error } = await supabase.functions.invoke("drive-export", {
+            body: { file_id: driveFileId, format: "text" },
+          });
+          
+          if (error) throw error;
+          if (data?.content) {
+            setDriveContent(data.content);
+          }
+        } catch (err) {
+          console.error("Error fetching Drive content:", err);
+          setDriveContentError(err instanceof Error ? err.message : "Failed to load content");
+        } finally {
+          setLoadingDriveContent(false);
+        }
+      };
+      
+      fetchDriveContent();
+    }
+  }, [needsDriveContent, driveContent, loadingDriveContent, driveFileId]);
 
   // Download original file from storage
   const handleDownloadOriginal = async () => {
@@ -111,7 +149,7 @@ const SOPCard = ({
   };
 
   // Enhanced content formatting for both system and uploaded content
-  const formattedContent = content.split('\n').map((line, idx) => {
+  const formattedContent = displayContent.split('\n').map((line, idx) => {
     const trimmedLine = line.trim();
     
     // Markdown H2 headers (## Header)
@@ -280,6 +318,12 @@ const SOPCard = ({
                   Original
                 </Badge>
               )}
+              {driveFileId && !content && (
+                <Badge variant="outline" className="text-xs flex-shrink-0 border-sky-500/50 text-sky-600 dark:text-sky-400">
+                  <Cloud className="h-3 w-3 mr-1" />
+                  Drive
+                </Badge>
+              )}
               {source === "org" ? (
                 <Badge variant="secondary" className="text-xs flex-shrink-0">✏️ Custom</Badge>
               ) : (
@@ -345,9 +389,48 @@ const SOPCard = ({
             {videoUrl && (
               <VideoEmbed url={videoUrl} title={title} />
             )}
-            <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-              {formattedContent}
-            </div>
+            
+            {/* Loading state for Drive content */}
+            {loadingDriveContent && (
+              <div className="flex items-center gap-2 py-4 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Loading content from Drive...</span>
+              </div>
+            )}
+            
+            {/* Error state */}
+            {driveContentError && (
+              <div className="py-4 text-destructive text-sm">
+                <p>Failed to load content: {driveContentError}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => {
+                    setDriveContent(null);
+                    setDriveContentError(null);
+                  }}
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
+            
+            {/* Content display */}
+            {!loadingDriveContent && !driveContentError && displayContent && (
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                {formattedContent}
+              </div>
+            )}
+            
+            {/* Drive badge indicator */}
+            {driveFileId && !content && (
+              <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                <Cloud className="h-3 w-3" />
+                <span>Content sourced from Google Drive</span>
+              </div>
+            )}
+            
             <div className="mt-2 text-xs text-muted-foreground">
               Version {version} • Epoch {ackEpoch}
             </div>

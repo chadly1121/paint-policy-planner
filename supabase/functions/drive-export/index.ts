@@ -109,10 +109,11 @@ serve(async (req) => {
     const mimeTypes: Record<string, string> = {
       'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'pdf': 'application/pdf',
+      'text': 'text/plain',
     };
 
     if (!mimeTypes[exportFormat]) {
-      return new Response(JSON.stringify({ error: 'Invalid format. Use docx or pdf' }), {
+      return new Response(JSON.stringify({ error: 'Invalid format. Use docx, pdf, or text' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -178,6 +179,27 @@ serve(async (req) => {
     if (!exportResponse.ok) {
       const error = await exportResponse.text();
       throw new Error(`Failed to export file: ${error}`);
+    }
+
+    // For text format, return content directly without base64 encoding
+    if (exportFormat === 'text') {
+      const textContent = await exportResponse.text();
+      
+      // Update last_used_at
+      await supabase
+        .from('user_drive_tokens')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('id', tokenRecord.id);
+
+      return new Response(JSON.stringify({
+        success: true,
+        file_name: fileMetadata.name,
+        format: 'text',
+        content: textContent,
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const fileBuffer = await exportResponse.arrayBuffer();
