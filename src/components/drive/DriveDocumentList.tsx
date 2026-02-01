@@ -9,6 +9,8 @@ import { Search, RefreshCw, Loader2, FolderOpen, Plus, FilePlus } from "lucide-r
 import { useDriveFiles, type DriveFile } from "@/hooks/useDriveFiles";
 import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface DriveDocumentListProps {
   moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
@@ -26,7 +28,9 @@ export function DriveDocumentList({
   onStartQuiz,
 }: DriveDocumentListProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const { files, loading, error, refresh, folderId } = useDriveFiles(moduleType);
   const { folders } = useDriveConnection();
   const [syncing, setSyncing] = useState(false);
@@ -64,14 +68,48 @@ export function DriveDocumentList({
     }
   };
 
-  // Open template with "Make a Copy" dialog
-  const createNewFromTemplate = () => {
-    if (templateFile) {
-      // Google Docs copy URL opens the "Make a copy" dialog
-      window.open(`https://docs.google.com/document/d/${templateFile.id}/copy`, '_blank');
-    } else {
-      // Fallback: open the folder in Drive
-      openInDrive();
+  // Create new doc using edge function (copies template server-side)
+  const createNewFromTemplate = async () => {
+    const docTitle = prompt(`Enter a title for the new ${moduleType.toUpperCase()}:`);
+    if (!docTitle?.trim()) return;
+
+    setIsCreating(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await supabase.functions.invoke("drive-create-from-template", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {
+          title: docTitle.trim(),
+          folder_type: moduleType,
+        },
+      });
+
+      if (response.error) throw response.error;
+
+      const fromTemplate = response.data.from_template ? " (from template)" : "";
+      toast({
+        title: "Document created",
+        description: `"${docTitle}" created${fromTemplate}`,
+      });
+
+      // Open in new tab for editing
+      if (response.data.web_view_link) {
+        window.open(response.data.web_view_link, "_blank");
+      }
+
+      // Refresh the file list
+      await refresh();
+    } catch (err) {
+      console.error("Create error:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to create document",
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -117,10 +155,15 @@ export function DriveDocumentList({
                 variant="default"
                 size="sm"
                 onClick={createNewFromTemplate}
+                disabled={isCreating}
                 className="gap-2"
               >
-                <FilePlus className="h-4 w-4" />
-                Create New
+                {isCreating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FilePlus className="h-4 w-4" />
+                )}
+                {isCreating ? "Creating..." : "Create New"}
               </Button>
               <Button
                 variant="outline"
