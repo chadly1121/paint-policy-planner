@@ -22,10 +22,10 @@ serve(async (req) => {
 
     const { sectionKey, sectionContent, userId, quizType, itemKey } = await req.json();
     
-    // quizType can be: "mini" (2 questions for single item), "final" (10 questions for all items), or undefined (legacy 5 questions)
+    // quizType can be: "mini" (5 questions for single item), "final" (10 questions for all items), or undefined (legacy 5 questions)
     const isMiniQuiz = quizType === "mini";
     const isFinalExam = quizType === "final";
-    const questionCount = isMiniQuiz ? 2 : isFinalExam ? 10 : 5;
+    const questionCount = isMiniQuiz ? 5 : isFinalExam ? 10 : 5;
     
     // For mini quizzes, we use itemKey (e.g., "safety_safety1"), otherwise sectionKey
     const quizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
