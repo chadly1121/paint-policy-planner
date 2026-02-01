@@ -35,6 +35,8 @@ import { useOrgSops } from "@/hooks/useOrgSops";
 import { useOrg } from "@/contexts/OrganizationContext";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
 
+let cachedGoogleClientId: string | null = null;
+
 interface ImportedFile {
   id: string;
   source_file_id: string;
@@ -106,14 +108,60 @@ const DocumentImporter = () => {
     });
   };
 
-  // Get picker access token via GIS
-  const getPickerAccessToken = async (): Promise<string> => {
+  // Load Google Identity Services (GIS) for OAuth token client
+  const loadGisApi = async (): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      if (!clientId) {
-        reject(new Error("Google Client ID not configured"));
+      if (window.google?.accounts?.oauth2?.initTokenClient) {
+        resolve();
         return;
       }
+
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Failed to load Google Identity Services"));
+      document.head.appendChild(script);
+    });
+  };
+
+  const getGoogleClientId = async (): Promise<string> => {
+    if (cachedGoogleClientId) return cachedGoogleClientId;
+
+    const fromBuild = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (fromBuild) {
+      cachedGoogleClientId = fromBuild;
+      return fromBuild;
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) throw new Error("Not authenticated");
+
+    const res = await supabase.functions.invoke("public-config", {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (res.error) throw res.error;
+
+    const clientId = res.data?.google_client_id as string | null | undefined;
+    if (!clientId) throw new Error("Google Client ID not configured");
+
+    cachedGoogleClientId = clientId;
+    return clientId;
+  };
+
+  // Get picker access token via GIS
+  const getPickerAccessToken = async (): Promise<string> => {
+    await loadGisApi();
+    const clientId = await getGoogleClientId();
+
+    return new Promise((resolve, reject) => {
 
       const tokenClient = window.google?.accounts.oauth2.initTokenClient({
         client_id: clientId,
