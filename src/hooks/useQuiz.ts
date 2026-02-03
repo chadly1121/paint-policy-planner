@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 
 interface QuizQuestion {
   id: string;
@@ -24,7 +24,6 @@ interface QuizAttempt {
 export const useQuiz = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [reviewQuestions, setReviewQuestions] = useState<QuizQuestionWithAnswer[]>([]);
