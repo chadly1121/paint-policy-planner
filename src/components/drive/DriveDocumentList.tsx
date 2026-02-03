@@ -149,9 +149,9 @@ export function DriveDocumentList({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0 overflow-hidden">
       {/* Header Card */}
-      <Card className="border-primary/20">
+      <Card className="border-primary/20 w-full min-w-0">
         <CardHeader className="pb-4">
           {/* Header: stack on mobile, row on tablet+ */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

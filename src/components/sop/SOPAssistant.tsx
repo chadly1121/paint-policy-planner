@@ -202,7 +202,7 @@ export function SOPAssistant() {
   }
 
   return (
-    <Card className="flex flex-col h-[400px] sm:h-[500px] xl:h-[600px]">
+    <Card className="flex flex-col h-[400px] sm:h-[500px] xl:h-[600px] w-full min-w-0 overflow-hidden">
       <CardHeader className="border-b shrink-0 py-3 sm:py-4">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -243,7 +243,7 @@ export function SOPAssistant() {
                 }`}
               >
                 {message.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <div className="prose prose-sm dark:prose-invert max-w-none break-words overflow-hidden">
                     <ReactMarkdown>{message.content}</ReactMarkdown>
                   </div>
                 ) : (
