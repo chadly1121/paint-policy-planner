@@ -41,7 +41,8 @@ import {
   BarChart3,
   FileEdit,
   Building2,
-  Cloud
+  Cloud,
+  Bot
 } from "lucide-react";
 import { z } from "zod";
 import { languages } from "@/components/LanguageSelector";
@@ -50,6 +51,7 @@ import ContentSettingsCard from "@/components/admin/ContentSettingsCard";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
 
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
+import { AISettingsCard } from "@/components/admin/AISettingsCard";
 import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { useOrganization } from "@/hooks/useOrganization";
 const employeeSchema = z.object({
@@ -396,7 +398,7 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 max-w-4xl">
+        <TabsList className="grid w-full grid-cols-7 max-w-5xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Analytics
@@ -412,6 +414,10 @@ const Admin = () => {
           <TabsTrigger value="drive" className="flex items-center gap-2">
             <Cloud className="h-4 w-4" />
             Drive
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            AI
           </TabsTrigger>
           <TabsTrigger value="employees" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -443,6 +449,10 @@ const Admin = () => {
 
         <TabsContent value="drive">
           <DriveConnectionCard />
+        </TabsContent>
+
+        <TabsContent value="ai">
+          <AISettingsCard />
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">

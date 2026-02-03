@@ -441,6 +441,68 @@ export type Database = {
         }
         Relationships: []
       }
+      org_ai_settings: {
+        Row: {
+          api_key_encrypted: string
+          api_key_hint: string | null
+          connected_at: string | null
+          connected_by: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_test_at: string | null
+          last_test_success: boolean | null
+          last_used_at: string | null
+          org_id: string
+          provider: string
+          requests_month_start: string | null
+          requests_this_month: number | null
+          updated_at: string
+        }
+        Insert: {
+          api_key_encrypted: string
+          api_key_hint?: string | null
+          connected_at?: string | null
+          connected_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_test_at?: string | null
+          last_test_success?: boolean | null
+          last_used_at?: string | null
+          org_id: string
+          provider?: string
+          requests_month_start?: string | null
+          requests_this_month?: number | null
+          updated_at?: string
+        }
+        Update: {
+          api_key_encrypted?: string
+          api_key_hint?: string | null
+          connected_at?: string | null
+          connected_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_test_at?: string | null
+          last_test_success?: boolean | null
+          last_used_at?: string | null
+          org_id?: string
+          provider?: string
+          requests_month_start?: string | null
+          requests_this_month?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_ai_settings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_drive_folders: {
         Row: {
           created_at: string | null
@@ -1314,6 +1376,7 @@ export type Database = {
         }
         Returns: string
       }
+      org_has_ai_enabled: { Args: { _org_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "employee"
