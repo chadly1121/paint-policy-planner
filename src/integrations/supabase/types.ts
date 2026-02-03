@@ -1039,6 +1039,79 @@ export type Database = {
           },
         ]
       }
+      sds_documents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          drive_file_id: string | null
+          external_url: string | null
+          hazard_category: string | null
+          id: string
+          is_active: boolean
+          manufacturer: string | null
+          notes: string | null
+          org_id: string
+          product_name: string
+          revision_date: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          drive_file_id?: string | null
+          external_url?: string | null
+          hazard_category?: string | null
+          id?: string
+          is_active?: boolean
+          manufacturer?: string | null
+          notes?: string | null
+          org_id: string
+          product_name: string
+          revision_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          drive_file_id?: string | null
+          external_url?: string | null
+          hazard_category?: string | null
+          id?: string
+          is_active?: boolean
+          manufacturer?: string | null
+          notes?: string | null
+          org_id?: string
+          product_name?: string
+          revision_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sds_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sds_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sds_documents_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       section_item_progress: {
         Row: {
           completed: boolean

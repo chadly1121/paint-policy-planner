@@ -9,6 +9,7 @@ import MainLayout from "./components/layout/MainLayout";
 import Index from "./pages/Index";
 import SOPs from "./pages/SOPs";
 import Safety from "./pages/Safety";
+import SDS from "./pages/SDS";
 import Policies from "./pages/Policies";
 import Training from "./pages/Training";
 import Disciplinary from "./pages/Disciplinary";
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/sops" element={<SOPs />} />
               <Route path="/safety" element={<Safety />} />
+              <Route path="/sds" element={<SDS />} />
               <Route path="/policies" element={<Policies />} />
               <Route path="/training" element={<Training />} />
               <Route path="/disciplinary" element={<Disciplinary />} />
