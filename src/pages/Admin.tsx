@@ -39,7 +39,6 @@ import {
   RefreshCw,
   Globe,
   BarChart3,
-  FileEdit,
   Building2,
   Cloud,
   Bot
@@ -47,7 +46,6 @@ import {
 import { z } from "zod";
 import { languages } from "@/components/LanguageSelector";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
-import ContentSettingsCard from "@/components/admin/ContentSettingsCard";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
 import RedemptionItemsManager from "@/components/admin/RedemptionItemsManager";
 
@@ -401,7 +399,7 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8 max-w-6xl">
+        <TabsList className="grid w-full grid-cols-7 max-w-5xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Analytics</span>
@@ -409,10 +407,6 @@ const Admin = () => {
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">Branding</span>
-          </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center gap-2">
-            <FileEdit className="h-4 w-4" />
-            <span className="hidden sm:inline">Content</span>
           </TabsTrigger>
           <TabsTrigger value="drive" className="flex items-center gap-2">
             <Cloud className="h-4 w-4" />
@@ -447,10 +441,6 @@ const Admin = () => {
 
         <TabsContent value="branding">
           <OrgBrandingCard />
-        </TabsContent>
-
-        <TabsContent value="content">
-          <ContentSettingsCard />
         </TabsContent>
 
 
