@@ -159,6 +159,7 @@ export type Database = {
           updated_at: string
           user_id: string
           version: number
+          video_url: string | null
         }
         Insert: {
           change_summary?: string | null
@@ -174,6 +175,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           version?: number
+          video_url?: string | null
         }
         Update: {
           change_summary?: string | null
@@ -189,6 +191,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: number
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -207,6 +210,7 @@ export type Database = {
           updated_at: string
           user_id: string
           version: number
+          video_url: string | null
         }
         Insert: {
           change_summary?: string | null
@@ -222,6 +226,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           version?: number
+          video_url?: string | null
         }
         Update: {
           change_summary?: string | null
@@ -237,6 +242,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: number
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -255,6 +261,7 @@ export type Database = {
           updated_at: string
           user_id: string
           version: number
+          video_url: string | null
         }
         Insert: {
           change_summary?: string | null
@@ -270,6 +277,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           version?: number
+          video_url?: string | null
         }
         Update: {
           change_summary?: string | null
@@ -285,6 +293,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: number
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -381,6 +390,7 @@ export type Database = {
           updated_at: string
           user_id: string
           version: number
+          video_url: string | null
         }
         Insert: {
           change_summary?: string | null
@@ -396,6 +406,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           version?: number
+          video_url?: string | null
         }
         Update: {
           change_summary?: string | null
@@ -411,6 +422,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: number
+          video_url?: string | null
         }
         Relationships: []
       }
