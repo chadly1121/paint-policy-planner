@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export type DocumentType = "sop" | "policy" | "safety" | "training" | "disciplinary";
 
@@ -9,6 +10,7 @@ export interface Message {
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/document-builder`;
+const SAVE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/drive-save-builder-doc`;
 
 export function useDocumentBuilder() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -138,13 +140,63 @@ export function useDocumentBuilder() {
     return lastAssistant.content;
   }, [messages]);
 
+  const [isSaving, setIsSaving] = useState(false);
+
+  const saveToDrive = useCallback(async (title?: string) => {
+    const content = extractMarkdownContent();
+    if (!content) {
+      toast.error("No document content to save");
+      return null;
+    }
+
+    setIsSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to save to Drive");
+        return null;
+      }
+
+      const response = await fetch(SAVE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          content,
+          document_type: documentType,
+          title,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.error || "Failed to save document");
+        return null;
+      }
+
+      toast.success("Document saved to Google Drive!");
+      return data;
+    } catch (error) {
+      console.error("Save to Drive error:", error);
+      toast.error("Failed to save document to Drive");
+      return null;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [extractMarkdownContent, documentType]);
+
   return {
     messages,
     isLoading,
+    isSaving,
     documentType,
     setDocumentType,
     sendMessage,
     clearChat,
     extractMarkdownContent,
+    saveToDrive,
   };
 }
