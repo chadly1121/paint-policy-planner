@@ -12,12 +12,11 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// Available prices
+// Available prices - TEST MODE
 const PRICES = {
-  monthly: "price_1SwohuI3v1u61BwNPB3vpGgo",    // $79/mo
-  annual: "price_1SwoiAI3v1u61BwNNnVd3fK8",     // $790/yr
-  friends: "price_1SwojyI3v1u61BwNuJSCy5WE",    // $20/mo
-  extra_seat: "price_1SwoiTI3v1u61BwNkyFkwNYf", // $8/mo per seat
+  monthly: "price_1SwpJjI3v1u61BwN1d5apgRH",    // $79/mo
+  annual: "price_1SwpK2I3v1u61BwN0aJBYr5w",     // $790/yr
+  extra_seat: "price_1SwpKVI3v1u61BwN3OLDf42N", // $8/mo per seat
 };
 
 serve(async (req) => {
@@ -76,15 +75,10 @@ serve(async (req) => {
 
     // Get the price ID based on plan type
     let priceId: string;
-    switch (planType) {
-      case "annual":
-        priceId = PRICES.annual;
-        break;
-      case "friends":
-        priceId = PRICES.friends;
-        break;
-      default:
-        priceId = PRICES.monthly;
+    if (planType === "annual") {
+      priceId = PRICES.annual;
+    } else {
+      priceId = PRICES.monthly;
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });

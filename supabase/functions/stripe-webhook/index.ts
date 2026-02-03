@@ -12,12 +12,11 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
-// Price ID to product mapping
+// Price ID to product mapping - TEST MODE
 const PRICE_CONFIG: Record<string, { name: string; baseUsers: number }> = {
-  "price_1SwohuI3v1u61BwNPB3vpGgo": { name: "SOPed Pro Monthly", baseUsers: 6 },
-  "price_1SwoiAI3v1u61BwNNnVd3fK8": { name: "SOPed Pro Annual", baseUsers: 6 },
-  "price_1SwojyI3v1u61BwNuJSCy5WE": { name: "SOPed Pro Friends", baseUsers: 6 },
-  "price_1SwoiTI3v1u61BwNkyFkwNYf": { name: "Additional Seat", baseUsers: 0 },
+  "price_1SwpJjI3v1u61BwN1d5apgRH": { name: "SOPed Pro Monthly", baseUsers: 6 },
+  "price_1SwpK2I3v1u61BwN0aJBYr5w": { name: "SOPed Pro Annual", baseUsers: 6 },
+  "price_1SwpKVI3v1u61BwN3OLDf42N": { name: "Additional Seat", baseUsers: 0 },
 };
 
 serve(async (req) => {
