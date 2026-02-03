@@ -51,7 +51,8 @@ import ContentSettingsCard from "@/components/admin/ContentSettingsCard";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
 import DocumentImporter from "@/components/admin/DocumentImporter";
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
-
+import { EmployeeActions } from "@/components/admin/EmployeeActions";
+import { useOrganization } from "@/hooks/useOrganization";
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
@@ -77,6 +78,8 @@ interface EmployeeData {
   available_points: number;
   sections_completed: number;
   created_at: string;
+  role: string;
+  is_active: boolean;
 }
 
 const TOTAL_SECTIONS = 5;
@@ -84,6 +87,7 @@ const TOTAL_SECTIONS = 5;
 const Admin = () => {
   const { t } = useTranslation();
   const { isAdmin, loading: authLoading } = useAuth();
+  const { org } = useOrganization();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -108,26 +112,43 @@ const Admin = () => {
   }, [isAdmin, authLoading, navigate]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin && org?.id) {
       fetchRedemptionRequests();
       fetchEmployees();
     }
-  }, [isAdmin]);
+  }, [isAdmin, org?.id]);
 
   const fetchEmployees = async () => {
+    if (!org?.id) return;
+    
     setLoadingEmployees(true);
     try {
-      // Fetch all profiles
+      // Fetch org_users for this org (includes role and is_active)
+      const { data: orgUsers, error: orgUsersError } = await supabase
+        .from("org_users")
+        .select("user_id, role, is_active")
+        .eq("org_id", org.id);
+
+      if (orgUsersError) throw orgUsersError;
+
+      if (!orgUsers || orgUsers.length === 0) {
+        setEmployees([]);
+        return;
+      }
+
+      const userIds = orgUsers.map(ou => ou.user_id);
+      const orgUserMap = new Map(orgUsers.map(ou => [ou.user_id, ou]));
+
+      // Fetch profiles for these users
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
+        .in("user_id", userIds)
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
 
       if (profiles && profiles.length > 0) {
-        const userIds = profiles.map(p => p.user_id);
-
         // Fetch points balances
         const { data: balances } = await supabase
           .from("points_balance")
@@ -152,6 +173,7 @@ const Admin = () => {
 
         const employeeData: EmployeeData[] = profiles.map(profile => {
           const balance = balanceMap.get(profile.user_id);
+          const orgUser = orgUserMap.get(profile.user_id);
           return {
             user_id: profile.user_id,
             full_name: profile.full_name,
@@ -160,6 +182,8 @@ const Admin = () => {
             available_points: balance?.available_points ?? balance?.total_points ?? 0,
             sections_completed: progressMap.get(profile.user_id) || 0,
             created_at: profile.created_at,
+            role: orgUser?.role || "employee",
+            is_active: orgUser?.is_active ?? true,
           };
         });
 
@@ -567,6 +591,7 @@ const Admin = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Employee</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead>Progress</TableHead>
                         <TableHead className="text-center">
                           <div className="flex items-center justify-center gap-1">
@@ -576,16 +601,22 @@ const Admin = () => {
                         </TableHead>
                         <TableHead className="text-center">Available</TableHead>
                         <TableHead>Joined</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {employees.map((employee) => (
+                      {employees.filter(e => e.is_active).map((employee) => (
                         <TableRow key={employee.user_id}>
                           <TableCell>
                             <div>
                               <p className="font-medium">{employee.full_name}</p>
                               <p className="text-sm text-muted-foreground">{employee.email}</p>
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={employee.role === "admin" ? "default" : "secondary"}>
+                              {employee.role}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="space-y-1 min-w-[120px]">
@@ -613,6 +644,12 @@ const Admin = () => {
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">
                             {new Date(employee.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <EmployeeActions 
+                              employee={employee} 
+                              onUpdate={fetchEmployees} 
+                            />
                           </TableCell>
                         </TableRow>
                       ))}
@@ -681,9 +718,9 @@ const Admin = () => {
                         </Button>
                         <Button
                           size="sm"
+                          variant="default"
                           onClick={() => handleProcessRequest(request.id, true)}
                           disabled={processingId === request.id}
-                          className="bg-green-600 hover:bg-green-700"
                         >
                           {processingId === request.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
