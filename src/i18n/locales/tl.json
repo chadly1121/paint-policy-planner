@@ -6,7 +6,9 @@
     "searchPlaceholder": "Maghanap gamit ang keyword...",
     "lastUpdated": "Huling na-update",
     "noResults": "Walang nahanap na resulta para sa",
-    "items": "mga item"
+    "items": "mga item",
+    "loading": "Naglo-load ng nilalaman",
+    "translating": "Isinasalin ang nilalaman"
   },
   "nav": {
     "dashboard": "Dashboard",
