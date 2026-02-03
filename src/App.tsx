@@ -21,6 +21,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import ComplianceGuidance from "./pages/ComplianceGuidance";
 import Pricing from "./pages/Pricing";
+import DocumentBuilder from "./pages/DocumentBuilder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/policies" element={<Policies />} />
               <Route path="/training" element={<Training />} />
               <Route path="/disciplinary" element={<Disciplinary />} />
+              <Route path="/builder" element={<DocumentBuilder />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/admin" element={<Admin />} />
               </Route>
