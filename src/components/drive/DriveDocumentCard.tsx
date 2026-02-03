@@ -16,20 +16,23 @@ import {
   CheckCircle2,
   FileCheck,
   Languages,
-  Video
+  Video,
+  Settings2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDriveContent } from "@/hooks/useDriveContent";
 import { useTranslatedTitle } from "@/hooks/useTranslatedTitle";
+import { useDriveFileMetadata } from "@/hooks/useDriveFileMetadata";
+import { useAuth } from "@/contexts/AuthContext";
 import VideoEmbed from "@/components/video/VideoEmbed";
+import { VideoUrlDialog } from "./VideoUrlDialog";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
   itemNumber: number;
   moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
-  videoUrl?: string | null;
   isAcknowledged?: boolean;
   ackRequired?: boolean;
   onAcknowledge?: () => void;
@@ -40,7 +43,6 @@ export function DriveDocumentCard({
   file,
   itemNumber,
   moduleType,
-  videoUrl,
   isAcknowledged = false,
   ackRequired = false,
   onAcknowledge,
@@ -48,12 +50,15 @@ export function DriveDocumentCard({
 }: DriveDocumentCardProps) {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   const { fetchDriveContent, clearCache, currentLanguage } = useDriveContent();
+  const { videoUrl, updateVideoUrl } = useDriveFileMetadata(file.id);
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [loadingContent, setLoadingContent] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [contentLanguage, setContentLanguage] = useState<string | null>(null);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
   // Get display title (remove file extension) and translate it
   const originalTitle = file.name.replace(/\.[^/.]+$/, '');
@@ -213,6 +218,22 @@ export function DriveDocumentCard({
               </Badge>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Video URL edit button (admin only) */}
+              {isAdmin && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVideoDialogOpen(true);
+                  }}
+                  title={videoUrl ? "Edit video" : "Add video"}
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <Video className="h-3 w-3" />
+                </Button>
+              )}
+              
               {/* Open in Drive */}
               {file.webViewLink && (
                 <Button
@@ -328,6 +349,15 @@ export function DriveDocumentCard({
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Video URL Dialog */}
+      <VideoUrlDialog
+        open={videoDialogOpen}
+        onOpenChange={setVideoDialogOpen}
+        currentUrl={videoUrl}
+        documentName={displayTitle}
+        onSave={updateVideoUrl}
+      />
     </Card>
   );
 }
