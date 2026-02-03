@@ -20,7 +20,58 @@ serve(async (req) => {
       });
     }
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify the user token
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage } = await req.json();
+    
+    // Ensure userId matches authenticated user
+    if (userId !== user.id) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Rate limiting check - 20 quiz generations per hour per user
+    const rateLimitTimestamp = Date.now();
+    const hourAgo = rateLimitTimestamp - (60 * 60 * 1000);
+    
+    const { data: recentRequests } = await supabase
+      .from("audit_logs")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("action", "quiz_generation_request")
+      .gte("created_at", new Date(hourAgo).toISOString())
+      .limit(21);
+    
+    if (recentRequests && recentRequests.length >= 20) {
+      console.warn(`Rate limit exceeded for user ${user.id}`);
+      return new Response(JSON.stringify({ 
+        error: "Rate limit exceeded. You can generate up to 20 quizzes per hour." 
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Log this request for rate limiting
+    await supabase.rpc("log_audit_event", {
+      p_user_id: user.id,
+      p_action: "quiz_generation_request",
+      p_table_name: "quiz_questions",
+    });
     
     // quizType can be: "mini" (5 questions for single item), "final" (10 questions for all items), or undefined (legacy 5 questions)
     const isMiniQuiz = quizType === "mini";
@@ -55,10 +106,6 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if user already has questions for this quiz
     const { data: existingQuestions } = await supabase

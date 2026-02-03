@@ -110,7 +110,7 @@ serve(async (req) => {
       const tokens = await tokenResponse.json();
       console.log('Tokens received, scopes:', tokens.scope);
 
-      // Verify required scopes
+      // Verify required scopes - REJECT if missing
       const grantedScopes = tokens.scope.split(' ');
       const requiredScopes = ['drive.file', 'documents'];
       const missingScopes = requiredScopes.filter(s => 
@@ -118,7 +118,34 @@ serve(async (req) => {
       );
       
       if (missingScopes.length > 0) {
-        console.warn('Missing scopes:', missingScopes);
+        console.error('Missing required scopes:', missingScopes);
+        const scopeNames = missingScopes.map(s => {
+          if (s === 'drive.file') return 'Google Drive file access';
+          if (s === 'documents') return 'Google Docs access';
+          return s;
+        }).join(', ');
+        
+        return new Response(`
+          <html>
+            <body>
+              <h1>Insufficient Permissions</h1>
+              <p>The following permissions were not granted: <strong>${scopeNames}</strong></p>
+              <p>Please try connecting again and make sure to grant all requested permissions.</p>
+              <script>
+                if (window.opener) {
+                  window.opener.postMessage({ 
+                    type: 'DRIVE_AUTH_ERROR', 
+                    error: 'Missing required permissions: ${scopeNames}. Please reconnect and grant all permissions.' 
+                  }, '*');
+                }
+                setTimeout(() => window.close(), 5000);
+              </script>
+            </body>
+          </html>
+        `, { 
+          status: 400, 
+          headers: { 'Content-Type': 'text/html' } 
+        });
       }
 
       // Get Google user info

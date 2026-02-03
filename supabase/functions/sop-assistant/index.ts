@@ -145,8 +145,52 @@ serve(async (req) => {
       });
     }
 
-    // Decrypt API key
-    const encryptionKey = Deno.env.get("DRIVE_ENCRYPTION_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Decrypt API key - require dedicated encryption key
+    const encryptionKey = Deno.env.get("DRIVE_ENCRYPTION_KEY");
+    if (!encryptionKey) {
+      console.error("DRIVE_ENCRYPTION_KEY not configured");
+      return new Response(JSON.stringify({ 
+        error: "Server configuration error. Please contact support.",
+        code: "CONFIG_ERROR"
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Rate limiting check - 50 requests per hour per user
+    const rateLimitTimestamp = Date.now();
+    const hourAgo = rateLimitTimestamp - (60 * 60 * 1000);
+    
+    // Check recent requests for this user in org_ai_settings usage tracking
+    // Simple rate limiting: check if user has made too many requests
+    const { data: recentRequests } = await supabase
+      .from("audit_logs")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("action", "sop_assistant_request")
+      .gte("created_at", new Date(hourAgo).toISOString())
+      .limit(51);
+    
+    if (recentRequests && recentRequests.length >= 50) {
+      console.warn(`Rate limit exceeded for user ${user.id}`);
+      return new Response(JSON.stringify({ 
+        error: "Rate limit exceeded. You can make up to 50 requests per hour.",
+        code: "RATE_LIMIT"
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Log this request for rate limiting
+    await supabase.rpc("log_audit_event", {
+      p_user_id: user.id,
+      p_action: "sop_assistant_request",
+      p_table_name: "org_ai_settings",
+      p_record_id: aiSettings.id,
+    });
+    
     const apiKey = await decryptApiKey(aiSettings.api_key_encrypted, encryptionKey);
 
     // Get Drive token for fetching documents

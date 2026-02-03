@@ -18,6 +18,30 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Import supabase client for rate limiting
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify the user token
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { content, targetLanguage, sourceLanguage, contentType } = await req.json();
 
     if (!content || !targetLanguage) {
@@ -35,6 +59,34 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Rate limiting check - 100 translations per hour per user
+    const rateLimitTimestamp = Date.now();
+    const hourAgo = rateLimitTimestamp - (60 * 60 * 1000);
+    
+    const { data: recentRequests } = await supabase
+      .from("audit_logs")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("action", "translate_content_request")
+      .gte("created_at", new Date(hourAgo).toISOString())
+      .limit(101);
+    
+    if (recentRequests && recentRequests.length >= 100) {
+      console.warn(`Rate limit exceeded for user ${user.id}`);
+      return new Response(JSON.stringify({ 
+        error: "Rate limit exceeded. You can translate up to 100 items per hour." 
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Log this request for rate limiting
+    await supabase.rpc("log_audit_event", {
+      p_user_id: user.id,
+      p_action: "translate_content_request",
+    });
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

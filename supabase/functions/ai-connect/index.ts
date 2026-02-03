@@ -119,8 +119,17 @@ serve(async (req) => {
 
     console.log("OpenAI API key valid, encrypting and storing...");
 
-    // Encrypt the API key
-    const encryptionKey = Deno.env.get("DRIVE_ENCRYPTION_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Encrypt the API key - require dedicated encryption key
+    const encryptionKey = Deno.env.get("DRIVE_ENCRYPTION_KEY");
+    if (!encryptionKey) {
+      console.error("DRIVE_ENCRYPTION_KEY not configured");
+      return new Response(JSON.stringify({ 
+        error: "Server configuration error. Please contact support." 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const encryptedKey = await encryptApiKey(apiKey, encryptionKey);
 
     // Get hint (last 4 chars)
