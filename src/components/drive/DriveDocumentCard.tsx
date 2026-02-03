@@ -65,12 +65,15 @@ export function DriveDocumentCard({
 
   // Re-fetch content when language changes and card is open
   useEffect(() => {
-    if (isOpen && content && contentLanguage !== currentLanguage) {
-      // Language changed while open, re-fetch with new language
+    if (isOpen && contentLanguage && contentLanguage !== currentLanguage) {
+      // Language changed while open - clear cached content and re-fetch
+      clearCache(file.id);
+      setContent(null);
+      setContentLanguage(null);
       loadContent();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLanguage, isOpen, contentLanguage]);
+  }, [currentLanguage]);
 
   // Load content from Drive with translation
   const loadContent = async () => {
