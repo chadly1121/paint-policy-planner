@@ -25,8 +25,9 @@ declare namespace google {
 
   namespace picker {
     class PickerBuilder {
-      addView(view: DocsView): PickerBuilder;
+      addView(view: DocsView | ViewId): PickerBuilder;
       setOAuthToken(token: string): PickerBuilder;
+      setDeveloperKey(key: string): PickerBuilder;
       setCallback(callback: (data: PickerResponse) => void): PickerBuilder;
       enableFeature(feature: Feature): PickerBuilder;
       setTitle(title: string): PickerBuilder;
@@ -55,6 +56,20 @@ declare namespace google {
 
     enum Feature {
       MULTISELECT_ENABLED = "MULTISELECT_ENABLED",
+    }
+
+    enum ViewId {
+      DOCS = "DOCS",
+      RECENTLY_PICKED = "RECENTLY_PICKED",
+      FOLDERS = "FOLDERS",
+      DOCUMENTS = "DOCUMENTS",
+      SPREADSHEETS = "SPREADSHEETS",
+      PRESENTATIONS = "PRESENTATIONS",
+    }
+
+    enum Action {
+      PICKED = "picked",
+      CANCEL = "cancel",
     }
   }
 }
