@@ -167,6 +167,19 @@ async function handleSubscriptionChange(
     ? "active" 
     : "inactive";
 
+  // Safely convert timestamps - Stripe uses Unix timestamps (seconds)
+  let periodStart: string | null = null;
+  let periodEnd: string | null = null;
+  
+  if (subscription.current_period_start && typeof subscription.current_period_start === 'number') {
+    periodStart = new Date(subscription.current_period_start * 1000).toISOString();
+  }
+  if (subscription.current_period_end && typeof subscription.current_period_end === 'number') {
+    periodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+  }
+
+  logStep("Preparing subscription upsert", { periodStart, periodEnd, status, baseUsers, extraSeats });
+
   // Upsert subscription record
   const { error } = await supabase
     .from("org_subscriptions")
@@ -177,8 +190,8 @@ async function handleSubscriptionChange(
       status,
       price_id: subscription.items.data[0]?.price.id,
       product_id: subscription.items.data[0]?.price.product as string,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
       base_user_limit: baseUsers,
       extra_seats: extraSeats,
       cancel_at_period_end: subscription.cancel_at_period_end,
