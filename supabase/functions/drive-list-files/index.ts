@@ -231,10 +231,11 @@ serve(async (req) => {
       console.log(`Folder verified: ${folderInfo.name} (trashed: ${folderInfo.trashed})`);
     }
 
-    // List files in the folder  
+    // List files in the folder (including shortcuts)
     const query = `'${folderRecord.drive_folder_id}' in parents and trashed = false`;
     const encodedQuery = encodeURIComponent(query);
-    const fields = 'files(id,name,mimeType,createdTime,modifiedTime,webViewLink,size)';
+    // Include shortcutDetails for shortcuts that point to other files
+    const fields = 'files(id,name,mimeType,createdTime,modifiedTime,webViewLink,size,shortcutDetails)';
     
     const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&fields=${fields}&orderBy=name`;
     console.log(`Querying Drive with folder ID: ${folderRecord.drive_folder_id}`);
