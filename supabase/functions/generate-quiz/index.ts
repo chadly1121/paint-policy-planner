@@ -27,9 +27,6 @@ serve(async (req) => {
     const isFinalExam = quizType === "final";
     const questionCount = isMiniQuiz ? 5 : isFinalExam ? 10 : 5;
     
-    // For mini quizzes, we use itemKey (e.g., "safety_safety1"), otherwise sectionKey
-    const quizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
-    
     // Language mapping for quiz generation
     const languageNames: Record<string, string> = {
       en: "English",
@@ -39,6 +36,11 @@ serve(async (req) => {
     };
     const userLanguage = targetLanguage || "en";
     const languageName = languageNames[userLanguage] || "English";
+    
+    // For mini quizzes, we use itemKey (e.g., "safety_safety1"), otherwise sectionKey
+    // Include language in the key so quizzes are regenerated per language
+    const baseQuizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
+    const quizKey = `${baseQuizKey}_${userLanguage}`;
     
     if (!quizKey || !sectionContent || !userId) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
