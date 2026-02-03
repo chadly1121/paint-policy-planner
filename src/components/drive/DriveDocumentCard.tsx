@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDriveContent } from "@/hooks/useDriveContent";
+import { useTranslatedTitle } from "@/hooks/useTranslatedTitle";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 interface DriveDocumentCardProps {
@@ -50,8 +51,9 @@ export function DriveDocumentCard({
   const [downloading, setDownloading] = useState(false);
   const [contentLanguage, setContentLanguage] = useState<string | null>(null);
 
-  // Get display title (remove file extension)
-  const displayTitle = file.name.replace(/\.[^/.]+$/, '');
+  // Get display title (remove file extension) and translate it
+  const originalTitle = file.name.replace(/\.[^/.]+$/, '');
+  const { translatedTitle: displayTitle, loading: titleLoading } = useTranslatedTitle(originalTitle);
 
   // Module prefix for numbering
   const prefixMap = {
