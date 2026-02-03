@@ -152,18 +152,20 @@ export function DriveDocumentList({
     <div className="space-y-6">
       {/* Header Card */}
       <Card className="border-primary/20">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+        <CardHeader className="pb-4">
+          {/* Header: stack on mobile, row on tablet+ */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 {icon}
               </div>
-              <div className="flex-1">
-                <CardTitle className="font-serif">{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
+              <div className="min-w-0">
+                <CardTitle className="font-serif truncate">{title}</CardTitle>
+                <CardDescription className="line-clamp-2">{description}</CardDescription>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            {/* Buttons: wrap on small screens */}
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="default"
                 size="sm"
@@ -176,7 +178,8 @@ export function DriveDocumentList({
                 ) : (
                   <FilePlus className="h-4 w-4" />
                 )}
-                {isCreating ? "Creating..." : "Create New"}
+                <span className="hidden xs:inline">{isCreating ? "Creating..." : "Create New"}</span>
+                <span className="xs:hidden">{isCreating ? "..." : "New"}</span>
               </Button>
               <Button
                 variant="outline"
@@ -184,8 +187,8 @@ export function DriveDocumentList({
                 onClick={handleRefresh}
                 disabled={syncing}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                Refresh
+                <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline ml-2">Refresh</span>
               </Button>
               {folderRecord && (
                 <Button
@@ -193,15 +196,15 @@ export function DriveDocumentList({
                   size="sm"
                   onClick={openInDrive}
                 >
-                  <FolderOpen className="h-4 w-4 mr-2" />
-                  Open Folder
+                  <FolderOpen className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Open Folder</span>
                 </Button>
               )}
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-        <div className="space-y-2">
+          <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Documents in Drive</span>
               <span className="font-medium">{filteredFiles.length} files</span>

@@ -31,8 +31,9 @@ const SOPs = () => {
   return (
     <DriveRequiredGuard moduleName="SOPs">
       <div className="space-y-6">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        {/* Responsive grid: stacked on mobile/tablet, side-by-side on desktop */}
+        <div className="grid gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-2 order-2 xl:order-1">
             <DriveDocumentList
               moduleType="sops"
               icon={<ClipboardList className="h-5 w-5 text-primary" />}
@@ -41,7 +42,7 @@ const SOPs = () => {
               onStartQuiz={handleStartQuiz}
             />
           </div>
-          <div className="lg:col-span-1">
+          <div className="xl:col-span-1 order-1 xl:order-2">
             <SOPAssistant />
           </div>
         </div>
