@@ -9,8 +9,9 @@ const corsHeaders = {
 const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID')!;
 const REDIRECT_URI = `${Deno.env.get('SUPABASE_URL')}/functions/v1/drive-auth-callback`;
 
-// Scopes: drive.file (app-owned files), documents (Google Docs API), userinfo
+// Scopes: drive.readonly (see all files including shortcuts), documents (Google Docs API), userinfo
 const SCOPES = [
+  'https://www.googleapis.com/auth/drive.readonly',
   'https://www.googleapis.com/auth/drive.file',
   'https://www.googleapis.com/auth/documents',
   'https://www.googleapis.com/auth/userinfo.email',
