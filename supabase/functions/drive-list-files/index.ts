@@ -251,9 +251,55 @@ serve(async (req) => {
     }
 
     const listData = await listResponse.json();
-    const files: DriveFile[] = listData.files || [];
+    const rawFiles = listData.files || [];
 
-    console.log(`Listed ${files.length} files in ${folder_type} folder`);
+    console.log(`Listed ${rawFiles.length} files in ${folder_type} folder`);
+
+    // Process files - resolve shortcuts to their target files
+    const files: DriveFile[] = [];
+    for (const file of rawFiles) {
+      if (file.mimeType === 'application/vnd.google-apps.shortcut' && file.shortcutDetails) {
+        // This is a shortcut - fetch the actual target file details
+        const targetId = file.shortcutDetails.targetId;
+        const targetMimeType = file.shortcutDetails.targetMimeType;
+        
+        try {
+          const targetResponse = await fetch(
+            `https://www.googleapis.com/drive/v3/files/${targetId}?fields=id,name,mimeType,createdTime,modifiedTime,webViewLink,size`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          );
+          
+          if (targetResponse.ok) {
+            const targetFile = await targetResponse.json();
+            files.push({
+              id: targetFile.id,
+              name: targetFile.name || file.name,
+              mimeType: targetFile.mimeType || targetMimeType,
+              createdTime: targetFile.createdTime || file.createdTime,
+              modifiedTime: targetFile.modifiedTime || file.modifiedTime,
+              webViewLink: targetFile.webViewLink,
+              size: targetFile.size,
+            });
+            console.log(`Resolved shortcut "${file.name}" -> "${targetFile.name}"`);
+          } else {
+            console.log(`Failed to resolve shortcut "${file.name}" to target ${targetId}`);
+          }
+        } catch (err) {
+          console.log(`Error resolving shortcut "${file.name}":`, err);
+        }
+      } else {
+        // Regular file
+        files.push({
+          id: file.id,
+          name: file.name,
+          mimeType: file.mimeType,
+          createdTime: file.createdTime,
+          modifiedTime: file.modifiedTime,
+          webViewLink: file.webViewLink,
+          size: file.size,
+        });
+      }
+    }
     
     // If still empty, search for any folder named "Policies" anywhere and log it
     if (files.length === 0 && folder_type === 'policies') {
