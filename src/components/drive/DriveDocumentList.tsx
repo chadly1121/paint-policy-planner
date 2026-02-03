@@ -1,11 +1,11 @@
 // Drive-based document list component
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Search, RefreshCw, Loader2, FolderOpen, Plus, FilePlus, Upload } from "lucide-react";
+import { Search, RefreshCw, Loader2, FolderOpen, Plus, FilePlus } from "lucide-react";
 import { useDriveFiles, type DriveFile } from "@/hooks/useDriveFiles";
 import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
@@ -33,96 +33,9 @@ export function DriveDocumentList({
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
   const { files, loading, error, refresh } = useDriveFiles(moduleType);
   const { folders } = useDriveConnection();
   const [syncing, setSyncing] = useState(false);
-
-  // Import a file using Google Picker and copy to org folder
-  const handleImportFile = useCallback(async () => {
-    setIsImporting(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      // Get picker token
-      const tokenResponse = await supabase.functions.invoke("picker-token-exchange", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (tokenResponse.error) throw tokenResponse.error;
-      const { access_token, developer_key } = tokenResponse.data;
-
-      // Load Google Picker API
-      await new Promise<void>((resolve, reject) => {
-        if (window.google?.picker) {
-          resolve();
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/api.js';
-        script.onload = () => {
-          window.gapi.load('picker', () => resolve());
-        };
-        script.onerror = reject;
-        document.body.appendChild(script);
-      });
-
-      // Show picker - use any to avoid TS issues with Google Picker types
-      const googlePicker = (window as any).google.picker;
-      const picker = new googlePicker.PickerBuilder()
-        .addView(googlePicker.ViewId.DOCS)
-        .addView(googlePicker.ViewId.RECENTLY_PICKED)
-        .setOAuthToken(access_token)
-        .setDeveloperKey(developer_key)
-        .setTitle("Select a file to import")
-        .setCallback(async (data: any) => {
-          if (data.action === googlePicker.Action.PICKED) {
-            const file = data.docs[0];
-            if (file?.id) {
-              // Copy the selected file to org folder
-              try {
-                const copyResponse = await supabase.functions.invoke("drive-copy-file", {
-                  headers: { Authorization: `Bearer ${session.access_token}` },
-                  body: {
-                    source_file_id: file.id,
-                    folder_type: moduleType,
-                  },
-                });
-
-                if (copyResponse.error) throw copyResponse.error;
-
-                toast({
-                  title: "File imported",
-                  description: copyResponse.data.message,
-                });
-
-                await refresh();
-              } catch (err) {
-                console.error("Copy error:", err);
-                toast({
-                  variant: "destructive",
-                  title: "Failed to import file",
-                  description: err instanceof Error ? err.message : "Unknown error",
-                });
-              }
-            }
-          }
-          setIsImporting(false);
-        })
-        .build();
-
-      picker.setVisible(true);
-    } catch (err) {
-      console.error("Import error:", err);
-      toast({
-        variant: "destructive",
-        title: "Failed to open file picker",
-        description: err instanceof Error ? err.message : "Unknown error",
-      });
-      setIsImporting(false);
-    }
-  }, [moduleType, refresh, toast]);
 
   // Get folder info for "Open in Drive" link
   const folderRecord = folders.find(f => f.folder_type === moduleType);
@@ -245,20 +158,6 @@ export function DriveDocumentList({
                   <FilePlus className="h-4 w-4" />
                 )}
                 {isCreating ? "Creating..." : "Create New"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleImportFile}
-                disabled={isImporting}
-                className="gap-2"
-              >
-                {isImporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4" />
-                )}
-                {isImporting ? "Importing..." : "Import File"}
               </Button>
               <Button
                 variant="outline"
