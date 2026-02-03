@@ -137,7 +137,7 @@ serve(async (req) => {
     // Get the folder record for this module
     const { data: folderRecord, error: folderError } = await supabase
       .from('org_drive_folders')
-      .select('drive_folder_id, drive_folder_name')
+      .select('id, drive_folder_id, drive_folder_name')
       .eq('org_id', orgUser.org_id)
       .eq('folder_type', folder_type)
       .single();
@@ -171,14 +171,73 @@ serve(async (req) => {
 
     const accessToken = await getValidAccessToken(tokenRecord, supabase);
 
-    // List files in the folder
+    // First verify the folder still exists and is accessible
+    const folderCheckResponse = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${folderRecord.drive_folder_id}?fields=id,name,trashed`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    
+    if (!folderCheckResponse.ok) {
+      const status = folderCheckResponse.status;
+      console.error(`Folder check failed with status ${status}`);
+      if (status === 404) {
+        // Folder was deleted - try to find it by name in the root folder
+        const rootFolder = await supabase
+          .from('org_drive_folders')
+          .select('drive_folder_id')
+          .eq('org_id', orgUser.org_id)
+          .eq('folder_type', 'root')
+          .single();
+        
+        if (rootFolder.data) {
+          // Search for folder by name under root
+          const folderNameMap: Record<string, string> = {
+            'sops': 'SOPs',
+            'policies': 'Policies', 
+            'safety': 'Safety',
+            'training': 'Training',
+            'disciplinary': 'Disciplinary'
+          };
+          const expectedName = folderNameMap[folder_type] || folder_type;
+          
+          const searchQuery = encodeURIComponent(
+            `'${rootFolder.data.drive_folder_id}' in parents and name = '${expectedName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
+          );
+          const searchResponse = await fetch(
+            `https://www.googleapis.com/drive/v3/files?q=${searchQuery}&fields=files(id,name)`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          );
+          
+          if (searchResponse.ok) {
+            const searchData = await searchResponse.json();
+            if (searchData.files && searchData.files.length > 0) {
+              const correctFolderId = searchData.files[0].id;
+              console.log(`Found correct folder: ${correctFolderId}, updating database...`);
+              
+              // Update the database with correct folder ID
+              await supabase
+                .from('org_drive_folders')
+                .update({ drive_folder_id: correctFolderId })
+                .eq('id', folderRecord.id);
+              
+              // Use the corrected folder ID
+              folderRecord.drive_folder_id = correctFolderId;
+            }
+          }
+        }
+      }
+    } else {
+      const folderInfo = await folderCheckResponse.json();
+      console.log(`Folder verified: ${folderInfo.name} (trashed: ${folderInfo.trashed})`);
+    }
+
+    // List files in the folder  
     const query = `'${folderRecord.drive_folder_id}' in parents and trashed = false`;
     const encodedQuery = encodeURIComponent(query);
     const fields = 'files(id,name,mimeType,createdTime,modifiedTime,webViewLink,size)';
     
     const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&fields=${fields}&orderBy=name`;
     console.log(`Querying Drive with folder ID: ${folderRecord.drive_folder_id}`);
-    console.log(`Query: ${query}`);
     
     const listResponse = await fetch(listUrl, { 
       headers: { Authorization: `Bearer ${accessToken}` } 
@@ -191,10 +250,33 @@ serve(async (req) => {
     }
 
     const listData = await listResponse.json();
-    console.log(`Drive API raw response:`, JSON.stringify(listData));
     const files: DriveFile[] = listData.files || [];
 
     console.log(`Listed ${files.length} files in ${folder_type} folder`);
+    
+    // If still empty, search for any folder named "Policies" anywhere and log it
+    if (files.length === 0 && folder_type === 'policies') {
+      const globalSearch = encodeURIComponent(`name = 'Policies' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`);
+      const globalSearchResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${globalSearch}&fields=files(id,name,parents)`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (globalSearchResponse.ok) {
+        const globalData = await globalSearchResponse.json();
+        console.log(`Found ${globalData.files?.length || 0} folders named "Policies" in Drive:`, JSON.stringify(globalData.files));
+      }
+      
+      // Also search for ANY recent documents to help debug
+      const recentDocsQuery = encodeURIComponent(`mimeType = 'application/vnd.google-apps.document' and trashed = false`);
+      const recentDocsResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${recentDocsQuery}&fields=files(id,name,parents)&orderBy=modifiedTime desc&pageSize=20`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (recentDocsResponse.ok) {
+        const recentData = await recentDocsResponse.json();
+        console.log(`Recent 20 docs in Drive:`, JSON.stringify(recentData.files));
+      }
+    }
 
     // Update last_used_at
     await supabase
