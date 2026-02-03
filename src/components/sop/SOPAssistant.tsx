@@ -215,9 +215,9 @@ export function SOPAssistant() {
           {messages.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
               <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">Ask me about your SOPs!</p>
+              <p className="font-medium">{t('sopAssistant.welcome', 'Ask me about your SOPs!')}</p>
               <p className="text-sm mt-1">
-                I can answer questions about your organization's documents.
+                {t('sopAssistant.description', "I can answer questions about your organization's documents.")}
               </p>
             </div>
           )}
@@ -254,7 +254,7 @@ export function SOPAssistant() {
                   <div className="mt-3 pt-3 border-t border-border/50">
                     <p className="text-xs font-medium mb-2 flex items-center gap-1">
                       <FileText className="h-3 w-3" />
-                      Referenced Documents:
+                      {t('sopAssistant.referencedDocs', 'Referenced Documents:')}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {message.citedDocs.map((doc, docIndex) => (
@@ -292,7 +292,7 @@ export function SOPAssistant() {
               <div className="bg-muted rounded-lg p-3">
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm text-muted-foreground">Thinking...</span>
+                  <span className="text-sm text-muted-foreground">{t('sopAssistant.thinking', 'Thinking...')}</span>
                 </div>
               </div>
             </div>
@@ -306,7 +306,7 @@ export function SOPAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about your SOPs..."
+            placeholder={t('sopAssistant.placeholder', 'Ask about your SOPs...')}
             disabled={loading}
             className="flex-1"
           />
@@ -319,7 +319,7 @@ export function SOPAssistant() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mt-2 text-center">
-          Powered by your organization's AI provider. Answers are based on your documents.
+          {t('sopAssistant.poweredBy', "Powered by your organization's AI provider. Answers are based on your documents.")}
         </p>
       </div>
     </Card>
