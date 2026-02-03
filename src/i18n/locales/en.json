@@ -7,7 +7,9 @@
     "lastUpdated": "Last updated",
     "noResults": "No results found matching",
     "items": "items",
-    "points": "points"
+    "points": "points",
+    "loading": "Loading content",
+    "translating": "Translating content"
   },
   "quiz": {
     "takeQuiz": "Take Quiz",

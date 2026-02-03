@@ -1,5 +1,5 @@
-// Drive-based SOP Card component - displays a file from Google Drive
-import { useState } from "react";
+// Drive-based SOP Card component - displays a file from Google Drive with translation support
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,12 @@ import {
   Loader2,
   Download,
   CheckCircle2,
-  FileCheck
+  FileCheck,
+  Languages
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDriveContent } from "@/hooks/useDriveContent";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 interface DriveDocumentCardProps {
@@ -39,12 +41,14 @@ export function DriveDocumentCard({
   onAcknowledge,
   onStartQuiz,
 }: DriveDocumentCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
+  const { fetchDriveContent, clearCache, currentLanguage } = useDriveContent();
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [loadingContent, setLoadingContent] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [contentLanguage, setContentLanguage] = useState<string | null>(null);
 
   // Get display title (remove file extension)
   const displayTitle = file.name.replace(/\.[^/.]+$/, '');
@@ -59,35 +63,42 @@ export function DriveDocumentCard({
   };
   const prefix = prefixMap[moduleType];
 
+  // Re-fetch content when language changes and card is open
+  useEffect(() => {
+    if (isOpen && content && contentLanguage !== currentLanguage) {
+      // Language changed while open, re-fetch with new language
+      loadContent();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLanguage, isOpen, contentLanguage]);
+
+  // Load content from Drive with translation
+  const loadContent = async () => {
+    setLoadingContent(true);
+    try {
+      const translatedContent = await fetchDriveContent(file.id, { translate: true });
+      if (translatedContent) {
+        setContent(translatedContent);
+        setContentLanguage(currentLanguage);
+      }
+    } catch (err) {
+      console.error("Error loading content:", err);
+      toast({
+        variant: "destructive",
+        title: "Failed to load content",
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setLoadingContent(false);
+    }
+  };
+
   // Load content from Drive when expanded
   const handleToggle = async (open: boolean) => {
     setIsOpen(open);
     
-    if (open && !content && !loadingContent) {
-      setLoadingContent(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error("Not authenticated");
-
-        const response = await supabase.functions.invoke("drive-export", {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          body: { file_id: file.id, format: "text" },
-        });
-
-        if (response.error) throw response.error;
-        if (response.data?.content) {
-          setContent(response.data.content);
-        }
-      } catch (err) {
-        console.error("Error loading content:", err);
-        toast({
-          variant: "destructive",
-          title: "Failed to load content",
-          description: err instanceof Error ? err.message : "Unknown error",
-        });
-      } finally {
-        setLoadingContent(false);
-      }
+    if (open && (!content || contentLanguage !== currentLanguage) && !loadingContent) {
+      await loadContent();
     }
   };
 
@@ -239,7 +250,8 @@ export function DriveDocumentCard({
             {loadingContent && (
               <div className="flex items-center gap-2 py-4 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Loading content from Drive...</span>
+                <Languages className="h-4 w-4" />
+                <span>{currentLanguage !== 'en' ? t("common.translating") : t("common.loading")}...</span>
               </div>
             )}
             

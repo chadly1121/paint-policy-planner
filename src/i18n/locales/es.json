@@ -6,7 +6,9 @@
     "searchPlaceholder": "Buscar por palabra clave...",
     "lastUpdated": "Última actualización",
     "noResults": "No se encontraron resultados para",
-    "items": "elementos"
+    "items": "elementos",
+    "loading": "Cargando contenido",
+    "translating": "Traduciendo contenido"
   },
   "nav": {
     "dashboard": "Panel de control",
