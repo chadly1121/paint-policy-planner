@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Search, RefreshCw, Loader2, FolderOpen, Plus, FilePlus } from "lucide-react";
+import { Search, RefreshCw, Loader2, FolderOpen, FilePlus } from "lucide-react";
 import { useDriveFiles, type DriveFile } from "@/hooks/useDriveFiles";
 import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
@@ -209,14 +209,24 @@ export function DriveDocumentList({
             <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="font-medium text-lg mb-2">No documents yet</h3>
             <p className="text-muted-foreground mb-4">
-              Add documents to your {title} folder in Google Drive.
+              Create a new document or add files directly in Google Drive.
             </p>
-            {folderRecord && (
-              <Button onClick={openInDrive}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Documents in Drive
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => setCreateDialogOpen(true)} disabled={isCreating}>
+                {isCreating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FilePlus className="h-4 w-4 mr-2" />
+                )}
+                Create New
               </Button>
-            )}
+              {folderRecord && (
+                <Button variant="outline" onClick={openInDrive}>
+                  <FolderOpen className="h-4 w-4 mr-2" />
+                  Open Folder
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
