@@ -172,20 +172,26 @@ serve(async (req) => {
     const accessToken = await getValidAccessToken(tokenRecord, supabase);
 
     // List files in the folder
-    const query = encodeURIComponent(`'${folderRecord.drive_folder_id}' in parents and trashed = false`);
+    const query = `'${folderRecord.drive_folder_id}' in parents and trashed = false`;
+    const encodedQuery = encodeURIComponent(query);
     const fields = 'files(id,name,mimeType,createdTime,modifiedTime,webViewLink,size)';
     
-    const listResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q=${query}&fields=${fields}&orderBy=name`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+    const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&fields=${fields}&orderBy=name`;
+    console.log(`Querying Drive with folder ID: ${folderRecord.drive_folder_id}`);
+    console.log(`Query: ${query}`);
+    
+    const listResponse = await fetch(listUrl, { 
+      headers: { Authorization: `Bearer ${accessToken}` } 
+    });
 
     if (!listResponse.ok) {
-      const error = await listResponse.text();
-      throw new Error(`Failed to list files: ${error}`);
+      const errorText = await listResponse.text();
+      console.error(`Drive API error: ${listResponse.status} - ${errorText}`);
+      throw new Error(`Failed to list files: ${errorText}`);
     }
 
     const listData = await listResponse.json();
+    console.log(`Drive API raw response:`, JSON.stringify(listData));
     const files: DriveFile[] = listData.files || [];
 
     console.log(`Listed ${files.length} files in ${folder_type} folder`);
