@@ -48,6 +48,19 @@ const Pricing = () => {
         </div>
       </header>
 
+      {/* Promo Banner */}
+      <section className="bg-primary/10 border-b border-primary/20">
+        <div className="container mx-auto px-4 py-3 text-center">
+          <p className="text-sm font-medium">
+            🎉 <span className="font-bold">Limited Time Offer:</span> Use code{" "}
+            <code className="rounded bg-primary px-2 py-0.5 font-mono font-bold text-primary-foreground">
+              BTAFREE
+            </code>{" "}
+            at checkout for a <span className="font-bold">FREE subscription!</span>
+          </p>
+        </div>
+      </section>
+
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 text-center">
         <Badge variant="secondary" className="mb-4">
