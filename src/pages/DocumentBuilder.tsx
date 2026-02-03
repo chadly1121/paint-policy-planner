@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import ReactMarkdown from "react-markdown";
 import {
   Send,
   Trash2,
@@ -14,11 +13,11 @@ import {
   Sparkles,
   Loader2,
   Save,
-  ExternalLink,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDocumentBuilder, DocumentType } from "@/hooks/useDocumentBuilder";
+import { DocumentPreview } from "@/components/document-builder/DocumentPreview";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -76,7 +76,6 @@ const DocumentBuilder = () => {
   const { t } = useTranslation();
   const [input, setInput] = useState("");
   const [copied, setCopied] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
@@ -91,10 +90,6 @@ const DocumentBuilder = () => {
     saveToDrive,
   } = useDocumentBuilder();
   const [lastSavedDoc, setLastSavedDoc] = useState<{ web_view_link: string; file_name: string } | null>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,6 +133,10 @@ const DocumentBuilder = () => {
   const selectedType = DOCUMENT_TYPES.find((d) => d.value === documentType);
   const TypeIcon = selectedType?.icon || FileText;
 
+  // Get the latest assistant message for the document preview
+  const latestAssistantMessage = [...messages].reverse().find((m) => m.role === "assistant");
+  const hasDocument = !!latestAssistantMessage;
+
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-4">
       {/* Header */}
@@ -172,7 +171,7 @@ const DocumentBuilder = () => {
             </SelectContent>
           </Select>
 
-          {messages.length > 0 && (
+          {hasDocument && (
             <>
               <Button
                 variant="default"
@@ -199,97 +198,121 @@ const DocumentBuilder = () => {
         </div>
       </div>
 
-      {/* Chat Area */}
-      <Card className="flex flex-1 flex-col overflow-hidden">
-        <ScrollArea className="flex-1 p-4">
-          {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-6 py-12">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Sparkles className="h-8 w-8 text-primary" />
+      {/* Main Content Area */}
+      <div className="flex flex-1 gap-4 overflow-hidden">
+        {/* Chat Panel */}
+        <Card className={cn(
+          "flex flex-col overflow-hidden transition-all duration-300",
+          hasDocument ? "w-1/3 min-w-[320px]" : "flex-1"
+        )}>
+          <div className="flex items-center gap-2 border-b px-4 py-3">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Chat</span>
+          </div>
+          
+          <ScrollArea className="flex-1 p-4">
+            {messages.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-6 py-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </div>
+                <div className="max-w-sm text-center">
+                  <h3 className="text-base font-semibold">Start Building</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Describe what you need and I'll create a professional {selectedType?.description.toLowerCase()}.
+                  </p>
+                </div>
+                <div className="grid gap-2 w-full">
+                  {STARTER_PROMPTS[documentType].map((prompt) => (
+                    <Button
+                      key={prompt}
+                      variant="outline"
+                      size="sm"
+                      className="h-auto whitespace-normal text-left text-xs"
+                      onClick={() => handleStarterPrompt(prompt)}
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <div className="max-w-md text-center">
-                <h3 className="text-lg font-semibold">Start Building Your Document</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Describe what you need and I'll help you create a professional{" "}
-                  {selectedType?.description.toLowerCase()}.
-                </p>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {STARTER_PROMPTS[documentType].map((prompt) => (
-                  <Button
-                    key={prompt}
-                    variant="outline"
-                    size="sm"
-                    className="h-auto whitespace-normal text-left"
-                    onClick={() => handleStarterPrompt(prompt)}
-                  >
-                    {prompt}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "flex",
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  )}
-                >
+            ) : (
+              <div className="space-y-3">
+                {messages.map((msg, i) => (
                   <div
+                    key={i}
                     className={cn(
-                      "max-w-[85%] rounded-lg px-4 py-3",
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                      "flex",
+                      msg.role === "user" ? "justify-end" : "justify-start"
                     )}
                   >
-                    {msg.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p className="text-sm">{msg.content}</p>
-                    )}
+                    <div
+                      className={cn(
+                        "max-w-[90%] rounded-lg px-3 py-2 text-sm",
+                        msg.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {msg.role === "user" ? (
+                        <p>{msg.content}</p>
+                      ) : (
+                        <p className="text-xs italic">Document generated ✓</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {isLoading && messages[messages.length - 1]?.role === "user" && (
-                <div className="flex justify-start">
-                  <div className="flex items-center gap-2 rounded-lg bg-muted px-4 py-3">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm text-muted-foreground">Thinking...</span>
+                ))}
+                {isLoading && messages[messages.length - 1]?.role === "user" && (
+                  <div className="flex justify-start">
+                    <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span className="text-xs text-muted-foreground">Generating...</span>
+                    </div>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </ScrollArea>
+                )}
+              </div>
+            )}
+          </ScrollArea>
 
-        {/* Input Area */}
-        <div className="border-t p-4">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={`Describe the ${selectedType?.description.toLowerCase()} you need...`}
-              className="min-h-[60px] flex-1 resize-none"
-              disabled={isLoading}
-            />
-            <Button type="submit" size="icon" className="h-[60px] w-[60px]" disabled={!input.trim() || isLoading}>
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-            </Button>
-          </form>
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            AI-generated content. Always review before use.
-          </p>
-        </div>
-      </Card>
+          {/* Input Area */}
+          <div className="border-t p-3">
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={hasDocument ? "Ask for changes..." : `Describe the ${selectedType?.description.toLowerCase()}...`}
+                className="min-h-[50px] flex-1 resize-none text-sm"
+                disabled={isLoading}
+              />
+              <Button type="submit" size="icon" className="h-[50px] w-[50px]" disabled={!input.trim() || isLoading}>
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </form>
+          </div>
+        </Card>
+
+        {/* Document Preview Panel */}
+        {hasDocument && (
+          <Card className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex items-center gap-2 border-b px-4 py-3">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Document Preview</span>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {selectedType?.description}
+              </span>
+            </div>
+            <ScrollArea className="flex-1">
+              <DocumentPreview
+                content={latestAssistantMessage?.content || ""}
+                isStreaming={isLoading && messages[messages.length - 1]?.role === "assistant"}
+                className="m-4 min-h-[calc(100%-2rem)]"
+              />
+            </ScrollArea>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
