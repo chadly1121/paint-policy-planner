@@ -20,7 +20,7 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, sectionContent, userId, quizType, itemKey } = await req.json();
+    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage } = await req.json();
     
     // quizType can be: "mini" (5 questions for single item), "final" (10 questions for all items), or undefined (legacy 5 questions)
     const isMiniQuiz = quizType === "mini";
@@ -30,6 +30,16 @@ serve(async (req) => {
     // For mini quizzes, we use itemKey (e.g., "safety_safety1"), otherwise sectionKey
     const quizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
     
+    // Language mapping for quiz generation
+    const languageNames: Record<string, string> = {
+      en: "English",
+      es: "Spanish", 
+      fr: "French",
+      tl: "Tagalog (Filipino)",
+    };
+    const userLanguage = targetLanguage || "en";
+    const languageName = languageNames[userLanguage] || "English";
+    
     if (!quizKey || !sectionContent || !userId) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
@@ -37,7 +47,7 @@ serve(async (req) => {
       });
     }
     
-    console.log(`Generating ${quizType || 'standard'} quiz for: ${quizKey}, user: ${userId}, questions: ${questionCount}`);
+    console.log(`Generating ${quizType || 'standard'} quiz for: ${quizKey}, user: ${userId}, questions: ${questionCount}, language: ${languageName}`);
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -73,17 +83,20 @@ serve(async (req) => {
 Generate exactly ${questionCount} multiple choice questions based on the provided content.
 Each question should test understanding of key concepts, procedures, or rules.
 Make questions clear and unambiguous with exactly one correct answer.
-IMPORTANT: Generate questions and answers in the SAME LANGUAGE as the provided content.
+CRITICAL: You MUST generate ALL questions and ALL answer options in ${languageName}. 
+The content may be in any language, but your output must be entirely in ${languageName}.
 ${isMiniQuiz ? 'Focus on the most important points from this specific procedure.' : 'Vary the difficulty - some straightforward, some requiring deeper understanding.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
-    const userPrompt = `Generate ${questionCount} multiple choice questions for this ${isMiniQuiz ? 'standard operating procedure' : 'section of the employee manual'}:
+    const userPrompt = `Generate ${questionCount} multiple choice questions for this ${isMiniQuiz ? 'standard operating procedure' : 'section of the employee manual'}.
+IMPORTANT: Generate all questions and answers in ${languageName}.
 
+Content to create questions from:
 ${sectionContent}
 
 For each question, provide:
-1. A clear question
-2. Exactly 4 answer options (A, B, C, D)
+1. A clear question (in ${languageName})
+2. Exactly 4 answer options A, B, C, D (in ${languageName})
 3. The index of the correct answer (0 for A, 1 for B, 2 for C, 3 for D)`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
