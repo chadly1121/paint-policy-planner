@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Settings,
   UserCircle,
+  FlaskConical,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -35,6 +36,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { path: "/profile", label: "My Profile", icon: UserCircle },
     { path: "/sops", label: t("nav.sops"), icon: ClipboardList },
     { path: "/safety", label: t("nav.safetyProtocols"), icon: Shield },
+    { path: "/sds", label: "Safety Data Sheets", icon: FlaskConical },
     { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
     { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
     { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
