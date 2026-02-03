@@ -488,6 +488,86 @@ export type Database = {
           },
         ]
       }
+      incident_reports: {
+        Row: {
+          corrective_actions: string | null
+          created_at: string
+          description: string
+          drive_file_id: string | null
+          id: string
+          immediate_actions: string | null
+          incident_date: string
+          incident_time: string | null
+          injuries_reported: boolean | null
+          injury_details: string | null
+          location: string
+          org_id: string
+          reported_by: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          root_cause: string | null
+          severity: string
+          status: string
+          updated_at: string
+          witnesses: string | null
+        }
+        Insert: {
+          corrective_actions?: string | null
+          created_at?: string
+          description: string
+          drive_file_id?: string | null
+          id?: string
+          immediate_actions?: string | null
+          incident_date: string
+          incident_time?: string | null
+          injuries_reported?: boolean | null
+          injury_details?: string | null
+          location: string
+          org_id: string
+          reported_by: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          root_cause?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          witnesses?: string | null
+        }
+        Update: {
+          corrective_actions?: string | null
+          created_at?: string
+          description?: string
+          drive_file_id?: string | null
+          id?: string
+          immediate_actions?: string | null
+          incident_date?: string
+          incident_time?: string | null
+          injuries_reported?: boolean | null
+          injury_details?: string | null
+          location?: string
+          org_id?: string
+          reported_by?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          root_cause?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          witnesses?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_reports_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_ai_settings: {
         Row: {
           api_key_encrypted: string
