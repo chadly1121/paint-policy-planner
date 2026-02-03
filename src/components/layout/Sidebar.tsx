@@ -14,6 +14,7 @@ import {
   UserCircle,
   FlaskConical,
   Sparkles,
+  AlertOctagon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -41,6 +42,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
     { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
     { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
+    { path: "/incidents", label: "Incident Reports", icon: AlertOctagon },
     { path: "/builder", label: "Document Builder", icon: Sparkles },
     { path: "/settings", label: t("nav.settings"), icon: Settings },
     ...(isAdmin ? [{ path: "/admin", label: t("nav.admin"), icon: ShieldCheck }] : []),

@@ -22,6 +22,7 @@ import Privacy from "./pages/Privacy";
 import ComplianceGuidance from "./pages/ComplianceGuidance";
 import Pricing from "./pages/Pricing";
 import DocumentBuilder from "./pages/DocumentBuilder";
+import IncidentReports from "./pages/IncidentReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/disciplinary" element={<Disciplinary />} />
               <Route path="/builder" element={<DocumentBuilder />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/incidents" element={<IncidentReports />} />
               <Route path="/admin" element={<Admin />} />
               </Route>
               <Route path="*" element={<NotFound />} />
