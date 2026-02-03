@@ -14,6 +14,7 @@ import {
   Sparkles,
   Loader2,
   Save,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,12 +82,15 @@ const DocumentBuilder = () => {
   const {
     messages,
     isLoading,
+    isSaving,
     documentType,
     setDocumentType,
     sendMessage,
     clearChat,
     extractMarkdownContent,
+    saveToDrive,
   } = useDocumentBuilder();
+  const [lastSavedDoc, setLastSavedDoc] = useState<{ web_view_link: string; file_name: string } | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -121,6 +125,14 @@ const DocumentBuilder = () => {
   const handleStarterPrompt = (prompt: string) => {
     setInput(prompt);
     textareaRef.current?.focus();
+  };
+
+  const handleSaveToDrive = async () => {
+    const result = await saveToDrive();
+    if (result?.web_view_link) {
+      setLastSavedDoc({ web_view_link: result.web_view_link, file_name: result.file_name });
+      window.open(result.web_view_link, '_blank');
+    }
   };
 
   const selectedType = DOCUMENT_TYPES.find((d) => d.value === documentType);
@@ -162,6 +174,20 @@ const DocumentBuilder = () => {
 
           {messages.length > 0 && (
             <>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSaveToDrive}
+                disabled={isSaving}
+                title="Save to Google Drive"
+              >
+                {isSaving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save to Drive
+              </Button>
               <Button variant="outline" size="icon" onClick={handleCopy} title="Copy content">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
