@@ -15,18 +15,21 @@ import {
   Download,
   CheckCircle2,
   FileCheck,
-  Languages
+  Languages,
+  Video
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDriveContent } from "@/hooks/useDriveContent";
 import { useTranslatedTitle } from "@/hooks/useTranslatedTitle";
+import VideoEmbed from "@/components/video/VideoEmbed";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
   itemNumber: number;
   moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
+  videoUrl?: string | null;
   isAcknowledged?: boolean;
   ackRequired?: boolean;
   onAcknowledge?: () => void;
@@ -37,6 +40,7 @@ export function DriveDocumentCard({
   file,
   itemNumber,
   moduleType,
+  videoUrl,
   isAcknowledged = false,
   ackRequired = false,
   onAcknowledge,
@@ -197,6 +201,12 @@ export function DriveDocumentCard({
                 </span>
                 {displayTitle}
               </CardTitle>
+              {videoUrl && (
+                <Badge variant="outline" className="text-xs flex-shrink-0 border-blue-500/50 text-blue-600 dark:text-blue-400">
+                  <Video className="h-3 w-3 mr-1" />
+                  Video
+                </Badge>
+              )}
               <Badge variant="outline" className="text-xs flex-shrink-0 border-sky-500/50 text-sky-600 dark:text-sky-400">
                 <FileText className="h-3 w-3 mr-1" />
                 Drive
@@ -251,6 +261,11 @@ export function DriveDocumentCard({
         
         <CollapsibleContent>
           <CardContent className="pt-0">
+            {/* Video embed */}
+            {videoUrl && (
+              <VideoEmbed url={videoUrl} title={displayTitle} />
+            )}
+            
             {/* Loading state */}
             {loadingContent && (
               <div className="flex items-center gap-2 py-4 text-muted-foreground">
