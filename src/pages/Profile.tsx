@@ -17,6 +17,7 @@ import AwardCard from "@/components/profile/AwardCard";
 import AddCertificateDialog from "@/components/profile/AddCertificateDialog";
 import AddAwardDialog from "@/components/profile/AddAwardDialog";
 import ExpiryReminders from "@/components/profile/ExpiryReminders";
+import RedemptionHistory from "@/components/profile/RedemptionHistory";
 
 const Profile = () => {
   const { userId } = useParams<{ userId?: string }>();
@@ -177,6 +178,9 @@ const Profile = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Redemption History - only show on own profile */}
+      {isOwnProfile && <RedemptionHistory />}
 
       {/* Certificates & Awards Tabs */}
       <Tabs defaultValue="certificates" className="space-y-4">
