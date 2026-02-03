@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useQuiz } from "@/hooks/useQuiz";
+import { useTranslatedTitle } from "@/hooks/useTranslatedTitle";
 import { CheckCircle2, XCircle, Loader2, Trophy, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,8 @@ const QuizModal = ({
   quizType,
   itemKey,
 }: QuizModalProps) => {
+  // Translate the quiz title
+  const { translatedTitle, loading: titleLoading } = useTranslatedTitle(sectionTitle);
   const {
     loading,
     questions,
@@ -86,7 +89,7 @@ const QuizModal = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">
-            {quizComplete ? "Quiz Results" : `Quiz: ${sectionTitle}`}
+            {quizComplete ? "Quiz Results" : `Quiz: ${titleLoading ? sectionTitle : translatedTitle}`}
           </DialogTitle>
           <DialogDescription>
             {quizComplete

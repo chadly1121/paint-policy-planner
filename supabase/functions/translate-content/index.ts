@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { content, targetLanguage, sourceLanguage } = await req.json();
+    const { content, targetLanguage, sourceLanguage, contentType } = await req.json();
 
     if (!content || !targetLanguage) {
       return new Response(JSON.stringify({ error: "Missing content or targetLanguage" }), {
@@ -26,6 +26,8 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    
+    const isTitle = contentType === "title";
 
     // If target language is English or same as source, return original
     if (targetLanguage === "en" || targetLanguage === sourceLanguage) {
@@ -44,7 +46,9 @@ serve(async (req) => {
 
     console.log(`Translating content from ${sourceLangName} to ${targetLangName}`);
 
-    const systemPrompt = `You are a professional translator specializing in workplace documentation.
+    const systemPrompt = isTitle 
+      ? `You are a professional translator. Translate the following document title from ${sourceLangName} to ${targetLangName}. Return ONLY the translated title, nothing else. Keep it concise and professional.`
+      : `You are a professional translator specializing in workplace documentation.
 Translate the following content from ${sourceLangName} to ${targetLangName}.
 Maintain the original formatting, structure, and any markdown/headers.
 Keep technical terms accurate and use appropriate workplace terminology.
