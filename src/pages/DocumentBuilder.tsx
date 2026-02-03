@@ -41,8 +41,9 @@ const DOCUMENT_TYPES: { value: DocumentType; label: string; icon: React.ElementT
 const STARTER_PROMPTS = [
   "Create an SOP for interior painting preparation",
   "Write a safety protocol for working at heights",
-  "Draft a policy for equipment maintenance",
+  "Draft a company policy for equipment maintenance",
   "Create training requirements for new painters",
+  "Write a disciplinary procedure for attendance violations",
 ];
 
 const DocumentBuilder = () => {
