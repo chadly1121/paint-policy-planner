@@ -54,6 +54,7 @@ import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
 import { AISettingsCard } from "@/components/admin/AISettingsCard";
 import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { SubscriptionCard } from "@/components/admin/SubscriptionCard";
+import { InvoiceHistory } from "@/components/admin/InvoiceHistory";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
 const employeeSchema = z.object({
@@ -460,8 +461,9 @@ const Admin = () => {
           <AdminAnalytics />
         </TabsContent>
 
-        <TabsContent value="billing">
+        <TabsContent value="billing" className="space-y-6">
           <SubscriptionCard />
+          <InvoiceHistory />
         </TabsContent>
 
         <TabsContent value="branding">

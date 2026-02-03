@@ -118,21 +118,60 @@ export function SubscriptionCard() {
               {subscription?.current_users || 0} / {subscription?.user_limit || 6}
             </span>
           </div>
-          <Progress 
-            value={usagePercent} 
-            className={isNearLimit ? "bg-warning/20" : undefined}
-          />
-          {isAtLimit && (
-            <div className="flex items-center gap-1 text-xs text-destructive">
-              <AlertTriangle className="h-3 w-3" />
-              <span>You've reached your user limit. Upgrade to add more team members.</span>
+        <Progress 
+          value={usagePercent} 
+          className={isNearLimit ? "bg-warning/20" : undefined}
+        />
+        {isAtLimit && (
+          <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+            <div className="flex items-center gap-2 text-sm text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <span>You've reached your user limit</span>
             </div>
-          )}
-          {!isAtLimit && remainingSeats > 0 && (
-            <p className="text-xs text-muted-foreground">
-              {remainingSeats} seat{remainingSeats !== 1 ? "s" : ""} remaining
+            {isSubscribed ? (
+              <Button 
+                size="sm" 
+                variant="destructive"
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+              >
+                {portalLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Add Seats"}
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                variant="destructive"
+                onClick={() => handleSubscribe("monthly")}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Upgrade Now"}
+              </Button>
+            )}
+          </div>
+        )}
+        {!isAtLimit && isNearLimit && (
+          <div className="flex items-center justify-between p-2 rounded-lg bg-warning/10 border border-warning/20">
+            <p className="text-xs text-warning-foreground">
+              {remainingSeats} seat{remainingSeats !== 1 ? "s" : ""} remaining — consider adding more
             </p>
-          )}
+            {isSubscribed && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+                className="text-xs h-7"
+              >
+                Add Seats
+              </Button>
+            )}
+          </div>
+        )}
+        {!isAtLimit && !isNearLimit && remainingSeats > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {remainingSeats} seat{remainingSeats !== 1 ? "s" : ""} remaining
+          </p>
+        )}
         </div>
 
         {/* Subscription Details or Upgrade Options */}
