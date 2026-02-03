@@ -55,6 +55,25 @@ export function DriveDocumentList({
 
   const handleRefresh = async () => {
     setSyncing(true);
+    try {
+      // First sync titles from document headers to filenames
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const syncResponse = await supabase.functions.invoke("drive-sync-titles", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: { folder_type: moduleType },
+        });
+        
+        if (syncResponse.data?.renamed > 0) {
+          toast({
+            title: "Titles synced",
+            description: `${syncResponse.data.renamed} file(s) renamed to match document headers`,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Title sync error:", err);
+    }
     await refresh();
     setSyncing(false);
   };
