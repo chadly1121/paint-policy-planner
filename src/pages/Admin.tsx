@@ -41,7 +41,8 @@ import {
   BarChart3,
   Building2,
   Cloud,
-  Bot
+  Bot,
+  CreditCard
 } from "lucide-react";
 import { z } from "zod";
 import { languages } from "@/components/LanguageSelector";
@@ -52,7 +53,9 @@ import RedemptionItemsManager from "@/components/admin/RedemptionItemsManager";
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
 import { AISettingsCard } from "@/components/admin/AISettingsCard";
 import { EmployeeActions } from "@/components/admin/EmployeeActions";
+import { SubscriptionCard } from "@/components/admin/SubscriptionCard";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useSubscription } from "@/hooks/useSubscription";
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
@@ -90,6 +93,7 @@ const Admin = () => {
   const { t } = useTranslation();
   const { isAdmin, loading: authLoading } = useAuth();
   const { org } = useOrganization();
+  const { canAddUsers, subscription, checkSubscription } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -240,6 +244,16 @@ const Admin = () => {
     e.preventDefault();
     setErrors({});
 
+    // Check user limit before validation
+    if (!canAddUsers(1)) {
+      toast({
+        variant: "destructive",
+        title: "User limit reached",
+        description: "Upgrade your subscription to add more team members.",
+      });
+      return;
+    }
+
     const validation = employeeSchema.safeParse({ email, password, fullName, preferredLanguage });
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
@@ -285,8 +299,11 @@ const Admin = () => {
         setPassword("");
         setFullName("");
         setPreferredLanguage("en");
-        // Refresh employee list after short delay to allow DB trigger to complete
-        setTimeout(() => fetchEmployees(), 1000);
+        // Refresh employee list and subscription after short delay to allow DB trigger to complete
+        setTimeout(() => {
+          fetchEmployees();
+          checkSubscription();
+        }, 1000);
       }
     } catch (error) {
       console.error("Error creating employee:", error);
@@ -399,10 +416,14 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+        <TabsList className="grid w-full grid-cols-8 max-w-6xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Analytics</span>
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            <span className="hidden sm:inline">Billing</span>
           </TabsTrigger>
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
@@ -439,6 +460,10 @@ const Admin = () => {
           <AdminAnalytics />
         </TabsContent>
 
+        <TabsContent value="billing">
+          <SubscriptionCard />
+        </TabsContent>
+
         <TabsContent value="branding">
           <OrgBrandingCard />
         </TabsContent>
@@ -460,13 +485,22 @@ const Admin = () => {
           {/* Create Employee Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserPlus className="h-5 w-5" />
-                Create Employee Account
-              </CardTitle>
-              <CardDescription>
-                Create a new employee account. They will receive login credentials.
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserPlus className="h-5 w-5" />
+                    Create Employee Account
+                  </CardTitle>
+                  <CardDescription>
+                    Create a new employee account. They will receive login credentials.
+                  </CardDescription>
+                </div>
+                {subscription && (
+                  <Badge variant={canAddUsers(1) ? "secondary" : "destructive"}>
+                    {subscription.current_users} / {subscription.user_limit} seats used
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleCreateEmployee} className="space-y-4">

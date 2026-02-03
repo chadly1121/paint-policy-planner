@@ -685,6 +685,65 @@ export type Database = {
           },
         ]
       }
+      org_subscriptions: {
+        Row: {
+          base_user_limit: number
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          extra_seats: number
+          id: string
+          org_id: string
+          price_id: string | null
+          product_id: string | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_user_limit?: number
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          extra_seats?: number
+          id?: string
+          org_id: string
+          price_id?: string | null
+          product_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_user_limit?: number
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          extra_seats?: number
+          id?: string
+          org_id?: string
+          price_id?: string | null
+          product_id?: string | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_subscriptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_users: {
         Row: {
           created_at: string
@@ -1440,6 +1499,17 @@ export type Database = {
           total_points: number
         }[]
       }
+      get_org_subscription: {
+        Args: { _org_id: string }
+        Returns: {
+          cancel_at_period_end: boolean
+          current_users: number
+          period_end: string
+          status: string
+          user_limit: number
+        }[]
+      }
+      get_org_user_count: { Args: { _org_id: string }; Returns: number }
       get_secure_leaderboard: {
         Args: never
         Returns: {
@@ -1493,6 +1563,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      org_can_add_users: {
+        Args: { _count?: number; _org_id: string }
+        Returns: boolean
       }
       org_has_ai_enabled: { Args: { _org_id: string }; Returns: boolean }
     }
