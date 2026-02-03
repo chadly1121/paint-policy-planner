@@ -49,6 +49,7 @@ import { languages } from "@/components/LanguageSelector";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import ContentSettingsCard from "@/components/admin/ContentSettingsCard";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
+import RedemptionItemsManager from "@/components/admin/RedemptionItemsManager";
 
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
 import { AISettingsCard } from "@/components/admin/AISettingsCard";
@@ -68,6 +69,8 @@ interface RedemptionRequest {
   status: string;
   created_at: string;
   admin_notes: string | null;
+  item_id: string | null;
+  item_name: string | null;
   profiles?: { full_name: string; email: string };
 }
 
@@ -398,34 +401,38 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+        <TabsList className="grid w-full grid-cols-8 max-w-6xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
-            Analytics
+            <span className="hidden sm:inline">Analytics</span>
           </TabsTrigger>
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
-            Branding
+            <span className="hidden sm:inline">Branding</span>
           </TabsTrigger>
           <TabsTrigger value="content" className="flex items-center gap-2">
             <FileEdit className="h-4 w-4" />
-            Content
+            <span className="hidden sm:inline">Content</span>
           </TabsTrigger>
           <TabsTrigger value="drive" className="flex items-center gap-2">
             <Cloud className="h-4 w-4" />
-            Drive
+            <span className="hidden sm:inline">Drive</span>
           </TabsTrigger>
           <TabsTrigger value="ai" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
-            AI
+            <span className="hidden sm:inline">AI</span>
           </TabsTrigger>
           <TabsTrigger value="employees" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Employees
+            <span className="hidden sm:inline">Employees</span>
+          </TabsTrigger>
+          <TabsTrigger value="rewards" className="flex items-center gap-2">
+            <Trophy className="h-4 w-4" />
+            <span className="hidden sm:inline">Rewards</span>
           </TabsTrigger>
           <TabsTrigger value="redemptions" className="flex items-center gap-2">
             <Gift className="h-4 w-4" />
-            Redemptions
+            <span className="hidden sm:inline">Requests</span>
             {pendingRequests.length > 0 && (
               <Badge variant="destructive" className="ml-1">
                 {pendingRequests.length}
@@ -453,6 +460,10 @@ const Admin = () => {
 
         <TabsContent value="ai">
           <AISettingsCard />
+        </TabsContent>
+
+        <TabsContent value="rewards">
+          <RedemptionItemsManager />
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
@@ -701,8 +712,13 @@ const Admin = () => {
                         <p className="text-sm text-muted-foreground">
                           {request.profiles?.email}
                         </p>
+                        {request.item_name && (
+                          <p className="text-sm font-medium text-primary">
+                            {request.item_name}
+                          </p>
+                        )}
                         <p className="text-sm">
-                          Requesting <span className="font-semibold text-primary">{request.points_requested}</span> points
+                          {request.points_requested.toLocaleString()} points
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(request.created_at).toLocaleDateString()}

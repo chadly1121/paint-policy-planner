@@ -32,7 +32,7 @@ const PointsDisplay = () => {
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 font-serif">
-            <Coins className="h-5 w-5 text-yellow-500" />
+            <Coins className="h-5 w-5 text-primary" />
             Your Progress
           </CardTitle>
         </CardHeader>
@@ -69,16 +69,14 @@ const PointsDisplay = () => {
             ))}
           </div>
 
-          {points.available_points >= 100 && (
-            <Button
-              onClick={() => setRedemptionOpen(true)}
-              className="w-full"
-              variant="outline"
-            >
-              <Gift className="h-4 w-4 mr-2" />
-              Redeem Points for Gift Cards
-            </Button>
-          )}
+          <Button
+            onClick={() => setRedemptionOpen(true)}
+            className="w-full"
+            variant="outline"
+          >
+            <Gift className="h-4 w-4 mr-2" />
+            Redeem Points
+          </Button>
         </CardContent>
       </Card>
 

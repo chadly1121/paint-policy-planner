@@ -829,11 +829,61 @@ export type Database = {
         }
         Relationships: []
       }
+      redemption_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          org_id: string
+          points_required: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          org_id: string
+          points_required: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          points_required?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemption_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       redemption_requests: {
         Row: {
           admin_notes: string | null
           created_at: string
           id: string
+          item_id: string | null
+          item_name: string | null
+          org_id: string | null
           points_requested: number
           processed_at: string | null
           processed_by: string | null
@@ -844,6 +894,9 @@ export type Database = {
           admin_notes?: string | null
           created_at?: string
           id?: string
+          item_id?: string | null
+          item_name?: string | null
+          org_id?: string | null
           points_requested: number
           processed_at?: string | null
           processed_by?: string | null
@@ -854,13 +907,31 @@ export type Database = {
           admin_notes?: string | null
           created_at?: string
           id?: string
+          item_id?: string | null
+          item_name?: string | null
+          org_id?: string | null
           points_requested?: number
           processed_at?: string | null
           processed_by?: string | null
           status?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "redemption_requests_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "redemption_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redemption_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       section_item_progress: {
         Row: {
