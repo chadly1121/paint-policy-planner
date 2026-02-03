@@ -12,11 +12,11 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
-// Available prices - TEST MODE
+// Available prices - LIVE MODE
 const PRICES = {
-  monthly: "price_1SwpJjI3v1u61BwN1d5apgRH",    // $79/mo
-  annual: "price_1SwpK2I3v1u61BwN0aJBYr5w",     // $790/yr
-  extra_seat: "price_1SwpKVI3v1u61BwN3OLDf42N", // $8/mo per seat
+  monthly: "price_1SwohuI3v1u61BwNPB3vpGgo",    // $79/mo
+  annual: "price_1SwoiAI3v1u61BwNNnVd3fK8",     // $790/yr
+  extra_seat: "price_1SwoiTI3v1u61BwNkyFkwNYf", // $8/mo per seat
 };
 
 serve(async (req) => {
