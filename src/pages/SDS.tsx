@@ -72,13 +72,13 @@ const SDS = () => {
             className="pl-10"
           />
         </div>
-        <Select value={hazardFilter} onValueChange={setHazardFilter}>
+        <Select value={hazardFilter || "all"} onValueChange={(val) => setHazardFilter(val === "all" ? "" : val)}>
           <SelectTrigger className="w-full sm:w-[200px]">
             <Filter className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Hazard type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All hazards</SelectItem>
+            <SelectItem value="all">All hazards</SelectItem>
             {HAZARD_CATEGORIES.map((cat) => (
               <SelectItem key={cat.value} value={cat.value}>
                 {cat.icon} {cat.label}
