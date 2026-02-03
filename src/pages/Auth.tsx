@@ -289,6 +289,14 @@ const Auth = () => {
               >
                 Don't have an account? Sign up
               </button>
+              <div className="mt-2">
+                <Link 
+                  to="/pricing" 
+                  className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+                >
+                  View Pricing →
+                </Link>
+              </div>
               <div className="text-xs text-muted-foreground space-x-2">
                 <Link to="/terms" className="hover:text-primary transition-colors underline">
                   Terms
