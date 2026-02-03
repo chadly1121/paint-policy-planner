@@ -202,21 +202,21 @@ export function SOPAssistant() {
   }
 
   return (
-    <Card className="flex flex-col h-[600px]">
-      <CardHeader className="border-b shrink-0">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="h-5 w-5" />
+    <Card className="flex flex-col h-[400px] sm:h-[500px] xl:h-[600px]">
+      <CardHeader className="border-b shrink-0 py-3 sm:py-4">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
           SOP Assistant
         </CardTitle>
       </CardHeader>
       
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 p-3 sm:p-4" ref={scrollRef}>
+        <div className="space-y-3 sm:space-y-4">
           {messages.length === 0 && (
-            <div className="text-center text-muted-foreground py-8">
-              <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">{t('sopAssistant.welcome', 'Ask me about your SOPs!')}</p>
-              <p className="text-sm mt-1">
+            <div className="text-center text-muted-foreground py-4 sm:py-8">
+              <Bot className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+              <p className="font-medium text-sm sm:text-base">{t('sopAssistant.welcome', 'Ask me about your SOPs!')}</p>
+              <p className="text-xs sm:text-sm mt-1">
                 {t('sopAssistant.description', "I can answer questions about your organization's documents.")}
               </p>
             </div>
@@ -230,13 +230,13 @@ export function SOPAssistant() {
               }`}
             >
               {message.role === "assistant" && (
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Bot className="h-4 w-4 text-primary" />
+                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
                 </div>
               )}
               
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
+                className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-2 sm:p-3 text-sm sm:text-base ${
                   message.role === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
@@ -277,22 +277,22 @@ export function SOPAssistant() {
               </div>
 
               {message.role === "user" && (
-                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-                  <User className="h-4 w-4 text-primary-foreground" />
+                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
                 </div>
               )}
             </div>
           ))}
 
           {loading && (
-            <div className="flex gap-3">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Bot className="h-4 w-4 text-primary" />
+            <div className="flex gap-2 sm:gap-3">
+              <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
               </div>
-              <div className="bg-muted rounded-lg p-3">
+              <div className="bg-muted rounded-lg p-2 sm:p-3">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm text-muted-foreground">{t('sopAssistant.thinking', 'Thinking...')}</span>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">{t('sopAssistant.thinking', 'Thinking...')}</span>
                 </div>
               </div>
             </div>
@@ -300,7 +300,7 @@ export function SOPAssistant() {
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t shrink-0">
+      <div className="p-3 sm:p-4 border-t shrink-0">
         <div className="flex gap-2">
           <Input
             value={input}
@@ -308,9 +308,9 @@ export function SOPAssistant() {
             onKeyDown={handleKeyDown}
             placeholder={t('sopAssistant.placeholder', 'Ask about your SOPs...')}
             disabled={loading}
-            className="flex-1"
+            className="flex-1 text-sm sm:text-base"
           />
-          <Button onClick={handleSend} disabled={loading || !input.trim()}>
+          <Button onClick={handleSend} disabled={loading || !input.trim()} size="sm" className="sm:size-default px-3 sm:px-4">
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -318,7 +318,7 @@ export function SOPAssistant() {
             )}
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
+        <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 text-center">
           {t('sopAssistant.poweredBy', "Powered by your organization's AI provider. Answers are based on your documents.")}
         </p>
       </div>
