@@ -453,6 +453,41 @@ export type Database = {
         }
         Relationships: []
       }
+      drive_file_metadata: {
+        Row: {
+          created_at: string
+          drive_file_id: string
+          id: string
+          org_id: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          drive_file_id: string
+          id?: string
+          org_id: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          drive_file_id?: string
+          id?: string
+          org_id?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drive_file_metadata_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_ai_settings: {
         Row: {
           api_key_encrypted: string
