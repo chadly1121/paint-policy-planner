@@ -41,7 +41,6 @@ import {
   BarChart3,
   FileEdit,
   Building2,
-  Upload,
   Cloud
 } from "lucide-react";
 import { z } from "zod";
@@ -49,7 +48,7 @@ import { languages } from "@/components/LanguageSelector";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import ContentSettingsCard from "@/components/admin/ContentSettingsCard";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
-import DocumentImporter from "@/components/admin/DocumentImporter";
+
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
 import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -397,7 +396,7 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-4xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Analytics
@@ -409,10 +408,6 @@ const Admin = () => {
           <TabsTrigger value="content" className="flex items-center gap-2">
             <FileEdit className="h-4 w-4" />
             Content
-          </TabsTrigger>
-          <TabsTrigger value="import" className="flex items-center gap-2">
-            <Upload className="h-4 w-4" />
-            Import
           </TabsTrigger>
           <TabsTrigger value="drive" className="flex items-center gap-2">
             <Cloud className="h-4 w-4" />
@@ -445,9 +440,6 @@ const Admin = () => {
           <ContentSettingsCard />
         </TabsContent>
 
-        <TabsContent value="import">
-          <DocumentImporter />
-        </TabsContent>
 
         <TabsContent value="drive">
           <DriveConnectionCard />
