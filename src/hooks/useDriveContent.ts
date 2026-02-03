@@ -1,7 +1,7 @@
 // Hook to fetch document content from Google Drive with translation support
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useTranslation } from "react-i18next";
+import i18n from "@/i18n";
 
 interface DriveContentResult {
   content: string | null;
@@ -16,13 +16,27 @@ const contentCache = new Map<string, string>();
 export const useDriveContent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { i18n } = useTranslation();
+  // Track language changes reactively
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'en');
+
+  // Subscribe to language changes
+  useEffect(() => {
+    const handleLanguageChange = (lng: string) => {
+      setCurrentLanguage(lng);
+    };
+    
+    i18n.on('languageChanged', handleLanguageChange);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, []);
 
   const fetchDriveContent = useCallback(async (
     driveFileId: string, 
     options?: { translate?: boolean }
   ): Promise<string | null> => {
     const shouldTranslate = options?.translate ?? true;
+    // Always get fresh language value
     const targetLanguage = i18n.language || 'en';
     const cacheKey = shouldTranslate ? `${driveFileId}_${targetLanguage}` : driveFileId;
 
@@ -83,7 +97,7 @@ export const useDriveContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [i18n.language]);
+  }, []);
 
   const clearCache = useCallback((driveFileId?: string) => {
     if (driveFileId) {
@@ -103,7 +117,7 @@ export const useDriveContent = () => {
     clearCache,
     loading,
     error,
-    currentLanguage: i18n.language,
+    currentLanguage,
   };
 };
 
