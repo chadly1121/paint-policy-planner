@@ -12,6 +12,46 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+// Email notification helper using fetch (compatible with Deno)
+async function sendSubscriptionEmail(
+  email: string,
+  subject: string,
+  htmlContent: string
+) {
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendKey) {
+    logStep("RESEND_API_KEY not set, skipping email");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendKey}`,
+      },
+      body: JSON.stringify({
+        from: "SOPed <notifications@soped.ai>",
+        to: [email],
+        subject,
+        html: htmlContent,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      logStep("Email API error", { status: response.status, error: errorText });
+      return;
+    }
+
+    logStep("Email sent successfully", { email, subject });
+  } catch (error) {
+    // Don't throw - email failure shouldn't break webhook
+    logStep("Failed to send email", { error: error instanceof Error ? error.message : String(error) });
+  }
+}
+
 // Price ID to product mapping - LIVE MODE
 const PRICE_CONFIG: Record<string, { name: string; baseUsers: number }> = {
   "price_1SwohuI3v1u61BwNPB3vpGgo": { name: "SOPed Pro Monthly", baseUsers: 6 },
@@ -71,13 +111,13 @@ serve(async (req) => {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(supabaseAdmin, subscription);
+        await handleSubscriptionDeleted(supabaseAdmin, stripe, subscription);
         break;
       }
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        await handlePaymentFailed(supabaseAdmin, invoice);
+        await handlePaymentFailed(supabaseAdmin, stripe, invoice);
         break;
       }
 
@@ -211,9 +251,14 @@ async function handleSubscriptionChange(
 
 async function handleSubscriptionDeleted(
   supabase: any,
+  stripe: Stripe,
   subscription: Stripe.Subscription
 ) {
   logStep("Processing subscription deletion", { subscriptionId: subscription.id });
+
+  // Get customer email for notification
+  const customer = await stripe.customers.retrieve(subscription.customer as string);
+  const customerEmail = !customer.deleted ? customer.email : null;
 
   // Find subscription by stripe_subscription_id
   const { data: existingSub } = await supabase
@@ -227,7 +272,7 @@ async function handleSubscriptionDeleted(
     return;
   }
 
-  // Mark as inactive
+  // Mark as cancelled
   const { error } = await supabase
     .from("org_subscriptions")
     .update({
@@ -242,10 +287,29 @@ async function handleSubscriptionDeleted(
   }
 
   logStep("Subscription marked as cancelled", { orgId: existingSub.org_id });
+
+  // Send cancellation email
+  if (customerEmail) {
+    await sendSubscriptionEmail(
+      customerEmail,
+      "Your SOPed Subscription Has Been Cancelled",
+      `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #ef4444;">Subscription Cancelled</h1>
+          <p>Your SOPed Pro subscription has been cancelled.</p>
+          <p>You will continue to have access until the end of your current billing period.</p>
+          <p>If this was a mistake or you'd like to resubscribe, you can do so anytime from your Admin panel.</p>
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+          <p style="color: #6b7280; font-size: 12px;">Questions? Contact us at support@soped.ai</p>
+        </div>
+      `
+    );
+  }
 }
 
 async function handlePaymentFailed(
   supabase: any,
+  stripe: Stripe,
   invoice: Stripe.Invoice
 ) {
   logStep("Processing payment failure", { 
@@ -258,6 +322,10 @@ async function handlePaymentFailed(
     logStep("No subscription on invoice, skipping");
     return;
   }
+
+  // Get customer email for notification
+  const customer = await stripe.customers.retrieve(invoice.customer as string);
+  const customerEmail = !customer.deleted ? customer.email : null;
 
   // Find subscription
   const { data: existingSub } = await supabase
@@ -286,4 +354,28 @@ async function handlePaymentFailed(
   }
 
   logStep("Subscription marked as past_due", { orgId: existingSub.org_id });
+
+  // Send payment failed email
+  if (customerEmail) {
+    const amountDue = invoice.amount_due ? `$${(invoice.amount_due / 100).toFixed(2)}` : 'your subscription amount';
+    await sendSubscriptionEmail(
+      customerEmail,
+      "⚠️ Payment Failed - Action Required",
+      `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #f59e0b;">Payment Failed</h1>
+          <p>We were unable to process your payment of <strong>${amountDue}</strong> for your SOPed Pro subscription.</p>
+          <p>Please update your payment method to avoid service interruption:</p>
+          <ol style="line-height: 1.8;">
+            <li>Log in to your SOPed account</li>
+            <li>Go to Admin → Subscription</li>
+            <li>Click "Manage Subscription" to update your payment method</li>
+          </ol>
+          <p>If you have any questions, please contact us at support@soped.ai</p>
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+          <p style="color: #6b7280; font-size: 12px;">This is an automated notification from SOPed.</p>
+        </div>
+      `
+    );
+  }
 }
