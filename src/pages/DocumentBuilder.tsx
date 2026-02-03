@@ -38,13 +38,38 @@ const DOCUMENT_TYPES: { value: DocumentType; label: string; icon: React.ElementT
   { value: "disciplinary", label: "Disciplinary", icon: Scale, description: "Disciplinary Procedure" },
 ];
 
-const STARTER_PROMPTS = [
-  "Create an SOP for interior painting preparation",
-  "Write a safety protocol for working at heights",
-  "Draft a company policy for equipment maintenance",
-  "Create training requirements for new painters",
-  "Write a disciplinary procedure for attendance violations",
-];
+const STARTER_PROMPTS: Record<DocumentType, string[]> = {
+  sop: [
+    "Create an SOP for interior painting preparation",
+    "Write procedures for spray equipment setup and cleanup",
+    "Draft an SOP for color matching and mixing",
+    "Create a checklist for job site walkthroughs",
+  ],
+  policy: [
+    "Draft a policy for equipment usage and maintenance",
+    "Write a cell phone and personal device policy",
+    "Create a customer communication standards policy",
+    "Draft a uniform and dress code policy",
+  ],
+  safety: [
+    "Write a safety protocol for working at heights",
+    "Create PPE requirements for spray painting",
+    "Draft a ladder safety and inspection protocol",
+    "Write procedures for handling chemical spills",
+  ],
+  training: [
+    "Create training requirements for new painters",
+    "Write onboarding checklist for field employees",
+    "Draft OSHA compliance training requirements",
+    "Create a mentorship program structure",
+  ],
+  disciplinary: [
+    "Write a disciplinary procedure for attendance violations",
+    "Create a progressive discipline policy",
+    "Draft procedures for safety violation consequences",
+    "Write a performance improvement plan template",
+  ],
+};
 
 const DocumentBuilder = () => {
   const { t } = useTranslation();
@@ -164,7 +189,7 @@ const DocumentBuilder = () => {
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
-                {STARTER_PROMPTS.map((prompt) => (
+                {STARTER_PROMPTS[documentType].map((prompt) => (
                   <Button
                     key={prompt}
                     variant="outline"
