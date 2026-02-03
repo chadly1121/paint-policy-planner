@@ -142,14 +142,30 @@ export function DriveConnectionCard() {
               Connect Google Drive
             </Button>
           ) : (
-            <Button variant="outline" onClick={handleConnect} disabled={isConnecting}>
-              {isConnecting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleConnect} disabled={isConnecting}>
+                {isConnecting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Reconnect
+              </Button>
+              {primaryToken && (
+                <Button 
+                  variant="destructive" 
+                  onClick={() => handleDisconnect(primaryToken.id)}
+                  disabled={isDisconnecting === primaryToken.id}
+                >
+                  {isDisconnecting === primaryToken.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Unlink className="h-4 w-4 mr-2" />
+                  )}
+                  Disconnect
+                </Button>
               )}
-              Reconnect
-            </Button>
+            </div>
           )}
         </div>
 
