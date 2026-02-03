@@ -5,6 +5,7 @@ import { ClipboardList } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
 import { DriveRequiredGuard } from "@/components/drive/DriveRequiredGuard";
 import { DriveDocumentList } from "@/components/drive/DriveDocumentList";
+import { SOPAssistant } from "@/components/sop/SOPAssistant";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 const SECTION_KEY = "sops";
@@ -30,13 +31,20 @@ const SOPs = () => {
   return (
     <DriveRequiredGuard moduleName="SOPs">
       <div className="space-y-6">
-        <DriveDocumentList
-          moduleType="sops"
-          icon={<ClipboardList className="h-5 w-5 text-primary" />}
-          title={t("sections.sops.title")}
-          description={t("sections.sops.description")}
-          onStartQuiz={handleStartQuiz}
-        />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <DriveDocumentList
+              moduleType="sops"
+              icon={<ClipboardList className="h-5 w-5 text-primary" />}
+              title={t("sections.sops.title")}
+              description={t("sections.sops.description")}
+              onStartQuiz={handleStartQuiz}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <SOPAssistant />
+          </div>
+        </div>
 
         <QuizModal
           open={quizOpen}

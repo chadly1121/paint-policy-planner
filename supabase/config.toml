@@ -50,3 +50,27 @@ verify_jwt = false
 
 [functions.drive-sync]
 verify_jwt = false
+
+[functions.drive-sync-titles]
+verify_jwt = false
+
+[functions.drive-create-from-template]
+verify_jwt = false
+
+[functions.translate-content]
+verify_jwt = false
+
+[functions.public-config]
+verify_jwt = false
+
+[functions.ai-connect]
+verify_jwt = false
+
+[functions.ai-test]
+verify_jwt = false
+
+[functions.ai-revoke]
+verify_jwt = false
+
+[functions.sop-assistant]
+verify_jwt = false
