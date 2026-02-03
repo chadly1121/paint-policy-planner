@@ -19,7 +19,7 @@ interface VideoUrlDialogProps {
   onOpenChange: (open: boolean) => void;
   currentUrl: string | null;
   documentName: string;
-  onSave: (url: string | null) => Promise<boolean>;
+  onSave: (url: string | null) => Promise<{ success: boolean; driveUpdateFailed?: boolean }>;
 }
 
 export function VideoUrlDialog({
@@ -62,13 +62,15 @@ export function VideoUrlDialog({
 
     setSaving(true);
     try {
-      const success = await onSave(trimmedUrl || null);
-      if (success) {
+      const result = await onSave(trimmedUrl || null);
+      if (result.success) {
         toast({
           title: trimmedUrl ? "Video URL saved" : "Video removed",
-          description: trimmedUrl 
-            ? "The video will now appear in the document." 
-            : "The video has been removed from the document.",
+          description: result.driveUpdateFailed 
+            ? "Saved to app, but couldn't update the Drive document."
+            : trimmedUrl 
+              ? "The video will now appear in the document." 
+              : "The video has been removed from the document.",
         });
         onOpenChange(false);
       } else {
@@ -86,8 +88,8 @@ export function VideoUrlDialog({
   const handleRemove = async () => {
     setSaving(true);
     try {
-      const success = await onSave(null);
-      if (success) {
+      const result = await onSave(null);
+      if (result.success) {
         toast({
           title: "Video removed",
           description: "The video has been removed from the document.",

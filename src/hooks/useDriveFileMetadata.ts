@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
-import { useToast } from "@/hooks/use-toast";
 
 interface DriveFileMetadata {
   id: string;
@@ -12,7 +11,6 @@ interface DriveFileMetadata {
 
 export function useDriveFileMetadata(driveFileId: string) {
   const { org } = useOrganization();
-  const { toast } = useToast();
   const [metadata, setMetadata] = useState<DriveFileMetadata | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -46,10 +44,13 @@ export function useDriveFileMetadata(driveFileId: string) {
   }, [fetchMetadata]);
 
   // Update video URL in both the database and the Google Doc
-  const updateVideoUrl = async (videoUrl: string | null) => {
-    if (!orgId || !driveFileId) return false;
+  // Returns { success: boolean, driveUpdateFailed?: boolean }
+  const updateVideoUrl = async (videoUrl: string | null): Promise<{ success: boolean; driveUpdateFailed?: boolean }> => {
+    if (!orgId || !driveFileId) return { success: false };
 
     try {
+      let driveUpdateFailed = false;
+
       // First, update the Google Doc to include/remove the video link
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
@@ -61,11 +62,7 @@ export function useDriveFileMetadata(driveFileId: string) {
 
       if (driveResponse.error) {
         console.error("Failed to update Drive document:", driveResponse.error);
-        toast({
-          variant: "destructive",
-          title: "Warning",
-          description: "Video saved to database but couldn't update the Drive document.",
-        });
+        driveUpdateFailed = true;
       }
 
       // Then update the database metadata
@@ -89,10 +86,10 @@ export function useDriveFileMetadata(driveFileId: string) {
       }
 
       await fetchMetadata();
-      return true;
+      return { success: true, driveUpdateFailed };
     } catch (err) {
       console.error("Error updating video URL:", err);
-      return false;
+      return { success: false };
     }
   };
 
