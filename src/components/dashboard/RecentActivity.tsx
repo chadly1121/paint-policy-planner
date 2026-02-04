@@ -22,15 +22,36 @@ const RecentActivity = () => {
       if (!user) return;
 
       try {
-        // Fetch recent SOP acknowledgments - only for org SOPs (Drive-backed)
+        // First, get the actual files in Drive to know what truly exists
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setLoading(false);
+          return;
+        }
+
+        const driveResponse = await supabase.functions.invoke("drive-list-files", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: { folder_type: "sops" },
+        });
+
+        // Get set of actual Drive file IDs (excluding templates)
+        const actualDriveFileIds = new Set<string>(
+          (driveResponse.data?.files || [])
+            .filter((f: { name: string }) => !f.name.startsWith("_TEMPLATE"))
+            .map((f: { id: string }) => f.id)
+        );
+
+        // Fetch recent SOP acknowledgments
         const { data: acks } = await supabase
           .from("sop_acks")
-          .select("id, acknowledged_at, sop_id, sops(title, source)")
+          .select("id, acknowledged_at, sop_id, sops(title, source, drive_file_id)")
           .eq("user_id", user.id)
           .order("acknowledged_at", { ascending: false })
           .limit(10);
 
-        // Fetch recent quiz passes - filter for Drive file IDs (not system keys like sop001)
+        // Fetch recent quiz passes
         const { data: quizzes } = await supabase
           .from("section_item_progress")
           .select("id, completed_at, item_key, section_key")
@@ -49,11 +70,12 @@ const RecentActivity = () => {
 
         const items: ActivityItem[] = [];
 
-        // Only show org SOPs (Drive-backed), not system templates
+        // Only show org SOPs that exist in Drive
         acks
           ?.filter((ack) => {
-            const sop = ack.sops as { title: string; source: string } | null;
-            return sop?.source === "org";
+            const sop = ack.sops as { title: string; source: string; drive_file_id: string | null } | null;
+            // Must be org SOP AND have a drive_file_id that exists in actual Drive
+            return sop?.source === "org" && sop?.drive_file_id && actualDriveFileIds.has(sop.drive_file_id);
           })
           .forEach((ack) => {
             items.push({
@@ -64,28 +86,36 @@ const RecentActivity = () => {
             });
           });
 
-        // For quiz passes, fetch the actual SOP titles
-        const driveQuizzes = quizzes?.filter((q) => {
-          // Drive file IDs are UUIDs or Google Doc IDs (long alphanumeric), not system keys
-          return q.item_key.length > 20 || q.item_key.includes("-");
-        }) || [];
-
-        // Fetch SOP titles for quiz item_keys
-        if (driveQuizzes.length > 0) {
-          const itemKeys = driveQuizzes.map((q) => q.item_key);
-          const { data: sops } = await supabase
+        // For quiz passes, only show those for SOPs that exist in Drive
+        if (quizzes && quizzes.length > 0 && actualDriveFileIds.size > 0) {
+          // Get all SOPs that have drive_file_ids in our actual Drive files
+          const { data: driveSops } = await supabase
             .from("sops")
             .select("id, title, drive_file_id")
-            .or(`id.in.(${itemKeys.join(",")}),drive_file_id.in.(${itemKeys.join(",")})`);
+            .not("drive_file_id", "is", null);
 
-          driveQuizzes.forEach((q) => {
-            const sop = sops?.find((s) => s.id === q.item_key || s.drive_file_id === q.item_key);
-            items.push({
-              id: `quiz-${q.id}`,
-              type: "quiz_pass",
-              title: sop?.title || "Document Quiz",
-              timestamp: q.completed_at || "",
-            });
+          // Filter to only SOPs whose drive_file_id exists in actual Drive
+          const validDriveSops = (driveSops || []).filter(
+            (s) => s.drive_file_id && actualDriveFileIds.has(s.drive_file_id)
+          );
+          
+          const validSopIds = new Set(validDriveSops.map((s) => s.id));
+          const validDriveFileIds = new Set(validDriveSops.map((s) => s.drive_file_id));
+
+          quizzes.forEach((q) => {
+            // Check if item_key matches a valid SOP id or drive_file_id
+            const matchingSop = validDriveSops.find(
+              (s) => s.id === q.item_key || s.drive_file_id === q.item_key
+            );
+            
+            if (matchingSop) {
+              items.push({
+                id: `quiz-${q.id}`,
+                type: "quiz_pass",
+                title: matchingSop.title,
+                timestamp: q.completed_at || "",
+              });
+            }
           });
         }
 
@@ -103,6 +133,7 @@ const RecentActivity = () => {
         setActivities(items.slice(0, 5));
       } catch (error) {
         console.error("Error fetching activity:", error);
+        setActivities([]);
       } finally {
         setLoading(false);
       }
