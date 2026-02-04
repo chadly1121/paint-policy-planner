@@ -43,6 +43,12 @@ interface ExpiringCertificate {
   is_urgent: boolean;
 }
 
+interface OrgAdmin {
+  user_id: string;
+  email: string;
+  full_name: string;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -63,7 +69,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (settingsError) {
       console.error("Error fetching org settings:", settingsError);
-      // Continue with defaults if settings fetch fails
     }
 
     // Create a map of org_id -> settings
@@ -91,7 +96,7 @@ const handler = async (req: Request): Promise<Response> => {
       };
     };
 
-    // Get the maximum possible reminder window (to fetch all potentially relevant certs)
+    // Get the maximum possible reminder window
     const maxFirstDays = Math.max(
       DEFAULT_FIRST_REMINDER_DAYS,
       ...(orgSettings?.map(s => s.cert_reminder_days_first) || [])
@@ -140,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Check if certificate is within this org's reminder window
       if (daysLeft > settings.firstDays) {
-        continue; // Not yet in reminder window for this org
+        continue;
       }
 
       // Check if we've already sent a reminder within the frequency period
@@ -149,7 +154,7 @@ const handler = async (req: Request): Promise<Response> => {
         const daysSinceLastReminder = Math.ceil((now.getTime() - lastSent.getTime()) / (1000 * 60 * 60 * 24));
         
         if (daysSinceLastReminder < settings.frequencyDays) {
-          continue; // Already notified within frequency window
+          continue;
         }
       }
 
@@ -179,8 +184,50 @@ const handler = async (req: Request): Promise<Response> => {
 
     const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
 
+    // Get org admins for notifications
+    const orgIds = [...new Set(certificatesToNotify.filter(c => c.org_id).map(c => c.org_id!))];
+    const orgAdminsMap = new Map<string, OrgAdmin[]>();
+
+    if (orgIds.length > 0) {
+      const { data: orgAdmins, error: adminError } = await supabase
+        .from("org_users")
+        .select("org_id, user_id")
+        .in("org_id", orgIds)
+        .eq("role", "admin")
+        .eq("is_active", true);
+
+      if (adminError) {
+        console.error("Error fetching org admins:", adminError);
+      } else if (orgAdmins && orgAdmins.length > 0) {
+        const adminUserIds = [...new Set(orgAdmins.map(a => a.user_id))];
+        const { data: adminProfiles } = await supabase
+          .from("profiles")
+          .select("user_id, email, full_name")
+          .in("user_id", adminUserIds);
+
+        const adminProfileMap = new Map(adminProfiles?.map(p => [p.user_id, p]) || []);
+
+        for (const admin of orgAdmins) {
+          const profile = adminProfileMap.get(admin.user_id);
+          if (profile) {
+            if (!orgAdminsMap.has(admin.org_id)) {
+              orgAdminsMap.set(admin.org_id, []);
+            }
+            orgAdminsMap.get(admin.org_id)!.push({
+              user_id: admin.user_id,
+              email: profile.email,
+              full_name: profile.full_name,
+            });
+          }
+        }
+      }
+    }
+
     // Group certificates by user with enriched data
     const userCertificates = new Map<string, ExpiringCertificate[]>();
+    
+    // Also group by org for admin notifications
+    const orgCertificates = new Map<string, ExpiringCertificate[]>();
     
     for (const cert of certificatesToNotify) {
       const profile = profileMap.get(cert.user_id);
@@ -207,6 +254,14 @@ const handler = async (req: Request): Promise<Response> => {
         userCertificates.set(cert.user_id, []);
       }
       userCertificates.get(cert.user_id)!.push(expiringCert);
+
+      // Group by org for admin notifications
+      if (cert.org_id) {
+        if (!orgCertificates.has(cert.org_id)) {
+          orgCertificates.set(cert.org_id, []);
+        }
+        orgCertificates.get(cert.org_id)!.push(expiringCert);
+      }
     }
 
     let sentCount = 0;
@@ -219,7 +274,7 @@ const handler = async (req: Request): Promise<Response> => {
       const hasUrgent = certs.some(c => c.is_urgent);
 
       const certListHtml = certs
-        .sort((a, b) => a.days_left - b.days_left) // Sort by urgency
+        .sort((a, b) => a.days_left - b.days_left)
         .map((c) => {
           const expiryDate = new Date(c.expiry_date);
           const urgentStyle = c.is_urgent ? 'color: #dc2626; font-weight: bold;' : '';
@@ -249,14 +304,13 @@ const handler = async (req: Request): Promise<Response> => {
 
       try {
         const { error: emailError } = await resend.emails.send({
-          from: "Reminders <onboarding@resend.dev>",
+          from: "Reminders <notifications@soped.ai>",
           to: [userEmail],
           subject,
           html,
         });
 
         if (emailError) {
-          // Handle unverified recipient domains gracefully
           const errorMessage = typeof emailError === 'object' && 'message' in emailError 
             ? (emailError as { message: string }).message 
             : String(emailError);
@@ -273,6 +327,85 @@ const handler = async (req: Request): Promise<Response> => {
         }
       } catch (err) {
         console.error(`Error sending email to ${userEmail}:`, err);
+      }
+    }
+
+    // Send summary emails to org admins
+    for (const [orgId, certs] of orgCertificates) {
+      const admins = orgAdminsMap.get(orgId);
+      if (!admins || admins.length === 0) continue;
+
+      const hasUrgent = certs.some(c => c.is_urgent);
+      
+      // Group by employee
+      const byEmployee = new Map<string, ExpiringCertificate[]>();
+      for (const cert of certs) {
+        if (!byEmployee.has(cert.user_id)) {
+          byEmployee.set(cert.user_id, []);
+        }
+        byEmployee.get(cert.user_id)!.push(cert);
+      }
+
+      const employeeListHtml = [...byEmployee.entries()]
+        .map(([_, empCerts]) => {
+          const empName = empCerts[0].user_name;
+          const certItems = empCerts
+            .sort((a, b) => a.days_left - b.days_left)
+            .map(c => {
+              const expiryDate = new Date(c.expiry_date);
+              const urgentStyle = c.is_urgent ? 'color: #dc2626; font-weight: bold;' : '';
+              const urgentLabel = c.is_urgent ? ' ⚠️' : '';
+              return `<li style="${urgentStyle}">${c.name} - ${expiryDate.toLocaleDateString()} (${c.days_left} days)${urgentLabel}</li>`;
+            })
+            .join('');
+          return `<div style="margin-bottom: 16px;"><strong>${empName}</strong><ul>${certItems}</ul></div>`;
+        })
+        .join('');
+
+      const subjectPrefix = hasUrgent ? "⚠️ URGENT: " : "";
+      const subject = `${subjectPrefix}Admin Alert: ${certs.length} Employee Certificate(s) Expiring Soon`;
+
+      const html = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: ${hasUrgent ? '#dc2626' : '#333'};">Employee Certificate Expiry Report</h1>
+          <p>The following employee certificates are expiring within the next 30 days:</p>
+          <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+            ${employeeListHtml}
+          </div>
+          ${hasUrgent ? '<p style="color: #dc2626; font-weight: bold;">⚠️ Some certificates expire within 14 days and require immediate attention!</p>' : ''}
+          <p>Please follow up with employees to ensure timely renewals.</p>
+          <p style="color: #666; font-size: 14px; margin-top: 30px;">
+            This is an automated admin notification from your Employee Manual system.
+          </p>
+        </div>
+      `;
+
+      for (const admin of admins) {
+        try {
+          const { error: emailError } = await resend.emails.send({
+            from: "Reminders <notifications@soped.ai>",
+            to: [admin.email],
+            subject,
+            html,
+          });
+
+          if (emailError) {
+            const errorMessage = typeof emailError === 'object' && 'message' in emailError 
+              ? (emailError as { message: string }).message 
+              : String(emailError);
+            
+            if (errorMessage.includes('not a verified')) {
+              console.log(`Skipping unverified admin domain for ${admin.email}`);
+            } else {
+              console.error(`Failed to send admin email to ${admin.email}:`, emailError);
+            }
+          } else {
+            console.log(`Sent admin summary to ${admin.email} for ${certs.length} certificates`);
+            sentCount++;
+          }
+        } catch (err) {
+          console.error(`Error sending admin email to ${admin.email}:`, err);
+        }
       }
     }
 
