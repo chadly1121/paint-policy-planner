@@ -224,20 +224,19 @@ export function DriveConnectionCard() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Drive Folders</h4>
-              {!hasFolders && (
-                <Button 
-                  size="sm" 
-                  onClick={handleCreateFolders}
-                  disabled={isCreatingFolders}
-                >
-                  {isCreatingFolders ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <FolderPlus className="h-4 w-4 mr-2" />
-                  )}
-                  Create Folders
-                </Button>
-              )}
+              <Button 
+                size="sm" 
+                variant={hasFolders ? "outline" : "default"}
+                onClick={handleCreateFolders}
+                disabled={isCreatingFolders}
+              >
+                {isCreatingFolders ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FolderPlus className="h-4 w-4 mr-2" />
+                )}
+                {hasFolders ? "Sync Folders" : "Create Folders"}
+              </Button>
             </div>
             
             {hasFolders ? (
