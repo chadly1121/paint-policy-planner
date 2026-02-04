@@ -34,7 +34,7 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage } = await req.json();
+    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage, forceNew } = await req.json();
     
     // Ensure userId matches authenticated user
     if (userId !== user.id) {
@@ -107,25 +107,29 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Check if user already has questions for this quiz
-    const { data: existingQuestions } = await supabase
-      .from("quiz_questions")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("section_key", quizKey);
-
-    if (existingQuestions && existingQuestions.length >= questionCount) {
-      console.log("User already has questions for this quiz");
-      const { data: questions } = await supabase
+    // Check if user already has questions for this quiz (skip if forceNew)
+    if (!forceNew) {
+      const { data: existingQuestions } = await supabase
         .from("quiz_questions")
-        .select("*")
+        .select("id")
         .eq("user_id", userId)
-        .eq("section_key", quizKey)
-        .limit(questionCount);
-      
-      return new Response(JSON.stringify({ questions }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        .eq("section_key", quizKey);
+
+      if (existingQuestions && existingQuestions.length >= questionCount) {
+        console.log("User already has questions for this quiz");
+        const { data: questions } = await supabase
+          .from("quiz_questions")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("section_key", quizKey)
+          .limit(questionCount);
+        
+        return new Response(JSON.stringify({ questions }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      console.log("Force new quiz generation requested");
     }
 
     const systemPrompt = `You are a quiz generator for employee training documents. 

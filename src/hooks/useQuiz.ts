@@ -36,7 +36,8 @@ export const useQuiz = () => {
     sectionKey: string, 
     sectionContent: string,
     quizType?: "mini" | "final",
-    itemKey?: string
+    itemKey?: string,
+    forceNew?: boolean
   ) => {
     if (!user) return;
 
@@ -57,6 +58,7 @@ export const useQuiz = () => {
           quizType,
           itemKey,
           targetLanguage: i18n.language || 'en',
+          forceNew: forceNew || false,
         },
       });
 
@@ -183,6 +185,7 @@ export const useQuiz = () => {
     setQuizComplete(false);
     setLastAttempt(null);
     setReviewQuestions([]);
+    setQuestions([]); // Clear questions so retry generates fresh ones
   }, []);
 
   return {

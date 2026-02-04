@@ -72,7 +72,8 @@ const QuizModal = ({
 
   const handleRetry = () => {
     resetQuiz();
-    generateQuiz(sectionKey, sectionContent, quizType, itemKey);
+    // Force new quiz generation on retry - don't use cached questions
+    generateQuiz(sectionKey, sectionContent, quizType, itemKey, true);
   };
 
   const questionCount = quizType === "mini" ? 5 : quizType === "final" ? 10 : 5;
