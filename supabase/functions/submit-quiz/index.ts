@@ -20,12 +20,16 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, answers, userId, quizType, itemKey } = await req.json();
+    const { sectionKey, answers, userId, quizType, itemKey, targetLanguage } = await req.json();
 
     // quizType can be: "mini" (item mini-quiz), "final" (section final exam), or undefined (legacy)
     const isMiniQuiz = quizType === "mini";
     const isFinalExam = quizType === "final";
-    const quizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
+    
+    // Build quiz key the same way as generate-quiz (includes language suffix)
+    const userLanguage = targetLanguage || "en";
+    const baseQuizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
+    const quizKey = `${baseQuizKey}_${userLanguage}`;
 
     console.log(`Processing ${quizType || 'standard'} quiz submission for: ${quizKey}, user: ${userId}`);
 
