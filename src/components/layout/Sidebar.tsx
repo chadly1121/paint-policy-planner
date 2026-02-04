@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Home,
@@ -15,6 +15,7 @@ import {
   FlaskConical,
   Sparkles,
   AlertOctagon,
+  Scale,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -118,8 +119,39 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           </ul>
         </nav>
 
+        {/* Legal Links */}
+        <div className="border-t border-sidebar-border px-4 py-3">
+          <div className="flex items-center gap-2 mb-2 text-sidebar-foreground/60">
+            <Scale className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">Legal & Compliance</span>
+          </div>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <Link 
+              to="/compliance-guidance" 
+              onClick={onClose}
+              className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            >
+              Guidance
+            </Link>
+            <Link 
+              to="/terms" 
+              onClick={onClose}
+              className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            >
+              Terms
+            </Link>
+            <Link 
+              to="/privacy" 
+              onClick={onClose}
+              className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+            >
+              Privacy
+            </Link>
+          </div>
+        </div>
+
         {/* Footer */}
-        <div className="border-t border-sidebar-border px-6 py-4">
+        <div className="border-t border-sidebar-border px-6 py-3">
           <p className="text-xs text-sidebar-foreground/50">
             {t("common.lastUpdated")}: {new Date().toLocaleDateString()}
           </p>
