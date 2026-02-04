@@ -52,6 +52,7 @@ const PointsDisplay = () => {
         const { data: progress } = await supabase
           .from('section_item_progress')
           .select('item_key, completed, points_earned')
+          .eq('user_id', session.user.id)
           .eq('section_key', 'sops');
 
         const completedCount = (progress || []).filter(
