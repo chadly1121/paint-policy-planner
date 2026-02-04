@@ -111,7 +111,7 @@ const PointsDisplay = () => {
               <p className="text-sm text-muted-foreground">Points Earned</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-semibold">{points.available_points}</p>
+              <p className="text-lg font-semibold">{Math.max(0, driveProgress.points - (points?.redeemed_points || 0))}</p>
               <p className="text-xs text-muted-foreground">Available</p>
             </div>
           </div>
