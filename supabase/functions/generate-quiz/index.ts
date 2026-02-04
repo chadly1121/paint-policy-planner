@@ -128,23 +128,34 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = `You are a quiz generator for an employee training manual. 
-Generate exactly ${questionCount} multiple choice questions based on the provided content.
-Each question should test understanding of key concepts, procedures, or rules.
-Make questions clear and unambiguous with exactly one correct answer.
-CRITICAL: You MUST generate ALL questions and ALL answer options in ${languageName}. 
-The content may be in any language, but your output must be entirely in ${languageName}.
-${isMiniQuiz ? 'Focus on the most important points from this specific procedure.' : 'Vary the difficulty - some straightforward, some requiring deeper understanding.'}
+    const systemPrompt = `You are a quiz generator for employee training documents. 
+Generate exactly ${questionCount} multiple choice questions based ONLY on the document body content provided.
+
+CRITICAL RULES:
+- Questions must test understanding of the ACTUAL PROCEDURES, POLICIES, RULES, or CONCEPTS described in the document body
+- Do NOT ask questions about the document title, filename, author, creation date, or metadata
+- Do NOT ask questions about whether the document was AI-generated, who wrote it, or document formatting
+- Do NOT ask trivial questions about headings or section names
+- Focus on actionable knowledge: steps to follow, safety rules, compliance requirements, best practices
+- Each question should test practical understanding an employee would need on the job
+- Make questions clear and unambiguous with exactly one correct answer
+- CRITICAL: You MUST generate ALL questions and ALL answer options in ${languageName}
+${isMiniQuiz ? 'Focus on the most important procedural steps and safety points from this specific document.' : 'Vary the difficulty - some straightforward recall, some requiring deeper understanding of the procedures.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
-    const userPrompt = `Generate ${questionCount} multiple choice questions for this ${isMiniQuiz ? 'standard operating procedure' : 'section of the employee manual'}.
-IMPORTANT: Generate all questions and answers in ${languageName}.
+    const userPrompt = `Generate ${questionCount} multiple choice questions testing employee knowledge of this ${isMiniQuiz ? 'procedure document' : 'training material'}.
 
-Content to create questions from:
+IMPORTANT RULES:
+- Generate all questions and answers in ${languageName}
+- Questions must be about the CONTENT and PROCEDURES described, NOT about document metadata
+- Focus on practical knowledge: what employees should DO, AVOID, or UNDERSTAND
+- Do NOT ask about document titles, authors, or formatting
+
+Document content to create questions from:
 ${sectionContent}
 
 For each question, provide:
-1. A clear question (in ${languageName})
+1. A clear, practical question about the procedures or policies (in ${languageName})
 2. Exactly 4 answer options A, B, C, D (in ${languageName})
 3. The index of the correct answer (0 for A, 1 for B, 2 for C, 3 for D)`;
 
