@@ -5,6 +5,7 @@ import { FileText } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
 import { DriveRequiredGuard } from "@/components/drive/DriveRequiredGuard";
 import { DriveDocumentList } from "@/components/drive/DriveDocumentList";
+import { DocumentAssistant } from "@/components/sop/DocumentAssistant";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 const SECTION_KEY = "policies";
@@ -29,7 +30,11 @@ const Policies = () => {
 
   return (
     <DriveRequiredGuard moduleName="Company Policies">
-      <div className="space-y-6">
+      <div className="space-y-4 w-full min-w-0 overflow-hidden">
+        {/* AI Assistant - compact at top */}
+        <DocumentAssistant />
+        
+        {/* Document List - full width */}
         <DriveDocumentList
           moduleType="policies"
           icon={<FileText className="h-5 w-5 text-primary" />}

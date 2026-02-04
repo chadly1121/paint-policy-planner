@@ -1,4 +1,5 @@
-// SOP Assistant - AI chat component that uses org's OpenAI key
+// Document Assistant - AI chat component that uses org's OpenAI key
+// Works across all sections: SOPs, Policies, Safety, Training, Disciplinary
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +32,7 @@ interface Message {
   citedDocs?: { title: string; fileId: string; webViewLink: string }[];
 }
 
-export function SOPAssistant() {
+export function DocumentAssistant() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { org } = useOrganization();
@@ -124,7 +125,7 @@ export function SOPAssistant() {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error("SOP Assistant error:", error);
+      console.error("Document Assistant error:", error);
       
       const errorMessage = error instanceof Error ? error.message : "An error occurred";
       
@@ -159,9 +160,9 @@ export function SOPAssistant() {
 
   if (checkingConnection) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <Card className="h-[200px]">
+        <CardContent className="flex items-center justify-center h-full">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </CardContent>
       </Card>
     );
@@ -169,29 +170,29 @@ export function SOPAssistant() {
 
   if (!aiConnected) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            SOP Assistant
+      <Card className="h-[200px]">
+        <CardHeader className="py-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Bot className="h-4 w-4" />
+            AI Assistant
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Alert>
+        <CardContent className="py-2">
+          <Alert className="py-2">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>AI Provider Required</AlertTitle>
-            <AlertDescription className="space-y-3">
-              <p>Connect your AI provider to enable the SOP Assistant.</p>
+            <AlertTitle className="text-sm">AI Required</AlertTitle>
+            <AlertDescription className="space-y-2 text-xs">
+              <p>Connect your AI provider to enable the assistant.</p>
               {isAdmin ? (
                 <Link to="/admin">
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Go to AI Settings
+                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                    <Settings className="h-3 w-3 mr-1" />
+                    AI Settings
                   </Button>
                 </Link>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Please ask your administrator to connect an OpenAI API key in the Admin panel.
+                <p className="text-muted-foreground">
+                  Ask your admin to connect an OpenAI API key.
                 </p>
               )}
             </AlertDescription>
@@ -202,48 +203,44 @@ export function SOPAssistant() {
   }
 
   return (
-    <Card className="flex flex-col h-[400px] sm:h-[500px] xl:h-[600px] w-full min-w-0 overflow-hidden">
-      <CardHeader className="border-b shrink-0 py-3 sm:py-4">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
-          SOP Assistant
+    <Card className="flex flex-col h-[200px] w-full min-w-0 overflow-hidden">
+      <CardHeader className="border-b shrink-0 py-2 px-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <Bot className="h-4 w-4" />
+          AI Assistant
         </CardTitle>
       </CardHeader>
       
-      <ScrollArea className="flex-1 p-3 sm:p-4" ref={scrollRef}>
-        <div className="space-y-3 sm:space-y-4">
+      <ScrollArea className="flex-1 p-2" ref={scrollRef}>
+        <div className="space-y-2">
           {messages.length === 0 && (
-            <div className="text-center text-muted-foreground py-4 sm:py-8">
-              <Bot className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-              <p className="font-medium text-sm sm:text-base">{t('sopAssistant.welcome', 'Ask me about your SOPs!')}</p>
-              <p className="text-xs sm:text-sm mt-1">
-                {t('sopAssistant.description', "I can answer questions about your organization's documents.")}
-              </p>
+            <div className="text-center text-muted-foreground py-2">
+              <p className="text-xs">{t('sopAssistant.welcome', 'Ask me anything about your documents!')}</p>
             </div>
           )}
 
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex gap-3 ${
+              className={`flex gap-2 ${
                 message.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
               {message.role === "assistant" && (
-                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bot className="h-3 w-3 text-primary" />
                 </div>
               )}
               
               <div
-                className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-2 sm:p-3 text-sm sm:text-base ${
+                className={`max-w-[85%] rounded-lg p-2 text-xs ${
                   message.role === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted"
                 }`}
               >
                 {message.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none break-words overflow-hidden">
+                  <div className="prose prose-xs dark:prose-invert max-w-none break-words overflow-hidden text-xs [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
                     <ReactMarkdown>{message.content}</ReactMarkdown>
                   </div>
                 ) : (
@@ -251,10 +248,10 @@ export function SOPAssistant() {
                 )}
                 
                 {message.citedDocs && message.citedDocs.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border/50">
-                    <p className="text-xs font-medium mb-2 flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      {t('sopAssistant.referencedDocs', 'Referenced Documents:')}
+                  <div className="mt-2 pt-2 border-t border-border/50">
+                    <p className="text-[10px] font-medium mb-1 flex items-center gap-1">
+                      <FileText className="h-2 w-2" />
+                      {t('sopAssistant.referencedDocs', 'References:')}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {message.citedDocs.map((doc, docIndex) => (
@@ -265,9 +262,9 @@ export function SOPAssistant() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1"
                         >
-                          <Badge variant="secondary" className="text-xs hover:bg-secondary/80">
+                          <Badge variant="secondary" className="text-[10px] py-0 px-1 hover:bg-secondary/80">
                             {doc.title}
-                            <ExternalLink className="h-2 w-2 ml-1" />
+                            <ExternalLink className="h-2 w-2 ml-0.5" />
                           </Badge>
                         </a>
                       ))}
@@ -277,22 +274,22 @@ export function SOPAssistant() {
               </div>
 
               {message.role === "user" && (
-                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-                  <User className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
+                <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  <User className="h-3 w-3 text-primary-foreground" />
                 </div>
               )}
             </div>
           ))}
 
           {loading && (
-            <div className="flex gap-2 sm:gap-3">
-              <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+            <div className="flex gap-2">
+              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Bot className="h-3 w-3 text-primary" />
               </div>
-              <div className="bg-muted rounded-lg p-2 sm:p-3">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                  <span className="text-xs sm:text-sm text-muted-foreground">{t('sopAssistant.thinking', 'Thinking...')}</span>
+              <div className="bg-muted rounded-lg p-2">
+                <div className="flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span className="text-[10px] text-muted-foreground">{t('sopAssistant.thinking', 'Thinking...')}</span>
                 </div>
               </div>
             </div>
@@ -300,27 +297,24 @@ export function SOPAssistant() {
         </div>
       </ScrollArea>
 
-      <div className="p-3 sm:p-4 border-t shrink-0">
-        <div className="flex gap-2">
+      <div className="p-2 border-t shrink-0">
+        <div className="flex gap-1">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('sopAssistant.placeholder', 'Ask about your SOPs...')}
+            placeholder={t('sopAssistant.placeholder', 'Ask a question...')}
             disabled={loading}
-            className="flex-1 text-sm sm:text-base"
+            className="flex-1 text-xs h-7"
           />
-          <Button onClick={handleSend} disabled={loading || !input.trim()} size="sm" className="sm:size-default px-3 sm:px-4">
+          <Button onClick={handleSend} disabled={loading || !input.trim()} size="sm" className="h-7 px-2">
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-3 w-3" />
             )}
           </Button>
         </div>
-        <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 text-center">
-          {t('sopAssistant.poweredBy', "Powered by your organization's AI provider. Answers are based on your documents.")}
-        </p>
       </div>
     </Card>
   );
