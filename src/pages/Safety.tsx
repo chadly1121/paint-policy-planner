@@ -25,7 +25,7 @@ const Safety = () => {
 
   const handleQuizComplete = (passed: boolean) => {
     if (passed) {
-      // Refresh would happen here if we had acknowledgment tracking
+      window.location.reload();
     }
   };
 

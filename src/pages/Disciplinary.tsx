@@ -26,7 +26,7 @@ const Disciplinary = () => {
 
   const handleQuizComplete = (passed: boolean) => {
     if (passed) {
-      // Refresh progress here
+      window.location.reload();
     }
   };
 
