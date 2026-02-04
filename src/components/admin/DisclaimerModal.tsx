@@ -45,7 +45,7 @@ const DisclaimerModal = ({ open, onClose, onAccepted }: DisclaimerModalProps) =>
 
     toast({
       title: "Disclaimer accepted",
-      description: "You can now customize SOPs and policies.",
+      description: "You can now create and manage documents.",
     });
     onAccepted();
   };
@@ -56,10 +56,10 @@ const DisclaimerModal = ({ open, onClose, onAccepted }: DisclaimerModalProps) =>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            Content Editing Disclaimer
+            Document Management Disclaimer
           </DialogTitle>
           <DialogDescription>
-            Please read and accept before enabling custom content editing
+            Please read and accept before creating or editing documents
           </DialogDescription>
         </DialogHeader>
 
@@ -67,31 +67,37 @@ const DisclaimerModal = ({ open, onClose, onAccepted }: DisclaimerModalProps) =>
           <Alert className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800 dark:text-amber-200">
-              <strong>Important Legal Notice</strong>
+              <strong>Important Notice</strong>
             </AlertDescription>
           </Alert>
 
           <div className="text-sm text-muted-foreground space-y-3">
             <p>
-              By enabling custom content editing, you acknowledge and agree that:
+              By creating or managing documents in SOPed.ai, you acknowledge and agree that:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-2">
               <li>
-                <strong>You are creating company-specific policies.</strong> This application 
-                provides templates and structure, not legal advice.
+                <strong>You control the content.</strong> All SOPs, policies, and training 
+                materials are created and stored in your Google Drive. SOPed.ai provides 
+                structure and tracking—not the content itself.
               </li>
               <li>
-                <strong>You are responsible for compliance.</strong> All customized SOPs and 
-                policies must be reviewed by your legal and compliance teams.
+                <strong>You are responsible for accuracy.</strong> Ensure your documents 
+                are accurate, complete, and appropriate for your organization's needs.
               </li>
               <li>
-                <strong>The app does not ensure legal correctness.</strong> We provide tools 
-                to help you document and enforce procedures, but cannot guarantee they meet 
-                your jurisdiction's requirements.
+                <strong>AI quizzes require review.</strong> Quiz questions are generated 
+                by AI based on your documents. Review them for accuracy before employees 
+                take them.
               </li>
               <li>
-                <strong>Your edits are your responsibility.</strong> Modified content is 
-                tracked as company-owned and marked distinctly from system templates.
+                <strong>Compliance is your responsibility.</strong> SOPed.ai does not 
+                verify legal compliance. Consult professionals for legal, HR, and safety 
+                requirements in your jurisdiction.
+              </li>
+              <li>
+                <strong>Acknowledgments are tracked.</strong> When employees acknowledge 
+                documents, timestamps and metadata are recorded for audit purposes.
               </li>
             </ul>
           </div>
@@ -103,9 +109,9 @@ const DisclaimerModal = ({ open, onClose, onAccepted }: DisclaimerModalProps) =>
               onCheckedChange={(checked) => setAgreed(checked === true)}
             />
             <Label htmlFor="agree" className="text-sm leading-relaxed cursor-pointer">
-              I understand and accept full responsibility for reviewing and approving 
-              any customized content for legal compliance. I acknowledge that this 
-              application does not provide legal advice.
+              I understand that I am responsible for creating accurate documents, reviewing 
+              AI-generated quizzes, and ensuring compliance with applicable laws. SOPed.ai 
+              provides tools—not legal advice.
             </Label>
           </div>
 
@@ -120,7 +126,7 @@ const DisclaimerModal = ({ open, onClose, onAccepted }: DisclaimerModalProps) =>
           </Button>
           <Button onClick={handleAccept} disabled={!agreed || saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Accept & Enable Editing
+            Accept & Continue
           </Button>
         </DialogFooter>
       </DialogContent>

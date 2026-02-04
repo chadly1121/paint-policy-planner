@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, AlertTriangle, CheckCircle2, BookOpen, Scale } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle, CheckCircle2, BookOpen, Scale, FileText, Users, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -22,10 +22,10 @@ const ComplianceGuidance = () => {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Compliance Guidance</h1>
-            <p className="text-lg text-muted-foreground">How to Use This App Responsibly</p>
+            <p className="text-lg text-muted-foreground">Understanding How SOPed.ai Works</p>
           </div>
 
-          {/* What This App Is */}
+          {/* What This Platform Is */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
@@ -33,37 +33,30 @@ const ComplianceGuidance = () => {
                   <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-3">What This App Is</h2>
-                  <p className="text-foreground/90">
-                    This app is an operational system designed to help painting and contracting businesses 
-                    run cleaner, safer, more organized jobs using standardized procedures, checklists, and workflows.
+                  <h2 className="text-xl font-semibold text-foreground mb-3">What SOPed.ai Is</h2>
+                  <p className="text-foreground/90 mb-4">
+                    SOPed.ai is a training and document management platform that helps organizations:
                   </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* What This App Is NOT */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-3">What This App Is NOT</h2>
                   <ul className="space-y-2 text-foreground/90">
                     <li className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      This is not a legal compliance app
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Store and organize SOPs, policies, and training materials in Google Drive
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      This is not legal, employment, or safety advice
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Track employee acknowledgments and quiz completions
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      This app does not guarantee compliance with any law
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Manage certifications and expiry reminders
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Document incidents and safety data sheets
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Generate AI-powered quizzes to verify employee understanding
                     </li>
                   </ul>
                 </div>
@@ -71,36 +64,63 @@ const ComplianceGuidance = () => {
             </CardContent>
           </Card>
 
-          {/* Why We Built It This Way */}
+          {/* What This Platform Is NOT */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-3">What SOPed.ai Is NOT</h2>
+                  <ul className="space-y-2 text-foreground/90">
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      NOT a legal compliance verification system
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      NOT a substitute for legal, HR, or safety professionals
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      NOT a guarantee that your documents meet regulatory requirements
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      NOT responsible for the accuracy of your custom content
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* How the System Works */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-3">Why We Built It This Way</h2>
-                  <p className="text-foreground/90 mb-4">
-                    Laws vary by country, province, state, and even city—and they change constantly. 
-                    No single app can accurately guarantee compliance everywhere.
-                  </p>
-                  <p className="text-foreground/90 mb-2">Instead, this app focuses on:</p>
-                  <ul className="space-y-2 text-foreground/90">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Industry best practices
+                  <h2 className="text-xl font-semibold text-foreground mb-3">How the System Works</h2>
+                  <ul className="space-y-3 text-foreground/90">
+                    <li className="flex items-start gap-2">
+                      <span className="font-semibold text-primary min-w-6">1.</span>
+                      <span><strong>Google Drive Integration:</strong> Your organization's documents are stored in your own Google Drive. SOPed.ai reads and displays them—we never store document content on our servers.</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Professional standards
+                    <li className="flex items-start gap-2">
+                      <span className="font-semibold text-primary min-w-6">2.</span>
+                      <span><strong>AI Quiz Generation:</strong> Quizzes are generated based on your document content using AI. These test comprehension of the material you provide.</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Clear operational discipline
+                    <li className="flex items-start gap-2">
+                      <span className="font-semibold text-primary min-w-6">3.</span>
+                      <span><strong>Acknowledgment Tracking:</strong> When employees acknowledge SOPs, we record timestamps and metadata for audit purposes.</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Documentation and accountability
+                    <li className="flex items-start gap-2">
+                      <span className="font-semibold text-primary min-w-6">4.</span>
+                      <span><strong>Progress Tracking:</strong> Quiz completions and acknowledgments are tracked to show training progress across your team.</span>
                     </li>
                   </ul>
                 </div>
@@ -117,19 +137,27 @@ const ComplianceGuidance = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground mb-3">Your Responsibility</h2>
-                  <p className="text-foreground/90 mb-2">You are responsible for:</p>
+                  <p className="text-foreground/90 mb-3">As the organization using SOPed.ai, you are responsible for:</p>
                   <ul className="space-y-2 text-foreground/90">
                     <li className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      Understanding which laws apply to your business
+                      Creating accurate, legally compliant SOPs and policies
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      Adjusting policies to your jurisdiction
+                      Reviewing AI-generated quiz questions for accuracy
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                      Consulting professionals when required
+                      Ensuring your training meets your jurisdiction's requirements
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                      Maintaining your Google Drive connection and document organization
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                      Consulting professionals for legal, safety, and HR requirements
                     </li>
                   </ul>
                 </div>
@@ -137,24 +165,67 @@ const ComplianceGuidance = () => {
             </CardContent>
           </Card>
 
-          {/* How to Use This App Safely */}
+          {/* Data & Privacy */}
           <Card>
             <CardContent className="pt-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">How to Use This App Safely</h2>
-              <ul className="space-y-3 text-foreground/90">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>Use SOPs as a starting point, not a legal conclusion</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>Modify language as needed for your region</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>Review policies with legal or safety professionals if required</span>
-                </li>
-              </ul>
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/30">
+                  <Users className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-3">Data & Privacy</h2>
+                  <ul className="space-y-2 text-foreground/90">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>Document content stays in your Google Drive—we access it via secure API tokens</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>We store acknowledgments, quiz results, and progress data for tracking purposes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>Audit logs record actions with timestamps for compliance verification</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>You can revoke Google Drive access at any time from Admin settings</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Best Practices */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                  <Award className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-3">Best Practices</h2>
+                  <ul className="space-y-3 text-foreground/90">
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span>Review AI-generated quizzes before employees take them</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span>Keep your SOPs and policies updated as regulations change</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span>Use acknowledgments for critical policies that require documented sign-off</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span>Monitor expiring certifications and set reminder thresholds in Admin settings</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -162,29 +233,29 @@ const ComplianceGuidance = () => {
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="pt-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">Our Philosophy</h2>
-              <p className="text-foreground/90 mb-4">We believe:</p>
+              <p className="text-foreground/90 mb-4">SOPed.ai provides:</p>
               <ul className="space-y-3 text-foreground/90">
                 <li className="flex items-start gap-3">
                   <span className="font-semibold text-primary">→</span>
-                  <span>Strong operations reduce risk</span>
+                  <span><strong>Structure</strong> — Organized document management and training workflows</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="font-semibold text-primary">→</span>
-                  <span>Clear rules prevent problems</span>
+                  <span><strong>Accountability</strong> — Tracked acknowledgments and quiz completions</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="font-semibold text-primary">→</span>
-                  <span>Accountability beats chaos</span>
+                  <span><strong>Visibility</strong> — Progress tracking and expiry reminders</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="font-semibold text-primary">→</span>
-                  <span>Professionalism protects businesses</span>
+                  <span><strong>Your Content</strong> — Documents stay in your Google Drive under your control</span>
                 </li>
               </ul>
               <div className="mt-6 pt-6 border-t border-primary/20">
                 <p className="text-center text-foreground font-medium">
-                  This app gives you structure.<br />
-                  <span className="text-muted-foreground">You decide how to apply it legally.</span>
+                  We provide the tools. You provide the content.<br />
+                  <span className="text-muted-foreground">Compliance is your responsibility.</span>
                 </p>
               </div>
             </CardContent>
