@@ -1,79 +1,22 @@
 import { useTranslation } from "react-i18next";
-import {
-  ClipboardList,
-  Shield,
-  FileText,
-  GraduationCap,
-  AlertTriangle,
-  BookOpen,
-  Trophy,
-  CheckCircle2,
-  Lock,
-} from "lucide-react";
-import SectionCard from "@/components/manual/SectionCard";
+import { BookOpen, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import PointsDisplay from "@/components/gamification/PointsDisplay";
 import Leaderboard from "@/components/gamification/Leaderboard";
 import CertificateGenerator from "@/components/gamification/CertificateGenerator";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+import AssignedTasks from "@/components/dashboard/AssignedTasks";
+import CertificateReminders from "@/components/dashboard/CertificateReminders";
 import { useProgress } from "@/hooks/useProgress";
 
 const Index = () => {
   const { t } = useTranslation();
-  const { progress, points, isSectionUnlocked, getCompletedSectionsCount } = useProgress();
+  const { points, getCompletedSectionsCount } = useProgress();
 
   const completedCount = getCompletedSectionsCount();
-  
-  const getSectionStatus = (sectionKey: string) => {
-    const isCompleted = progress.some(p => p.section_key === sectionKey && p.completed);
-    const isUnlocked = isSectionUnlocked(sectionKey);
-    return { isCompleted, isUnlocked };
-  };
-
-  const sections = [
-    {
-      title: t("sections.sops.title"),
-      description: t("sections.sops.description"),
-      icon: ClipboardList,
-      path: "/sops",
-      itemCount: 22,
-      sectionKey: "sops",
-    },
-    {
-      title: t("sections.safety.title"),
-      description: t("sections.safety.description"),
-      icon: Shield,
-      path: "/safety",
-      itemCount: 6,
-      sectionKey: "safety",
-    },
-    {
-      title: t("sections.policies.title"),
-      description: t("sections.policies.description"),
-      icon: FileText,
-      path: "/policies",
-      itemCount: 10,
-      sectionKey: "policies",
-    },
-    {
-      title: t("sections.training.title"),
-      description: t("sections.training.description"),
-      icon: GraduationCap,
-      path: "/training",
-      itemCount: 5,
-      sectionKey: "training",
-    },
-    {
-      title: t("sections.disciplinary.title"),
-      description: t("sections.disciplinary.description"),
-      icon: AlertTriangle,
-      path: "/disciplinary",
-      itemCount: 4,
-      sectionKey: "disciplinary",
-    },
-  ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Points Display */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <PointsDisplay />
@@ -122,34 +65,11 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Section Cards */}
-      <div>
-        <h3 className="mb-4 font-serif text-lg font-semibold text-foreground">
-          {t("dashboard.manualSections")}
-        </h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sections.map((section) => {
-            const { isCompleted, isUnlocked } = getSectionStatus(section.sectionKey);
-            return (
-              <div key={section.path} className="relative">
-                <SectionCard {...section} />
-                <div className="absolute top-3 right-3">
-                  {isCompleted ? (
-                    <div className="flex items-center gap-1 bg-green-500/20 text-green-600 px-2 py-1 rounded-full text-xs">
-                      <CheckCircle2 className="h-3 w-3" />
-                      <span>Complete</span>
-                    </div>
-                  ) : !isUnlocked ? (
-                    <div className="flex items-center gap-1 bg-muted text-muted-foreground px-2 py-1 rounded-full text-xs">
-                      <Lock className="h-3 w-3" />
-                      <span>Locked</span>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {/* Activity & Tasks Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <AssignedTasks />
+        <CertificateReminders />
+        <RecentActivity />
       </div>
 
       {/* Leaderboard */}
