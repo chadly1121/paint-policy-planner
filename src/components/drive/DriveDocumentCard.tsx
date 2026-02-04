@@ -200,29 +200,40 @@ export function DriveDocumentCard({
     <Card className={`transition-all ${isCompleted ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/20' : 'border-border'}`}>
       <Collapsible open={isOpen} onOpenChange={handleToggle}>
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              {isCompleted && (
-                <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
-              )}
-              <CardTitle className="text-base font-medium truncate">
-                <span className="text-muted-foreground font-mono mr-2">
-                  {prefix}-{String(itemNumber).padStart(3, '0')}
-                </span>
-                {displayTitle}
-              </CardTitle>
+          {/* Row 1: Title - full width */}
+          <div className="flex items-start gap-2 mb-2">
+            {isCompleted && (
+              <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+            )}
+            <CardTitle className="text-base font-medium leading-snug">
+              <span className="text-muted-foreground font-mono mr-2">
+                {prefix}-{String(itemNumber).padStart(3, '0')}
+              </span>
+              {displayTitle}
+            </CardTitle>
+          </div>
+          
+          {/* Row 2: Badges and actions */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {videoUrl && (
-                <Badge variant="outline" className="text-xs flex-shrink-0 border-blue-500/50 text-blue-600 dark:text-blue-400">
+                <Badge variant="outline" className="text-xs border-blue-500/50 text-blue-600 dark:text-blue-400">
                   <Video className="h-3 w-3 mr-1" />
                   Video
                 </Badge>
               )}
-              <Badge variant="outline" className="text-xs flex-shrink-0 border-sky-500/50 text-sky-600 dark:text-sky-400">
+              <Badge variant="outline" className="text-xs border-sky-500/50 text-sky-600 dark:text-sky-400">
                 <FileText className="h-3 w-3 mr-1" />
                 Drive
               </Badge>
+              {isAcknowledged && (
+                <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                  ✓ Acknowledged
+                </Badge>
+              )}
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            
+            <div className="flex items-center gap-1.5 flex-wrap">
               {/* Video URL edit button (admin only) */}
               {isAdmin && (
                 <Button
@@ -233,9 +244,9 @@ export function DriveDocumentCard({
                     setVideoDialogOpen(true);
                   }}
                   title={videoUrl ? "Edit video" : "Add video"}
-                  className="text-muted-foreground hover:text-primary"
+                  className="text-muted-foreground hover:text-primary h-8 w-8 p-0"
                 >
-                  <Video className="h-3 w-3" />
+                  <Video className="h-3.5 w-3.5" />
                 </Button>
               )}
               
@@ -249,35 +260,30 @@ export function DriveDocumentCard({
                     window.open(file.webViewLink, '_blank');
                   }}
                   title="Open in Google Drive"
+                  className="h-8 w-8 p-0"
                 >
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               )}
               
               {/* Acknowledge button */}
               {ackRequired && !isAcknowledged && onAcknowledge && (
-                <Button size="sm" variant="outline" onClick={onAcknowledge} className="text-xs">
+                <Button size="sm" variant="outline" onClick={onAcknowledge} className="text-xs h-8">
                   <FileCheck className="h-3 w-3 mr-1" />
-                  Acknowledge
+                  Ack
                 </Button>
-              )}
-              
-              {isAcknowledged && (
-                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                  ✓ Acknowledged
-                </Badge>
               )}
               
               {/* Quiz button */}
               {onStartQuiz && (
-                <Button size="sm" variant="outline" onClick={onStartQuiz}>
+                <Button size="sm" variant="outline" onClick={onStartQuiz} className="h-8">
                   <Play className="h-3 w-3 mr-1" />
                   Quiz
                 </Button>
               )}
               
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
               </CollapsibleTrigger>
