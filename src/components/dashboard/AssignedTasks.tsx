@@ -28,11 +28,32 @@ const AssignedTasks = () => {
           _user_id: user.id,
         });
 
+        // Filter for org SOPs that need acknowledgment
+        const pendingOrgSops = assignedSops?.filter(
+          (sop) => !sop.is_acknowledged && sop.ack_required && sop.source === "org"
+        ) || [];
+
+        if (pendingOrgSops.length === 0) {
+          setPendingItems([]);
+          setLoading(false);
+          return;
+        }
+
+        // Verify which SOPs actually have Drive files (are truly Drive-backed)
+        const sopIds = pendingOrgSops.map((sop) => sop.sop_id);
+        const { data: driveBackedSops } = await supabase
+          .from("sops")
+          .select("id, title, drive_file_id")
+          .in("id", sopIds)
+          .not("drive_file_id", "is", null);
+
+        const driveBackedIds = new Set(driveBackedSops?.map((s) => s.id) || []);
+
         const items: PendingItem[] = [];
 
-        // Add unacknowledged SOPs - only show org SOPs (Drive-backed), not system templates
-        assignedSops
-          ?.filter((sop) => !sop.is_acknowledged && sop.ack_required && sop.source === "org")
+        // Only show SOPs that have a drive_file_id (actually in Drive)
+        pendingOrgSops
+          .filter((sop) => driveBackedIds.has(sop.sop_id))
           .forEach((sop) => {
             items.push({
               id: sop.sop_id,
