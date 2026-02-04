@@ -30,9 +30,9 @@ const AssignedTasks = () => {
 
         const items: PendingItem[] = [];
 
-        // Add unacknowledged SOPs
+        // Add unacknowledged SOPs - only show org SOPs (Drive-backed), not system templates
         assignedSops
-          ?.filter((sop) => !sop.is_acknowledged && sop.ack_required)
+          ?.filter((sop) => !sop.is_acknowledged && sop.ack_required && sop.source === "org")
           .forEach((sop) => {
             items.push({
               id: sop.sop_id,
