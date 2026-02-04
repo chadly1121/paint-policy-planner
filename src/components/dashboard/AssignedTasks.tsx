@@ -23,49 +23,80 @@ const AssignedTasks = () => {
       if (!user) return;
 
       try {
-        // Fetch assigned SOPs that need acknowledgment
-        const { data: assignedSops } = await supabase.rpc("get_user_assigned_sops", {
-          _user_id: user.id,
+        // First, get the actual files in Drive to know what truly exists
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setLoading(false);
+          return;
+        }
+
+        const driveResponse = await supabase.functions.invoke("drive-list-files", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: { folder_type: "sops" },
         });
 
-        // Filter for org SOPs that need acknowledgment
-        const pendingOrgSops = assignedSops?.filter(
-          (sop) => !sop.is_acknowledged && sop.ack_required && sop.source === "org"
-        ) || [];
+        // Get set of actual Drive file IDs (excluding templates)
+        const actualDriveFileIds = new Set<string>(
+          (driveResponse.data?.files || [])
+            .filter((f: { name: string }) => !f.name.startsWith("_TEMPLATE"))
+            .map((f: { id: string }) => f.id)
+        );
 
-        if (pendingOrgSops.length === 0) {
+        if (actualDriveFileIds.size === 0) {
           setPendingItems([]);
           setLoading(false);
           return;
         }
 
-        // Verify which SOPs actually have Drive files (are truly Drive-backed)
-        const sopIds = pendingOrgSops.map((sop) => sop.sop_id);
-        const { data: driveBackedSops } = await supabase
-          .from("sops")
-          .select("id, title, drive_file_id")
-          .in("id", sopIds)
-          .not("drive_file_id", "is", null);
+        // Fetch assigned SOPs that need acknowledgment
+        const { data: assignedSops } = await supabase.rpc("get_user_assigned_sops", {
+          _user_id: user.id,
+        });
 
-        const driveBackedIds = new Set(driveBackedSops?.map((s) => s.id) || []);
-
+        // Filter for org SOPs that need acknowledgment AND exist in Drive
         const items: PendingItem[] = [];
 
-        // Only show SOPs that have a drive_file_id (actually in Drive)
-        pendingOrgSops
-          .filter((sop) => driveBackedIds.has(sop.sop_id))
-          .forEach((sop) => {
+        assignedSops?.forEach((sop) => {
+          // Only show if: not acknowledged, requires ack, is org SOP, and exists in Drive
+          if (!sop.is_acknowledged && sop.ack_required && sop.source === "org") {
+            // Get the drive_file_id for this SOP from the database
+            // Since we don't have it in the RPC result, we need to check the sops table
+            // But we can match by checking if any of our actual Drive files correspond to this SOP
             items.push({
               id: sop.sop_id,
               title: sop.title,
               type: "sop",
               urgent: false,
             });
-          });
+          }
+        });
 
-        setPendingItems(items.slice(0, 5));
+        // Now verify which of these SOPs actually have drive_file_ids that exist in Drive
+        if (items.length > 0) {
+          const sopIds = items.map((item) => item.id);
+          const { data: sopsWithDrive } = await supabase
+            .from("sops")
+            .select("id, drive_file_id")
+            .in("id", sopIds)
+            .not("drive_file_id", "is", null);
+
+          // Filter to only include SOPs whose drive_file_id is in our actual Drive files
+          const validSopIds = new Set(
+            (sopsWithDrive || [])
+              .filter((s) => s.drive_file_id && actualDriveFileIds.has(s.drive_file_id))
+              .map((s) => s.id)
+          );
+
+          const validItems = items.filter((item) => validSopIds.has(item.id));
+          setPendingItems(validItems.slice(0, 5));
+        } else {
+          setPendingItems([]);
+        }
       } catch (error) {
         console.error("Error fetching pending items:", error);
+        setPendingItems([]);
       } finally {
         setLoading(false);
       }
