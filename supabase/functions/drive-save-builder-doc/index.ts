@@ -134,20 +134,176 @@ async function getNextAutoNumber(accessToken: string, folderId: string, folderTy
   return max + 1;
 }
 
-// Convert markdown to Google Docs API requests
-function markdownToDocsRequests(markdown: string): any[] {
+// Parse markdown and convert to Google Docs API batch update requests
+function markdownToDocsRequests(markdown: string): { text: string; requests: any[] } {
+  // Remove markdown code block wrappers if present
+  let cleaned = markdown.replace(/```markdown\n?/g, '').replace(/```\n?/g, '');
+  
+  const lines = cleaned.split('\n');
+  const textLines: string[] = [];
+  const formattingRanges: Array<{
+    type: 'heading1' | 'heading2' | 'heading3' | 'heading4' | 'bold' | 'italic' | 'bullet' | 'numbered';
+    startOffset: number;
+    endOffset: number;
+    text?: string;
+  }> = [];
+  
+  let currentOffset = 1; // Google Docs uses 1-based indexing
+  
+  for (const line of lines) {
+    let processedLine = line;
+    let lineType: 'heading1' | 'heading2' | 'heading3' | 'heading4' | 'bullet' | 'numbered' | 'normal' = 'normal';
+    
+    // Check for headers
+    if (line.startsWith('#### ')) {
+      processedLine = line.slice(5);
+      lineType = 'heading4';
+    } else if (line.startsWith('### ')) {
+      processedLine = line.slice(4);
+      lineType = 'heading3';
+    } else if (line.startsWith('## ')) {
+      processedLine = line.slice(3);
+      lineType = 'heading2';
+    } else if (line.startsWith('# ')) {
+      processedLine = line.slice(2);
+      lineType = 'heading1';
+    } else if (line.match(/^[-*] /)) {
+      processedLine = line.slice(2);
+      lineType = 'bullet';
+    } else if (line.match(/^\d+\. /)) {
+      processedLine = line.replace(/^\d+\. /, '');
+      lineType = 'numbered';
+    }
+    
+    // Track bold text positions (before removing markdown)
+    const boldMatches = [...processedLine.matchAll(/\*\*(.+?)\*\*/g)];
+    let adjustedLine = processedLine;
+    let offsetAdjustment = 0;
+    
+    for (const match of boldMatches) {
+      const matchStart = match.index! - offsetAdjustment;
+      const innerText = match[1];
+      formattingRanges.push({
+        type: 'bold',
+        startOffset: currentOffset + matchStart,
+        endOffset: currentOffset + matchStart + innerText.length,
+      });
+      offsetAdjustment += 4; // Remove 4 asterisks
+    }
+    
+    // Remove markdown bold syntax
+    adjustedLine = adjustedLine.replace(/\*\*(.+?)\*\*/g, '$1');
+    
+    // Track italic text positions
+    const italicMatches = [...adjustedLine.matchAll(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g)];
+    offsetAdjustment = 0;
+    
+    for (const match of italicMatches) {
+      const matchStart = match.index! - offsetAdjustment;
+      const innerText = match[1];
+      formattingRanges.push({
+        type: 'italic',
+        startOffset: currentOffset + matchStart,
+        endOffset: currentOffset + matchStart + innerText.length,
+      });
+      offsetAdjustment += 2; // Remove 2 asterisks
+    }
+    
+    // Remove markdown italic syntax
+    adjustedLine = adjustedLine.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '$1');
+    
+    // Skip horizontal rules
+    if (line.match(/^---$/) || line.match(/^─+$/)) {
+      adjustedLine = '─'.repeat(50);
+    }
+    
+    const lineLength = adjustedLine.length + 1; // +1 for newline
+    
+    if (lineType !== 'normal') {
+      formattingRanges.push({
+        type: lineType,
+        startOffset: currentOffset,
+        endOffset: currentOffset + adjustedLine.length,
+      });
+    }
+    
+    textLines.push(adjustedLine);
+    currentOffset += lineLength;
+  }
+  
+  const plainText = textLines.join('\n');
   const requests: any[] = [];
-  let currentIndex = 1;
-
-  // Insert the full text first
-  requests.push({
-    insertText: {
-      location: { index: 1 },
-      text: markdown,
-    },
-  });
-
-  return requests;
+  
+  // Apply formatting in reverse order (from end to start) to preserve indices
+  const sortedRanges = formattingRanges.sort((a, b) => b.startOffset - a.startOffset);
+  
+  for (const range of sortedRanges) {
+    if (range.type === 'heading1') {
+      requests.push({
+        updateParagraphStyle: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset + 1 },
+          paragraphStyle: { namedStyleType: 'HEADING_1' },
+          fields: 'namedStyleType',
+        },
+      });
+    } else if (range.type === 'heading2') {
+      requests.push({
+        updateParagraphStyle: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset + 1 },
+          paragraphStyle: { namedStyleType: 'HEADING_2' },
+          fields: 'namedStyleType',
+        },
+      });
+    } else if (range.type === 'heading3') {
+      requests.push({
+        updateParagraphStyle: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset + 1 },
+          paragraphStyle: { namedStyleType: 'HEADING_3' },
+          fields: 'namedStyleType',
+        },
+      });
+    } else if (range.type === 'heading4') {
+      requests.push({
+        updateParagraphStyle: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset + 1 },
+          paragraphStyle: { namedStyleType: 'HEADING_4' },
+          fields: 'namedStyleType',
+        },
+      });
+    } else if (range.type === 'bullet') {
+      requests.push({
+        createParagraphBullets: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset + 1 },
+          bulletPreset: 'BULLET_DISC_CIRCLE_SQUARE',
+        },
+      });
+    } else if (range.type === 'numbered') {
+      requests.push({
+        createParagraphBullets: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset + 1 },
+          bulletPreset: 'NUMBERED_DECIMAL_ALPHA_ROMAN',
+        },
+      });
+    } else if (range.type === 'bold') {
+      requests.push({
+        updateTextStyle: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset },
+          textStyle: { bold: true },
+          fields: 'bold',
+        },
+      });
+    } else if (range.type === 'italic') {
+      requests.push({
+        updateTextStyle: {
+          range: { startIndex: range.startOffset, endIndex: range.endOffset },
+          textStyle: { italic: true },
+          fields: 'italic',
+        },
+      });
+    }
+  }
+  
+  return { text: plainText, requests };
 }
 
 serve(async (req) => {
@@ -271,29 +427,82 @@ serve(async (req) => {
     const newDoc = await createResponse.json();
     console.log('Created document:', newDoc.id);
 
-    // Insert content using Google Docs API
-    const headerContent = `${autoName}\n\n─────────────────────────────────────\n\n${content}`;
+    // Convert markdown to formatted content
+    const { text: plainText, requests: formatRequests } = markdownToDocsRequests(content);
     
-    const batchUpdateResponse = await fetch(`https://docs.googleapis.com/v1/documents/${newDoc.id}:batchUpdate`, {
+    // Prepare the full document text with header
+    const headerText = `${autoName}\n\n${'─'.repeat(50)}\n\n`;
+    const fullText = headerText + plainText;
+    
+    // First, insert all text
+    const insertRequest = {
+      requests: [
+        {
+          insertText: {
+            location: { index: 1 },
+            text: fullText,
+          },
+        },
+      ],
+    };
+
+    const insertResponse = await fetch(`https://docs.googleapis.com/v1/documents/${newDoc.id}:batchUpdate`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        requests: [
-          {
-            insertText: {
-              location: { index: 1 },
-              text: headerContent,
-            },
-          },
-        ],
-      }),
+      body: JSON.stringify(insertRequest),
     });
 
-    if (!batchUpdateResponse.ok) {
-      console.warn('Failed to insert content:', await batchUpdateResponse.text());
+    if (!insertResponse.ok) {
+      console.warn('Failed to insert text:', await insertResponse.text());
+    }
+
+    // Apply header formatting to the document title
+    const headerLength = headerText.length;
+    const titleFormatRequests: any[] = [
+      {
+        updateParagraphStyle: {
+          range: { startIndex: 1, endIndex: autoName.length + 1 },
+          paragraphStyle: { namedStyleType: 'HEADING_1' },
+          fields: 'namedStyleType',
+        },
+      },
+    ];
+
+    // Adjust formatting requests offsets to account for the header
+    const adjustedFormatRequests = formatRequests.map(req => {
+      const adjusted = JSON.parse(JSON.stringify(req));
+      if (adjusted.updateParagraphStyle) {
+        adjusted.updateParagraphStyle.range.startIndex += headerLength;
+        adjusted.updateParagraphStyle.range.endIndex += headerLength;
+      } else if (adjusted.updateTextStyle) {
+        adjusted.updateTextStyle.range.startIndex += headerLength;
+        adjusted.updateTextStyle.range.endIndex += headerLength;
+      } else if (adjusted.createParagraphBullets) {
+        adjusted.createParagraphBullets.range.startIndex += headerLength;
+        adjusted.createParagraphBullets.range.endIndex += headerLength;
+      }
+      return adjusted;
+    });
+
+    // Apply all formatting
+    const allFormatRequests = [...titleFormatRequests, ...adjustedFormatRequests];
+    
+    if (allFormatRequests.length > 0) {
+      const formatResponse = await fetch(`https://docs.googleapis.com/v1/documents/${newDoc.id}:batchUpdate`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requests: allFormatRequests }),
+      });
+
+      if (!formatResponse.ok) {
+        console.warn('Failed to apply formatting:', await formatResponse.text());
+      }
     }
 
     // Update last_used_at
