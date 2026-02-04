@@ -107,11 +107,11 @@ const PointsDisplay = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-3xl font-bold text-primary">{driveProgress.points}</p>
-              <p className="text-sm text-muted-foreground">Points (Drive SOPs)</p>
+              <p className="text-sm text-muted-foreground">Points Earned</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-semibold">{points.total_points}</p>
-              <p className="text-xs text-muted-foreground">Total Earned</p>
+              <p className="text-lg font-semibold">{points.available_points}</p>
+              <p className="text-xs text-muted-foreground">Available</p>
             </div>
           </div>
 
