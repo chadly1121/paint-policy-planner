@@ -116,6 +116,7 @@ export const useQuiz = () => {
           userId: user.id,
           quizType,
           itemKey,
+          targetLanguage: i18n.language || 'en',
         },
       });
 
