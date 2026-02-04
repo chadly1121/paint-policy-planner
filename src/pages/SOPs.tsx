@@ -5,7 +5,7 @@ import { ClipboardList } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
 import { DriveRequiredGuard } from "@/components/drive/DriveRequiredGuard";
 import { DriveDocumentList } from "@/components/drive/DriveDocumentList";
-import { SOPAssistant } from "@/components/sop/SOPAssistant";
+import { DocumentAssistant } from "@/components/sop/DocumentAssistant";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 const SECTION_KEY = "sops";
@@ -30,22 +30,18 @@ const SOPs = () => {
 
   return (
     <DriveRequiredGuard moduleName="SOPs">
-      <div className="space-y-6 w-full min-w-0 overflow-hidden">
-        {/* Responsive grid: stacked on mobile/tablet, side-by-side on desktop */}
-        <div className="grid gap-6 xl:grid-cols-3 w-full min-w-0">
-          <div className="xl:col-span-2 order-2 xl:order-1 min-w-0">
-            <DriveDocumentList
-              moduleType="sops"
-              icon={<ClipboardList className="h-5 w-5 text-primary" />}
-              title={t("sections.sops.title")}
-              description={t("sections.sops.description")}
-              onStartQuiz={handleStartQuiz}
-            />
-          </div>
-          <div className="xl:col-span-1 order-1 xl:order-2 min-w-0">
-            <SOPAssistant />
-          </div>
-        </div>
+      <div className="space-y-4 w-full min-w-0 overflow-hidden">
+        {/* AI Assistant - compact at top */}
+        <DocumentAssistant />
+        
+        {/* Document List - full width */}
+        <DriveDocumentList
+          moduleType="sops"
+          icon={<ClipboardList className="h-5 w-5 text-primary" />}
+          title={t("sections.sops.title")}
+          description={t("sections.sops.description")}
+          onStartQuiz={handleStartQuiz}
+        />
 
         <QuizModal
           open={quizOpen}

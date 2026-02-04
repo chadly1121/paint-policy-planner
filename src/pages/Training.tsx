@@ -5,6 +5,7 @@ import { GraduationCap } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
 import { DriveRequiredGuard } from "@/components/drive/DriveRequiredGuard";
 import { DriveDocumentList } from "@/components/drive/DriveDocumentList";
+import { DocumentAssistant } from "@/components/sop/DocumentAssistant";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 const SECTION_KEY = "training";
@@ -29,7 +30,9 @@ const Training = () => {
 
   return (
     <DriveRequiredGuard moduleName="Training Requirements">
-      <div className="space-y-6">
+      <div className="space-y-4 w-full min-w-0 overflow-hidden">
+        {/* AI Assistant - compact at top */}
+        <DocumentAssistant />
 
         <DriveDocumentList
           moduleType="training"

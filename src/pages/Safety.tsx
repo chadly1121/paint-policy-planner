@@ -1,11 +1,12 @@
 // Safety page - displays safety protocols from Google Drive
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Shield, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import QuizModal from "@/components/quiz/QuizModal";
 import { DriveRequiredGuard } from "@/components/drive/DriveRequiredGuard";
 import { DriveDocumentList } from "@/components/drive/DriveDocumentList";
+import { DocumentAssistant } from "@/components/sop/DocumentAssistant";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 const SECTION_KEY = "safety";
@@ -18,7 +19,7 @@ const Safety = () => {
 
   const handleStartQuiz = (file: DriveFile, content: string) => {
     setCurrentFile(file);
-    setQuizContent(content || file.name); // Use filename as fallback for quiz generation
+    setQuizContent(content || file.name);
     setQuizOpen(true);
   };
 
@@ -30,7 +31,10 @@ const Safety = () => {
 
   return (
     <DriveRequiredGuard moduleName="Safety Protocols">
-      <div className="space-y-6">
+      <div className="space-y-4 w-full min-w-0 overflow-hidden">
+        {/* AI Assistant - compact at top */}
+        <DocumentAssistant />
+
         <Alert className="border-destructive/50 bg-destructive/10">
           <AlertCircle className="h-5 w-5 text-destructive" />
           <AlertTitle className="text-destructive">{t("sections.safety.alertTitle")}</AlertTitle>

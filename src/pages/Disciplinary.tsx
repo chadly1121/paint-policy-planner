@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import QuizModal from "@/components/quiz/QuizModal";
 import { DriveRequiredGuard } from "@/components/drive/DriveRequiredGuard";
 import { DriveDocumentList } from "@/components/drive/DriveDocumentList";
+import { DocumentAssistant } from "@/components/sop/DocumentAssistant";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 
 const SECTION_KEY = "disciplinary";
@@ -31,7 +32,10 @@ const Disciplinary = () => {
 
   return (
     <DriveRequiredGuard moduleName="Disciplinary Procedures">
-      <div className="space-y-6">
+      <div className="space-y-4 w-full min-w-0 overflow-hidden">
+        {/* AI Assistant - compact at top */}
+        <DocumentAssistant />
+
         <Alert className="border-amber-500/50 bg-amber-500/10">
           <Info className="h-5 w-5 text-amber-600" />
           <AlertTitle className="text-amber-700">{t("sections.disciplinary.alertTitle")}</AlertTitle>
