@@ -9,6 +9,7 @@ import { Search, RefreshCw, Loader2, FolderOpen, FilePlus } from "lucide-react";
 import { useDriveFiles, type DriveFile } from "@/hooks/useDriveFiles";
 import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
+import { useSectionItemProgress } from "@/hooks/useSectionItemProgress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CreateDriveDocumentDialog, type DriveFolderType } from "./CreateDriveDocumentDialog";
@@ -35,6 +36,7 @@ export function DriveDocumentList({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { files, loading, error, refresh } = useDriveFiles(moduleType);
   const { folders } = useDriveConnection();
+  const { isItemCompleted, refreshProgress, getCompletedItemCount } = useSectionItemProgress(moduleType);
   const [syncing, setSyncing] = useState(false);
 
   // Get folder info for "Open in Drive" link
@@ -50,8 +52,10 @@ export function DriveDocumentList({
     );
   }, [files, searchQuery]);
 
-  // Calculate progress (placeholder - would need acknowledgment data)
-  const progressPercent = 0; // TODO: Connect to acknowledgment tracking
+  // Calculate progress based on completed quizzes
+  const completedCount = getCompletedItemCount();
+  const totalCount = filteredFiles.length;
+  const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   const handleRefresh = async () => {
     setSyncing(true);
@@ -75,6 +79,7 @@ export function DriveDocumentList({
       console.error("Title sync error:", err);
     }
     await refresh();
+    await refreshProgress();
     setSyncing(false);
   };
 
@@ -206,8 +211,8 @@ export function DriveDocumentList({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Documents in Drive</span>
-              <span className="font-medium">{filteredFiles.length} files</span>
+              <span className="text-muted-foreground">Quiz Progress</span>
+              <span className="font-medium">{completedCount} / {totalCount} completed</span>
             </div>
             <Progress value={progressPercent} className="h-2" />
           </div>
@@ -261,6 +266,7 @@ export function DriveDocumentList({
             file={file}
             itemNumber={index + 1}
             moduleType={moduleType}
+            isQuizCompleted={isItemCompleted(file.id)}
             onStartQuiz={onStartQuiz ? () => onStartQuiz(file, '') : undefined}
           />
         ))}

@@ -1,5 +1,5 @@
 // SOPs page - displays SOPs from Google Drive with acknowledgment tracking
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ClipboardList } from "lucide-react";
 import QuizModal from "@/components/quiz/QuizModal";
@@ -15,6 +15,7 @@ const SOPs = () => {
   const [quizOpen, setQuizOpen] = useState(false);
   const [currentFile, setCurrentFile] = useState<DriveFile | null>(null);
   const [quizContent, setQuizContent] = useState("");
+  const listRef = useRef<{ refreshProgress: () => void } | null>(null);
 
   const handleStartQuiz = (file: DriveFile, content: string) => {
     setCurrentFile(file);
@@ -24,7 +25,8 @@ const SOPs = () => {
 
   const handleQuizComplete = (passed: boolean) => {
     if (passed) {
-      // Refresh acknowledgments here
+      // Trigger a page refresh to update the card colors
+      window.location.reload();
     }
   };
 

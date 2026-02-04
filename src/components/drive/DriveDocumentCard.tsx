@@ -34,6 +34,7 @@ interface DriveDocumentCardProps {
   itemNumber: number;
   moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
   isAcknowledged?: boolean;
+  isQuizCompleted?: boolean;
   ackRequired?: boolean;
   onAcknowledge?: () => void;
   onStartQuiz?: () => void;
@@ -44,6 +45,7 @@ export function DriveDocumentCard({
   itemNumber,
   moduleType,
   isAcknowledged = false,
+  isQuizCompleted = false,
   ackRequired = false,
   onAcknowledge,
   onStartQuiz,
@@ -191,13 +193,16 @@ export function DriveDocumentCard({
     });
   };
 
+  // Determine card styling based on completion status
+  const isCompleted = isQuizCompleted || isAcknowledged;
+  
   return (
-    <Card className={`transition-all ${isAcknowledged ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/10' : 'border-border'}`}>
+    <Card className={`transition-all ${isCompleted ? 'border-green-500/50 bg-green-50/30 dark:bg-green-950/20' : 'border-border'}`}>
       <Collapsible open={isOpen} onOpenChange={handleToggle}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              {isAcknowledged && (
+              {isCompleted && (
                 <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
               )}
               <CardTitle className="text-base font-medium truncate">
