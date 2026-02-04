@@ -22,22 +22,22 @@ const RecentActivity = () => {
       if (!user) return;
 
       try {
-        // Fetch recent SOP acknowledgments
+        // Fetch recent SOP acknowledgments - only for org SOPs (Drive-backed)
         const { data: acks } = await supabase
           .from("sop_acks")
-          .select("id, acknowledged_at, sop_id, sops(title)")
+          .select("id, acknowledged_at, sop_id, sops(title, source)")
           .eq("user_id", user.id)
           .order("acknowledged_at", { ascending: false })
-          .limit(5);
+          .limit(10);
 
-        // Fetch recent quiz passes
+        // Fetch recent quiz passes - filter for Drive file IDs (not system keys like sop001)
         const { data: quizzes } = await supabase
           .from("section_item_progress")
           .select("id, completed_at, item_key, section_key")
           .eq("user_id", user.id)
           .eq("completed", true)
           .order("completed_at", { ascending: false })
-          .limit(5);
+          .limit(10);
 
         // Fetch recent certificates
         const { data: certs } = await supabase
@@ -49,23 +49,45 @@ const RecentActivity = () => {
 
         const items: ActivityItem[] = [];
 
-        acks?.forEach((ack) => {
-          items.push({
-            id: `ack-${ack.id}`,
-            type: "sop_ack",
-            title: (ack.sops as { title: string } | null)?.title || "SOP Acknowledged",
-            timestamp: ack.acknowledged_at,
+        // Only show org SOPs (Drive-backed), not system templates
+        acks
+          ?.filter((ack) => {
+            const sop = ack.sops as { title: string; source: string } | null;
+            return sop?.source === "org";
+          })
+          .forEach((ack) => {
+            items.push({
+              id: `ack-${ack.id}`,
+              type: "sop_ack",
+              title: (ack.sops as { title: string } | null)?.title || "SOP Acknowledged",
+              timestamp: ack.acknowledged_at,
+            });
           });
-        });
 
-        quizzes?.forEach((q) => {
-          items.push({
-            id: `quiz-${q.id}`,
-            type: "quiz_pass",
-            title: q.item_key.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-            timestamp: q.completed_at || "",
+        // For quiz passes, fetch the actual SOP titles
+        const driveQuizzes = quizzes?.filter((q) => {
+          // Drive file IDs are UUIDs or Google Doc IDs (long alphanumeric), not system keys
+          return q.item_key.length > 20 || q.item_key.includes("-");
+        }) || [];
+
+        // Fetch SOP titles for quiz item_keys
+        if (driveQuizzes.length > 0) {
+          const itemKeys = driveQuizzes.map((q) => q.item_key);
+          const { data: sops } = await supabase
+            .from("sops")
+            .select("id, title, drive_file_id")
+            .or(`id.in.(${itemKeys.join(",")}),drive_file_id.in.(${itemKeys.join(",")})`);
+
+          driveQuizzes.forEach((q) => {
+            const sop = sops?.find((s) => s.id === q.item_key || s.drive_file_id === q.item_key);
+            items.push({
+              id: `quiz-${q.id}`,
+              type: "quiz_pass",
+              title: sop?.title || "Document Quiz",
+              timestamp: q.completed_at || "",
+            });
           });
-        });
+        }
 
         certs?.forEach((c) => {
           items.push({
