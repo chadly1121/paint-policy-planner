@@ -253,8 +253,24 @@ serve(async (req) => {
       const newTitle = extractTitleFromHeader(firstLine);
       if (!newTitle) continue;
 
-      // Check if rename is needed
-      if (newTitle !== file.name) {
+      // Check if rename is needed - also ensure we're not creating duplicates
+      // e.g. if filename is already "SOP-1 ( Name )" don't rename to "SOP-4 SOP-1 ( Name )"
+      const currentHasPrefix = /^(SOP-\d+|CO-POL-\d+|SAFETY-\d+|TRAIN-\d+|DISC-\d+)/i.test(file.name);
+      const newTitleNormalized = newTitle.trim();
+      const fileNameNormalized = file.name.trim();
+      
+      // Only rename if the normalized versions differ and won't create a double-prefix
+      if (newTitleNormalized !== fileNameNormalized && !currentHasPrefix) {
+        const success = await renameFile(accessToken, file.id, newTitle);
+        results.push({
+          fileId: file.id,
+          oldName: file.name,
+          newName: newTitle,
+          success,
+        });
+      } else if (newTitleNormalized !== fileNameNormalized && currentHasPrefix) {
+        // File already has a prefix - only rename if the extracted title is truly different
+        // (meaning user intentionally changed the header)
         const success = await renameFile(accessToken, file.id, newTitle);
         results.push({
           fileId: file.id,
