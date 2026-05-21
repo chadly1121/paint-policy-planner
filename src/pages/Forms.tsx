@@ -29,10 +29,9 @@ const Forms = () => {
       <div className="space-y-4 w-full min-w-0 overflow-hidden">
         <DocumentAssistant
           suggestions={[
-            "How do I submit a clock correction?",
+            "How do I correct a missed clock-in?",
             "Where do I log my mileage?",
-            "What's on the daily job-start checklist?",
-            "How do I file a vehicle inspection?",
+            "How do I report damage to a customer's property?",
           ]}
         />
 
