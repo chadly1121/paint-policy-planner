@@ -13,6 +13,7 @@ import SDS from "./pages/SDS";
 import Policies from "./pages/Policies";
 import Training from "./pages/Training";
 import Disciplinary from "./pages/Disciplinary";
+import Forms from "./pages/Forms";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
