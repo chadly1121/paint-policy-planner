@@ -32,7 +32,11 @@ interface Message {
   citedDocs?: { title: string; fileId: string; webViewLink: string }[];
 }
 
-export function DocumentAssistant() {
+interface DocumentAssistantProps {
+  suggestions?: string[];
+}
+
+export function DocumentAssistant({ suggestions = [] }: DocumentAssistantProps = {}) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { org } = useOrganization();
