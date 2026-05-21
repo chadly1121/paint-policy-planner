@@ -199,7 +199,10 @@ export function DriveDocumentCard({
 
   // Format content for display
   const formatContent = (text: string) => {
-    return text.split('\n').map((line, idx) => {
+    // Strip "Related Procedures and Documents" / "Suggested next documents" sections —
+    // those are surfaced via the RelatedDocumentsPanel instead.
+    const { bodyLines } = extractRelationships(text);
+    return bodyLines.map((line, idx) => {
       const trimmed = line.trim();
       if (!trimmed) return <br key={idx} />;
       if (trimmed.startsWith('## ')) {
