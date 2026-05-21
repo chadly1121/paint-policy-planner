@@ -125,6 +125,16 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Get org jurisdiction for legal citation context
+    const { data: orgRecord } = await supabase
+      .from("orgs")
+      .select("jurisdiction")
+      .eq("id", orgUser.org_id)
+      .maybeSingle();
+    const jurisdiction = orgRecord?.jurisdiction || "CA-ON";
+    const jurisdictionContext = jurisdiction === "US"
+      ? "Cite US federal law where relevant: OSHA 29 CFR 1910, OSHA Hazard Communication Standard."
+      : "Cite Canadian law where relevant: Ontario Occupational Health and Safety Act, WHMIS 2015, federal Hazardous Products Regulations.";
 
     // Get AI settings
     const { data: aiSettings, error: aiError } = await supabase
