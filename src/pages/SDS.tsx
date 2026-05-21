@@ -18,7 +18,8 @@ import { useOrg } from "@/contexts/OrganizationContext";
 
 const SDS = () => {
   const { t } = useTranslation();
-  const { isOrgAdmin } = useOrg();
+  const { isOrgAdmin, org } = useOrg();
+  const isCanada = (org?.jurisdiction || "CA-ON").startsWith("CA");
   const [searchQuery, setSearchQuery] = useState("");
   const [hazardFilter, setHazardFilter] = useState("");
 
