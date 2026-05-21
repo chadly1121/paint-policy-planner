@@ -77,9 +77,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <h1 className="font-serif text-lg font-bold text-sidebar-foreground">
               {org?.name || t("common.companyName")}
             </h1>
-            <p className="text-xs text-sidebar-foreground/60">
-              {org?.tagline || t("common.employeeManual")}
-            </p>
+            {org?.tagline && (
+              <p className="text-xs text-sidebar-foreground/60">
+                {org.tagline}
+              </p>
+            )}
           </div>
         </div>
 
