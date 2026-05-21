@@ -89,9 +89,10 @@ serve(async (req) => {
     const languageName = languageNames[userLanguage] || "English";
     
     // For mini quizzes, we use itemKey (e.g., "safety_safety1"), otherwise sectionKey
-    // Include language in the key so quizzes are regenerated per language
+    // Include language + document version in the key so quizzes are regenerated on edits
+    const docVersion = Number.isFinite(Number(documentVersion)) ? Number(documentVersion) : 1;
     const baseQuizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
-    const quizKey = `${baseQuizKey}_${userLanguage}`;
+    const quizKey = `${baseQuizKey}_${userLanguage}_v${docVersion}`;
     
     if (!quizKey || !sectionContent || !userId) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
