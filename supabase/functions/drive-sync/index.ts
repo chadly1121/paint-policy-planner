@@ -217,7 +217,7 @@ serve(async (req) => {
         // Forms have their own table — drive-sync populates company_forms metadata.
         const { data: existingForms } = await supabase
           .from('company_forms')
-          .select('id, drive_file_id, title, is_active, doc_id_external')
+          .select('id, drive_file_id, title, is_active, doc_id_external, drive_modified_time')
           .eq('user_id', user.id)
           .not('drive_file_id', 'is', null);
         const existingByDriveId = new Map(
@@ -229,12 +229,16 @@ serve(async (req) => {
             const baseTitle = file.name.replace(/\.[^/.]+$/, '');
             const parsed = parseDocIdExternal(file.name);
             const docIdExternal = parsed?.id ?? null;
+            const driveModifiedTime = file.modifiedTime ?? null;
             const existing = existingByDriveId.get(file.id);
             if (existing) {
               const patch: Record<string, unknown> = {};
               if (existing.title !== baseTitle) patch.title = baseTitle;
               if (existing.doc_id_external !== docIdExternal) patch.doc_id_external = docIdExternal;
               if (!existing.is_active) patch.is_active = true;
+              const existingMs = existing.drive_modified_time ? new Date(existing.drive_modified_time).getTime() : null;
+              const incomingMs = driveModifiedTime ? new Date(driveModifiedTime).getTime() : null;
+              if (existingMs !== incomingMs) patch.drive_modified_time = driveModifiedTime;
               if (Object.keys(patch).length > 0) {
                 await supabase.from('company_forms').update(patch).eq('id', existing.id);
                 recordsUpdated++;
@@ -247,6 +251,7 @@ serve(async (req) => {
                 drive_file_id: file.id,
                 drive_folder_id: folderRecord.drive_folder_id,
                 doc_id_external: docIdExternal,
+                drive_modified_time: driveModifiedTime,
                 is_active: true,
               });
               recordsCreated++;
@@ -263,7 +268,7 @@ serve(async (req) => {
         // Existing modules: metadata lives in `sops`.
         const { data: existingSops } = await supabase
           .from('sops')
-          .select('id, drive_file_id, title, status, doc_id_external')
+          .select('id, drive_file_id, title, status, doc_id_external, drive_modified_time')
           .eq('org_id', orgUser.org_id)
           .not('drive_file_id', 'is', null);
         const existingByDriveId = new Map(
@@ -275,6 +280,7 @@ serve(async (req) => {
             const baseTitle = file.name.replace(/\.[^/.]+$/, '');
             const parsed = parseDocIdExternal(file.name);
             const docIdExternal = parsed?.id ?? null;
+            const driveModifiedTime = file.modifiedTime ?? null;
             const existing = existingByDriveId.get(file.id);
 
             if (existing) {
@@ -282,6 +288,9 @@ serve(async (req) => {
               if (existing.title !== baseTitle) patch.title = baseTitle;
               if (existing.doc_id_external !== docIdExternal) patch.doc_id_external = docIdExternal;
               if (existing.status !== 'active') patch.status = 'active';
+              const existingMs = existing.drive_modified_time ? new Date(existing.drive_modified_time).getTime() : null;
+              const incomingMs = driveModifiedTime ? new Date(driveModifiedTime).getTime() : null;
+              if (existingMs !== incomingMs) patch.drive_modified_time = driveModifiedTime;
               if (Object.keys(patch).length > 0) {
                 patch.updated_at = new Date().toISOString();
                 await supabase.from('sops').update(patch).eq('id', existing.id);
@@ -298,6 +307,7 @@ serve(async (req) => {
                 created_by: orgUser.id,
                 updated_by: orgUser.id,
                 doc_id_external: docIdExternal,
+                drive_modified_time: driveModifiedTime,
               });
               recordsCreated++;
             }
@@ -311,6 +321,7 @@ serve(async (req) => {
           }
         }
       }
+
 
       results.push({
         module_type: moduleType,

@@ -34,7 +34,7 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage, forceNew, documentVersion } = await req.json();
+    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage, forceNew, documentVersion, driveFileId } = await req.json();
     
     // Ensure userId matches authenticated user
     if (userId !== user.id) {
@@ -88,11 +88,42 @@ serve(async (req) => {
     const userLanguage = targetLanguage || "en";
     const languageName = languageNames[userLanguage] || "English";
     
+    // Look up the latest drive_modified_time for this document across all doc tables
+    // so the cache key naturally rotates when the source doc is edited in Drive.
+    let driveModifiedMillis = 0;
+    if (driveFileId) {
+      const docTables = [
+        "company_policies",
+        "company_sops",
+        "company_safety",
+        "company_training",
+        "company_disciplinary",
+        "company_forms",
+        "sops",
+      ];
+      for (const tbl of docTables) {
+        const { data: row } = await supabase
+          .from(tbl)
+          .select("drive_modified_time")
+          .eq("drive_file_id", driveFileId)
+          .not("drive_modified_time", "is", null)
+          .order("drive_modified_time", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (row?.drive_modified_time) {
+          driveModifiedMillis = new Date(row.drive_modified_time).getTime();
+          break;
+        }
+      }
+    }
+
     // For mini quizzes, we use itemKey (e.g., "safety_safety1"), otherwise sectionKey
-    // Include language + document version in the key so quizzes are regenerated on edits
+    // Include language + document version + drive modifiedTime in the key so quizzes
+    // are regenerated whenever the source doc is edited (in-app or in Drive).
     const docVersion = Number.isFinite(Number(documentVersion)) ? Number(documentVersion) : 1;
     const baseQuizKey = isMiniQuiz && itemKey ? `${sectionKey}_${itemKey}` : sectionKey;
-    const quizKey = `${baseQuizKey}_${userLanguage}_v${docVersion}`;
+    const quizKey = `${baseQuizKey}_${userLanguage}_v${docVersion}_m${driveModifiedMillis}`;
+
     
     if (!quizKey || !sectionContent || !userId) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
