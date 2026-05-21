@@ -13,6 +13,7 @@ import {
   Settings,
   UserCircle,
   FlaskConical,
+  FileSpreadsheet,
   Sparkles,
   AlertOctagon,
   Scale,
