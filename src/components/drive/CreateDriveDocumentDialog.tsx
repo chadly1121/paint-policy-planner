@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-export type DriveFolderType = "sops" | "policies" | "safety" | "training" | "disciplinary";
+export type DriveFolderType = "sops" | "policies" | "safety" | "training" | "disciplinary" | "forms";
 
 type Option = {
   value: DriveFolderType;
@@ -25,6 +25,7 @@ const OPTIONS: Option[] = [
   { value: "safety", label: "Safety Protocol" },
   { value: "training", label: "Training Requirement" },
   { value: "disciplinary", label: "Disciplinary Procedure" },
+  { value: "forms", label: "Form" },
 ];
 
 interface CreateDriveDocumentDialogProps {

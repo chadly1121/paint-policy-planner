@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CreateDriveDocumentDialog, type DriveFolderType } from "./CreateDriveDocumentDialog";
 
 interface DriveDocumentListProps {
-  moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
+  moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary" | "forms";
   icon: React.ReactNode;
   title: string;
   description: string;

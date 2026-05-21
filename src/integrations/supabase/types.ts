@@ -155,6 +155,7 @@ export type Database = {
           change_summary: string | null
           content: string | null
           created_at: string
+          doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
           edited_by: string | null
@@ -172,6 +173,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -189,6 +191,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -204,11 +207,69 @@ export type Database = {
         }
         Relationships: []
       }
+      company_forms: {
+        Row: {
+          change_summary: string | null
+          content: string | null
+          created_at: string
+          doc_id_external: string | null
+          drive_file_id: string | null
+          drive_folder_id: string | null
+          edited_by: string | null
+          id: string
+          is_active: boolean
+          parsed_sections: Json | null
+          source_form_key: string
+          title: string
+          updated_at: string
+          user_id: string
+          version: number
+          video_url: string | null
+        }
+        Insert: {
+          change_summary?: string | null
+          content?: string | null
+          created_at?: string
+          doc_id_external?: string | null
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          parsed_sections?: Json | null
+          source_form_key: string
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number
+          video_url?: string | null
+        }
+        Update: {
+          change_summary?: string | null
+          content?: string | null
+          created_at?: string
+          doc_id_external?: string | null
+          drive_file_id?: string | null
+          drive_folder_id?: string | null
+          edited_by?: string | null
+          id?: string
+          is_active?: boolean
+          parsed_sections?: Json | null
+          source_form_key?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       company_policies: {
         Row: {
           change_summary: string | null
           content: string | null
           created_at: string
+          doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
           edited_by: string | null
@@ -226,6 +287,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -243,6 +305,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -263,6 +326,7 @@ export type Database = {
           change_summary: string | null
           content: string | null
           created_at: string
+          doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
           edited_by: string | null
@@ -280,6 +344,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -297,6 +362,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -353,6 +419,7 @@ export type Database = {
           change_summary: string | null
           content: string
           created_at: string
+          doc_id_external: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -367,6 +434,7 @@ export type Database = {
           change_summary?: string | null
           content: string
           created_at?: string
+          doc_id_external?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -381,6 +449,7 @@ export type Database = {
           change_summary?: string | null
           content?: string
           created_at?: string
+          doc_id_external?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -398,6 +467,7 @@ export type Database = {
           change_summary: string | null
           content: string | null
           created_at: string
+          doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
           edited_by: string | null
@@ -415,6 +485,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -432,6 +503,7 @@ export type Database = {
           change_summary?: string | null
           content?: string | null
           created_at?: string
+          doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
           edited_by?: string | null
@@ -1498,6 +1570,7 @@ export type Database = {
           content_md: string | null
           created_at: string
           created_by: string | null
+          doc_id_external: string | null
           drive_file_id: string | null
           forked_from_sop_id: string | null
           id: string
@@ -1520,6 +1593,7 @@ export type Database = {
           content_md?: string | null
           created_at?: string
           created_by?: string | null
+          doc_id_external?: string | null
           drive_file_id?: string | null
           forked_from_sop_id?: string | null
           id?: string
@@ -1542,6 +1616,7 @@ export type Database = {
           content_md?: string | null
           created_at?: string
           created_by?: string | null
+          doc_id_external?: string | null
           drive_file_id?: string | null
           forked_from_sop_id?: string | null
           id?: string

@@ -32,7 +32,7 @@ import type { DriveFile } from "@/hooks/useDriveFiles";
 interface DriveDocumentCardProps {
   file: DriveFile;
   itemNumber: number;
-  moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary";
+  moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary" | "forms";
   isAcknowledged?: boolean;
   isQuizCompleted?: boolean;
   ackRequired?: boolean;
