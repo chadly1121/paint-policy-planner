@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import VideoEmbed from "@/components/video/VideoEmbed";
 import { VideoUrlDialog } from "./VideoUrlDialog";
 import type { DriveFile } from "@/hooks/useDriveFiles";
+import { DocReferenceText } from "@/components/docref/DocReferenceText";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
