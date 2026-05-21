@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Pencil, Trash2, Loader2, UserX, ShieldCheck, Shield } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Loader2, UserX, ShieldCheck, Shield, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -57,6 +57,8 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const [isChangingRole, setIsChangingRole] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
   
   // Edit form state
   const [editFullName, setEditFullName] = useState(employee.full_name);
@@ -184,6 +186,40 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
     }
   };
 
+  const handleRestartOnboarding = async () => {
+    setIsRestarting(true);
+    try {
+      const { error: profileErr } = await supabase
+        .from("profiles")
+        .update({ onboarding_completed_at: null })
+        .eq("user_id", employee.user_id);
+      if (profileErr) throw profileErr;
+
+      const { error: progressErr } = await supabase
+        .from("section_progress")
+        .delete()
+        .eq("user_id", employee.user_id);
+      if (progressErr) throw progressErr;
+
+      toast({
+        title: "Onboarding reset",
+        description: `${employee.full_name} will see the welcome wizard on next sign-in.`,
+      });
+      setRestartDialogOpen(false);
+      onUpdate();
+    } catch (error) {
+      console.error("Error restarting onboarding:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to restart onboarding",
+        description: "Please try again.",
+      });
+    } finally {
+      setIsRestarting(false);
+    }
+  };
+
+
   return (
     <>
       <DropdownMenu>
@@ -207,6 +243,10 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
           }}>
             <ShieldCheck className="h-4 w-4 mr-2" />
             Change Role
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setRestartDialogOpen(true)}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Restart Onboarding
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => setRemoveDialogOpen(true)}
@@ -348,6 +388,30 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
                   <Trash2 className="h-4 w-4 mr-2" />
                   Remove Access
                 </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Restart Onboarding Dialog */}
+      <AlertDialog open={restartDialogOpen} onOpenChange={setRestartDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restart onboarding for {employee.full_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This clears their onboarding completion flag and resets their section progress
+              so the guided welcome wizard appears the next time they sign in. Quiz attempts,
+              certificates, and points are preserved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestartOnboarding} disabled={isRestarting}>
+              {isRestarting ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Resetting…</>
+              ) : (
+                <><RotateCcw className="h-4 w-4 mr-2" /> Restart Onboarding</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

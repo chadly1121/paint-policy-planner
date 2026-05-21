@@ -23,6 +23,7 @@ const OrgBrandingCard = () => {
   const [tagline, setTagline] = useState(org?.tagline || "");
   const [logoUrl, setLogoUrl] = useState(org?.logo_url || "");
   const [jurisdiction, setJurisdiction] = useState(org?.jurisdiction || "CA-ON");
+  const [welcomeMessage, setWelcomeMessage] = useState(org?.onboarding_welcome_message || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,6 +100,7 @@ const OrgBrandingCard = () => {
           logo_url: logoUrl || null,
           tagline: tagline || null,
           jurisdiction,
+          onboarding_welcome_message: welcomeMessage || null,
         })
         .eq("id", org.id);
 
@@ -215,6 +217,23 @@ const OrgBrandingCard = () => {
           </Select>
           <p className="text-xs text-muted-foreground">
             Determines which workplace safety regulations are referenced (e.g. WHMIS vs. OSHA).
+          </p>
+        </div>
+
+        {/* Onboarding Welcome Message */}
+        <div className="space-y-2">
+          <Label htmlFor="welcome-message">New-hire welcome message</Label>
+          <Textarea
+            id="welcome-message"
+            value={welcomeMessage}
+            onChange={(e) => setWelcomeMessage(e.target.value)}
+            placeholder="Shown on the first-session onboarding wizard. e.g. Welcome to the team — here's what to expect on your first day…"
+            className="resize-none"
+            rows={4}
+            maxLength={500}
+          />
+          <p className="text-xs text-muted-foreground">
+            {welcomeMessage.length}/500 characters. Leave blank to use the default greeting.
           </p>
         </div>
 
