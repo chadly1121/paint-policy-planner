@@ -97,7 +97,7 @@ export const useSOPAssignments = () => {
     try {
       const { data: sop, error: sopError } = await supabase
         .from("sops")
-        .select("id, ack_epoch")
+        .select("id, ack_epoch, version, org_id")
         .eq("system_key", sopKey)
         .maybeSingle();
 
@@ -115,17 +115,32 @@ export const useSOPAssignments = () => {
         .limit(1)
         .maybeSingle();
 
+      // Resolve org_id: prefer SOP's org_id (org-owned), else the user's active org (system SOP).
+      let resolvedOrgId: string | null = (sop as any).org_id ?? null;
+      if (!resolvedOrgId) {
+        const { data: ou } = await supabase
+          .from("org_users")
+          .select("org_id")
+          .eq("user_id", user.id)
+          .eq("is_active", true)
+          .maybeSingle();
+        resolvedOrgId = ou?.org_id ?? null;
+      }
+
       const { data, error } = await supabase
         .from("sop_acks")
         .insert({
           user_id: user.id,
           sop_id: sop.id,
           ack_epoch: sop.ack_epoch,
+          document_version: (sop as any).version ?? sop.ack_epoch,
+          org_id: resolvedOrgId,
           quiz_score: quiz?.score ?? null,
           user_agent: navigator.userAgent,
         })
         .select("id, user_id, sop_id, ack_epoch, quiz_score, acknowledged_at")
         .single();
+
 
       if (error) throw error;
 
