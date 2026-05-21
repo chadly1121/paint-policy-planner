@@ -6,6 +6,7 @@ interface Organization {
   name: string;
   logo_url: string | null;
   tagline: string | null;
+  jurisdiction: string;
   created_at: string;
 }
 
