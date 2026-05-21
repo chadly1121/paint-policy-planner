@@ -68,16 +68,19 @@ serve(async (req) => {
     // Calculate score server-side
     let score = 0;
     const totalQuestions = questions.length;
+    const wrongQuestionIds: string[] = [];
 
     questions.forEach((q, idx) => {
       const userAnswer = answers[idx];
       if (userAnswer !== undefined && userAnswer === q.correct_answer) {
         score++;
+      } else {
+        wrongQuestionIds.push(q.id);
       }
     });
 
-    const passed = score === totalQuestions;
-    
+    const passed = totalQuestions > 0 && (score / totalQuestions) >= 0.8;
+
     // Points: mini-quiz = 10, final exam = 100, legacy = 100
     const pointsValue = isMiniQuiz ? 10 : 100;
     const pointsEarned = passed ? pointsValue : 0;
