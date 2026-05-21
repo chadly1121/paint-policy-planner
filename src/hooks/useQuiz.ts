@@ -92,7 +92,7 @@ export const useQuiz = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, toast, lastQuizKey]);
 
   const selectAnswer = useCallback((questionIndex: number, answerIndex: number) => {
     setAnswers((prev) => ({ ...prev, [questionIndex]: answerIndex }));
