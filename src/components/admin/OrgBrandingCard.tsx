@@ -8,6 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useOrg } from "@/contexts/OrganizationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Upload, Loader2, Save, Image } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const OrgBrandingCard = () => {
   const { org, refresh, isOrgAdmin } = useOrg();
@@ -15,6 +22,7 @@ const OrgBrandingCard = () => {
   
   const [tagline, setTagline] = useState(org?.tagline || "");
   const [logoUrl, setLogoUrl] = useState(org?.logo_url || "");
+  const [jurisdiction, setJurisdiction] = useState(org?.jurisdiction || "CA-ON");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,6 +98,7 @@ const OrgBrandingCard = () => {
         .update({
           logo_url: logoUrl || null,
           tagline: tagline || null,
+          jurisdiction,
         })
         .eq("id", org.id);
 
@@ -188,6 +197,24 @@ const OrgBrandingCard = () => {
           />
           <p className="text-xs text-muted-foreground">
             {tagline.length}/200 characters
+          </p>
+        </div>
+
+        {/* Jurisdiction */}
+        <div className="space-y-2">
+          <Label htmlFor="jurisdiction">Jurisdiction</Label>
+          <Select value={jurisdiction} onValueChange={setJurisdiction}>
+            <SelectTrigger id="jurisdiction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CA-ON">Canada – Ontario</SelectItem>
+              <SelectItem value="CA-other">Canada – Other province/territory</SelectItem>
+              <SelectItem value="US">United States</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Determines which workplace safety regulations are referenced (e.g. WHMIS vs. OSHA).
           </p>
         </div>
 

@@ -863,6 +863,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          jurisdiction: string
           logo_url: string | null
           name: string
           tagline: string | null
@@ -870,6 +871,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          jurisdiction?: string
           logo_url?: string | null
           name: string
           tagline?: string | null
@@ -877,6 +879,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          jurisdiction?: string
           logo_url?: string | null
           name?: string
           tagline?: string | null
