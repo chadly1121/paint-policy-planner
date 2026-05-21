@@ -82,10 +82,11 @@ export function DocumentAssistant({ suggestions = [] }: DocumentAssistantProps =
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
+    if (!text || loading) return;
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    const userMessage: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
