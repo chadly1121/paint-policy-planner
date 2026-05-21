@@ -98,6 +98,7 @@ const OrgBrandingCard = () => {
         .update({
           logo_url: logoUrl || null,
           tagline: tagline || null,
+          jurisdiction,
         })
         .eq("id", org.id);
 
