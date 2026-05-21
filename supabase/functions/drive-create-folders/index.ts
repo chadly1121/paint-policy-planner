@@ -548,7 +548,7 @@ serve(async (req) => {
     }
 
     // Create module subfolders
-    const moduleFolders = ['SOPs', 'Policies', 'Safety', 'Training', 'Disciplinary', 'MSDS', 'Incident-Reports'];
+    const moduleFolders = ['SOPs', 'Policies', 'Safety', 'Training', 'Disciplinary', 'Forms', 'MSDS', 'Incident-Reports'];
     
     for (const moduleName of moduleFolders) {
       const folderType = moduleName.toLowerCase();
