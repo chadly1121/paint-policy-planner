@@ -34,7 +34,7 @@ serve(async (req) => {
       });
     }
 
-    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage, forceNew } = await req.json();
+    const { sectionKey, sectionContent, userId, quizType, itemKey, targetLanguage, forceNew, documentVersion } = await req.json();
     
     // Ensure userId matches authenticated user
     if (userId !== user.id) {
