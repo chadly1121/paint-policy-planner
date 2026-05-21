@@ -10,6 +10,7 @@ interface Organization {
   logo_url: string | null;
   tagline: string | null;
   jurisdiction: string;
+  onboarding_welcome_message: string | null;
   created_at: string;
 }
 
