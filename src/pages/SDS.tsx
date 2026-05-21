@@ -55,10 +55,11 @@ const SDS = () => {
       {/* Safety Alert */}
       <Alert>
         <FileWarning className="h-4 w-4" />
-        <AlertTitle>OSHA Requirement</AlertTitle>
+        <AlertTitle>{isCanada ? "WHMIS 2015 Requirement" : "OSHA Requirement"}</AlertTitle>
         <AlertDescription>
-          Safety Data Sheets must be readily accessible to employees during each work shift.
-          Keep physical copies on job sites or ensure mobile access to this digital library.
+          {isCanada
+            ? "Safety Data Sheets must be readily accessible to workers during each shift, per the federal Hazardous Products Regulations and Ontario OHSA. Keep physical copies on job sites or ensure mobile access to this digital library."
+            : "Safety Data Sheets must be readily accessible to employees during each work shift. Keep physical copies on job sites or ensure mobile access to this digital library."}
         </AlertDescription>
       </Alert>
 
