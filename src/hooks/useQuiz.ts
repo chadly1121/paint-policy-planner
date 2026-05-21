@@ -31,6 +31,8 @@ export const useQuiz = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [quizComplete, setQuizComplete] = useState(false);
   const [lastAttempt, setLastAttempt] = useState<QuizAttempt | null>(null);
+  const [previousWrongCount, setPreviousWrongCount] = useState(0);
+  const [lastQuizKey, setLastQuizKey] = useState<string | null>(null);
 
   const generateQuiz = useCallback(async (
     sectionKey: string, 
