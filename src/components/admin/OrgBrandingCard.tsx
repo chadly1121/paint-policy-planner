@@ -8,6 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useOrg } from "@/contexts/OrganizationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Upload, Loader2, Save, Image } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const OrgBrandingCard = () => {
   const { org, refresh, isOrgAdmin } = useOrg();
@@ -15,6 +22,7 @@ const OrgBrandingCard = () => {
   
   const [tagline, setTagline] = useState(org?.tagline || "");
   const [logoUrl, setLogoUrl] = useState(org?.logo_url || "");
+  const [jurisdiction, setJurisdiction] = useState(org?.jurisdiction || "CA-ON");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
