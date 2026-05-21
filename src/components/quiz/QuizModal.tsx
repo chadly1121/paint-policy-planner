@@ -22,6 +22,7 @@ interface QuizModalProps {
   onComplete: (passed: boolean) => void;
   quizType?: "mini" | "final";
   itemKey?: string;
+  documentVersion?: number;
 }
 
 const QuizModal = ({
@@ -33,6 +34,7 @@ const QuizModal = ({
   onComplete,
   quizType,
   itemKey,
+  documentVersion,
 }: QuizModalProps) => {
   // Translate the quiz title
   const { translatedTitle, loading: titleLoading } = useTranslatedTitle(sectionTitle);
