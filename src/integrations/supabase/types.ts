@@ -1457,8 +1457,10 @@ export type Database = {
         Row: {
           ack_epoch: number
           acknowledged_at: string
+          document_version: number | null
           id: string
           ip_address: string | null
+          org_id: string | null
           org_user_id: string | null
           quiz_score: number | null
           sop_id: string
@@ -1468,8 +1470,10 @@ export type Database = {
         Insert: {
           ack_epoch: number
           acknowledged_at?: string
+          document_version?: number | null
           id?: string
           ip_address?: string | null
+          org_id?: string | null
           org_user_id?: string | null
           quiz_score?: number | null
           sop_id: string
@@ -1479,8 +1483,10 @@ export type Database = {
         Update: {
           ack_epoch?: number
           acknowledged_at?: string
+          document_version?: number | null
           id?: string
           ip_address?: string | null
+          org_id?: string | null
           org_user_id?: string | null
           quiz_score?: number | null
           sop_id?: string
@@ -1503,6 +1509,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sop_acks_migration_orphans: {
+        Row: {
+          acknowledged_at: string | null
+          id: string
+          ip_address: string | null
+          reason: string
+          recorded_at: string
+          sop_key: string | null
+          sop_version: number | null
+          source_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason: string
+          recorded_at?: string
+          sop_key?: string | null
+          sop_version?: number | null
+          source_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string
+          recorded_at?: string
+          sop_key?: string | null
+          sop_version?: number | null
+          source_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       sop_assignments: {
         Row: {
@@ -1897,6 +1942,15 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      migrate_sop_acknowledgments_to_sop_acks: {
+        Args: never
+        Returns: {
+          migrated: number
+          orphaned: number
+          skipped_duplicate: number
+          total_source: number
+        }[]
       }
       org_can_add_users: {
         Args: { _count?: number; _org_id: string }
