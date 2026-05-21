@@ -158,6 +158,7 @@ export type Database = {
           doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
+          drive_modified_time: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -176,6 +177,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -194,6 +196,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -215,6 +218,7 @@ export type Database = {
           doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
+          drive_modified_time: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -233,6 +237,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -251,6 +256,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -272,6 +278,7 @@ export type Database = {
           doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
+          drive_modified_time: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -290,6 +297,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -308,6 +316,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -329,6 +338,7 @@ export type Database = {
           doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
+          drive_modified_time: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -347,6 +357,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -365,6 +376,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -420,6 +432,7 @@ export type Database = {
           content: string
           created_at: string
           doc_id_external: string | null
+          drive_modified_time: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -435,6 +448,7 @@ export type Database = {
           content: string
           created_at?: string
           doc_id_external?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -450,6 +464,7 @@ export type Database = {
           content?: string
           created_at?: string
           doc_id_external?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -470,6 +485,7 @@ export type Database = {
           doc_id_external: string | null
           drive_file_id: string | null
           drive_folder_id: string | null
+          drive_modified_time: string | null
           edited_by: string | null
           id: string
           is_active: boolean
@@ -488,6 +504,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -506,6 +523,7 @@ export type Database = {
           doc_id_external?: string | null
           drive_file_id?: string | null
           drive_folder_id?: string | null
+          drive_modified_time?: string | null
           edited_by?: string | null
           id?: string
           is_active?: boolean
@@ -1611,6 +1629,7 @@ export type Database = {
           created_by: string | null
           doc_id_external: string | null
           drive_file_id: string | null
+          drive_modified_time: string | null
           forked_from_sop_id: string | null
           id: string
           last_change_summary: string | null
@@ -1634,6 +1653,7 @@ export type Database = {
           created_by?: string | null
           doc_id_external?: string | null
           drive_file_id?: string | null
+          drive_modified_time?: string | null
           forked_from_sop_id?: string | null
           id?: string
           last_change_summary?: string | null
@@ -1657,6 +1677,7 @@ export type Database = {
           created_by?: string | null
           doc_id_external?: string | null
           drive_file_id?: string | null
+          drive_modified_time?: string | null
           forked_from_sop_id?: string | null
           id?: string
           last_change_summary?: string | null
