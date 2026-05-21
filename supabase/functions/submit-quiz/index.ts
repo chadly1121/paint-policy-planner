@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const PASS_THRESHOLD = 0.8;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -80,7 +82,7 @@ serve(async (req) => {
       }
     });
 
-    const passed = totalQuestions > 0 && (score / totalQuestions) >= 0.8;
+    const passed = totalQuestions > 0 && (score / totalQuestions) >= PASS_THRESHOLD;
 
     // Points: mini-quiz = 10, final exam = 100, legacy = 100
     const pointsValue = isMiniQuiz ? 10 : 100;
@@ -215,6 +217,7 @@ serve(async (req) => {
         pointsEarned: passed && !alreadyCompleted ? pointsEarned : 0,
         questions: questionsWithAnswers,
         wrongQuestionIds,
+        threshold: PASS_THRESHOLD,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

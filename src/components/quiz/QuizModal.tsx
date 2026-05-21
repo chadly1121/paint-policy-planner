@@ -113,7 +113,7 @@ const QuizModal = ({
           <div className="space-y-6">
             {previousWrongCount > 0 && (
               <div className="rounded-lg border border-amber-500/40 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-200">
-                You missed {previousWrongCount} {previousWrongCount === 1 ? "question" : "questions"} last time. Focus on those — review them in the doc and try again.
+                You missed {previousWrongCount} {previousWrongCount === 1 ? "question" : "questions"} last time. Review section <span className="font-semibold">{translatedTitle || sectionTitle}</span> before retrying — focus on those concepts.
               </div>
             )}
             <div className="space-y-2">
