@@ -33,7 +33,7 @@ const Safety = () => {
     <DriveRequiredGuard moduleName="Safety Protocols">
       <div className="space-y-4 w-full min-w-0 overflow-hidden">
         {/* AI Assistant - compact at top */}
-        <DocumentAssistant />
+        <DocumentAssistant suggestions={["What PPE do I need for spraying?","When do I need fall protection?","How do I report a near-miss?"]} />
 
         <Alert className="border-destructive/50 bg-destructive/10">
           <AlertCircle className="h-5 w-5 text-destructive" />
