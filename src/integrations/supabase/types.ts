@@ -866,6 +866,7 @@ export type Database = {
           jurisdiction: string
           logo_url: string | null
           name: string
+          onboarding_welcome_message: string | null
           tagline: string | null
         }
         Insert: {
@@ -874,6 +875,7 @@ export type Database = {
           jurisdiction?: string
           logo_url?: string | null
           name: string
+          onboarding_welcome_message?: string | null
           tagline?: string | null
         }
         Update: {
@@ -882,6 +884,7 @@ export type Database = {
           jurisdiction?: string
           logo_url?: string | null
           name?: string
+          onboarding_welcome_message?: string | null
           tagline?: string | null
         }
         Relationships: []
@@ -923,6 +926,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          onboarding_completed_at: string | null
           preferred_language: string
           updated_at: string
           user_id: string
@@ -936,6 +940,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          onboarding_completed_at?: string | null
           preferred_language?: string
           updated_at?: string
           user_id: string
@@ -949,6 +954,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          onboarding_completed_at?: string | null
           preferred_language?: string
           updated_at?: string
           user_id?: string
