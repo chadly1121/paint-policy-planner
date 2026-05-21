@@ -115,7 +115,8 @@ export const useQuiz = () => {
   const submitQuiz = useCallback(async (
     sectionKey: string,
     quizType?: "mini" | "final",
-    itemKey?: string
+    itemKey?: string,
+    documentVersion?: number
   ) => {
     if (!user || questions.length === 0) return null;
 
@@ -129,6 +130,7 @@ export const useQuiz = () => {
           userId: user.id,
           quizType,
           itemKey,
+          documentVersion: documentVersion ?? 1,
           targetLanguage: i18n.language || 'en',
         },
       });
