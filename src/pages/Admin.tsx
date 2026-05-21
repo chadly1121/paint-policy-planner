@@ -457,6 +457,10 @@ const Admin = () => {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="refs" className="flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Refs</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="analytics">
@@ -483,6 +487,10 @@ const Admin = () => {
 
         <TabsContent value="rewards">
           <RedemptionItemsManager />
+        </TabsContent>
+
+        <TabsContent value="refs">
+          <BrokenReferencesCard />
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
