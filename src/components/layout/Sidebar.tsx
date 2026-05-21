@@ -44,6 +44,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
     { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
     { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
+    { path: "/forms", label: "Forms", icon: FileSpreadsheet },
     { path: "/incidents", label: "Incident Reports", icon: AlertOctagon },
     { path: "/builder", label: "Document Builder", icon: Sparkles },
     { path: "/settings", label: t("nav.settings"), icon: Settings },
