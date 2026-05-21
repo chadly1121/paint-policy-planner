@@ -51,6 +51,13 @@ export const useQuiz = () => {
     setQuizComplete(false);
     setLastAttempt(null);
 
+    // Reset retake memory when starting a different quiz
+    const quizKey = `${sectionKey}|${quizType ?? ""}|${itemKey ?? ""}`;
+    if (lastQuizKey !== quizKey) {
+      setPreviousWrongCount(0);
+    }
+    setLastQuizKey(quizKey);
+
     try {
       const { data, error } = await supabase.functions.invoke("generate-quiz", {
         body: { 
