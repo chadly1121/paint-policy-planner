@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: "section_completed" | "redemption_processed" | "redemption_requested";
+  type: "section_completed" | "redemption_processed" | "redemption_requested" | "critical_injury_alert";
   userId: string;
   data: {
     sectionKey?: string;
@@ -17,6 +17,12 @@ interface NotificationRequest {
     status?: string;
     pointsRequested?: number;
     adminNotes?: string;
+    orgId?: string;
+    incidentId?: string;
+    incidentDate?: string;
+    location?: string;
+    description?: string;
+    injuryDetails?: string;
   };
 }
 
