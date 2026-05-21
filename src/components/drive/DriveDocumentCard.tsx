@@ -343,6 +343,9 @@ export function DriveDocumentCard({
                 {formatContent(content)}
               </div>
             )}
+
+            {/* Related Documents (managed via document_relationships, not body text) */}
+            {!loadingContent && <RelatedDocumentsPanel fromDocIdExternal={selfDocId} />}
             
             {/* Metadata */}
             <div className="mt-4 text-xs text-muted-foreground flex items-center gap-4">
