@@ -60,7 +60,7 @@ export function extractRelationships(content: string): {
         const cleaned = line
           .replace(/^\s*[-*•]\s*/, "")
           .replace(new RegExp(DOC_REF_REGEX.source, "g"), "")
-          .replace(/^\s*[—–-:]\s*/, "")
+          .replace(/^\s*[\u2014\u2013\-:]\s*/, "")
           .trim();
         rels.push({
           to_doc_id_external: key,
