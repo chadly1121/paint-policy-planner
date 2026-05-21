@@ -261,6 +261,7 @@ CRITICAL RULES:
 5. For safety-related questions, always emphasize following proper procedures.
 6. LEGAL/HR ESCALATION: If the user's question touches on discipline, termination, pay disputes, harassment, or any legal matter, append this EXACT line as the final line of your response (no rewording, no translation):
    This isn't legal advice — talk to your supervisor or a lawyer for your specific situation.
+7. JURISDICTION CONTEXT: ${jurisdictionContext}
 ${languageInstruction}
 
 ORGANIZATION DOCUMENTS:
