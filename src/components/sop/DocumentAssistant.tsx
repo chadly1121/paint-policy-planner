@@ -32,7 +32,11 @@ interface Message {
   citedDocs?: { title: string; fileId: string; webViewLink: string }[];
 }
 
-export function DocumentAssistant() {
+interface DocumentAssistantProps {
+  suggestions?: string[];
+}
+
+export function DocumentAssistant({ suggestions = [] }: DocumentAssistantProps = {}) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { org } = useOrganization();
@@ -78,10 +82,11 @@ export function DocumentAssistant() {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
+  const handleSend = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
+    if (!text || loading) return;
 
-    const userMessage: Message = { role: "user", content: input.trim() };
+    const userMessage: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -297,7 +302,22 @@ export function DocumentAssistant() {
         </div>
       </ScrollArea>
 
-      <div className="p-2 border-t shrink-0">
+      <div className="p-2 border-t shrink-0 space-y-2">
+        {suggestions.length > 0 && messages.length === 0 && (
+          <div className="flex flex-wrap gap-1">
+            {suggestions.map((s, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => handleSend(s)}
+                disabled={loading}
+                className="text-[10px] px-2 py-1 rounded-full bg-muted hover:bg-muted/70 border border-border text-foreground disabled:opacity-50"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="flex gap-1">
           <Input
             value={input}
@@ -307,7 +327,7 @@ export function DocumentAssistant() {
             disabled={loading}
             className="flex-1 text-xs h-7"
           />
-          <Button onClick={handleSend} disabled={loading || !input.trim()} size="sm" className="h-7 px-2">
+          <Button onClick={() => handleSend()} disabled={loading || !input.trim()} size="sm" className="h-7 px-2">
             {loading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
             ) : (

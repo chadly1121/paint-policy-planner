@@ -32,7 +32,7 @@ const Training = () => {
     <DriveRequiredGuard moduleName="Training Requirements">
       <div className="space-y-4 w-full min-w-0 overflow-hidden">
         {/* AI Assistant - compact at top */}
-        <DocumentAssistant />
+        <DocumentAssistant suggestions={["What certifications do I need?","How often is the refresher?","Where do I upload my certificate?"]} />
 
         <DriveDocumentList
           moduleType="training"

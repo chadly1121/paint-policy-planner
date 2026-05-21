@@ -34,7 +34,7 @@ const Disciplinary = () => {
     <DriveRequiredGuard moduleName="Disciplinary Procedures">
       <div className="space-y-4 w-full min-w-0 overflow-hidden">
         {/* AI Assistant - compact at top */}
-        <DocumentAssistant />
+        <DocumentAssistant suggestions={["What happens after a verbal warning?","Can I appeal discipline?","What's grounds for termination?"]} />
 
         <Alert className="border-amber-500/50 bg-amber-500/10">
           <Info className="h-5 w-5 text-amber-600" />

@@ -32,7 +32,7 @@ const Policies = () => {
     <DriveRequiredGuard moduleName="Company Policies">
       <div className="space-y-4 w-full min-w-0 overflow-hidden">
         {/* AI Assistant - compact at top */}
-        <DocumentAssistant />
+        <DocumentAssistant suggestions={["How is overtime calculated?","What's the mileage rate?","How much notice for time off?"]} />
         
         {/* Document List - full width */}
         <DriveDocumentList
