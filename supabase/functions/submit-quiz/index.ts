@@ -82,7 +82,7 @@ serve(async (req) => {
       }
     });
 
-    const passed = totalQuestions > 0 && (score / totalQuestions) >= 0.8;
+    const passed = totalQuestions > 0 && (score / totalQuestions) >= PASS_THRESHOLD;
 
     // Points: mini-quiz = 10, final exam = 100, legacy = 100
     const pointsValue = isMiniQuiz ? 10 : 100;
