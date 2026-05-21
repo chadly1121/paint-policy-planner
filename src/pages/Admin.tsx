@@ -42,7 +42,8 @@ import {
   Building2,
   Cloud,
   Bot,
-  CreditCard
+  CreditCard,
+  Link2
 } from "lucide-react";
 import { z } from "zod";
 import { languages } from "@/components/LanguageSelector";
@@ -55,6 +56,7 @@ import { AISettingsCard } from "@/components/admin/AISettingsCard";
 import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { SubscriptionCard } from "@/components/admin/SubscriptionCard";
 import { InvoiceHistory } from "@/components/admin/InvoiceHistory";
+import { BrokenReferencesCard } from "@/components/admin/BrokenReferencesCard";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
 const employeeSchema = z.object({
@@ -417,7 +419,7 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8 max-w-6xl">
+        <TabsList className="grid w-full grid-cols-9 max-w-6xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Analytics</span>
@@ -455,6 +457,10 @@ const Admin = () => {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="refs" className="flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Refs</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="analytics">
@@ -481,6 +487,10 @@ const Admin = () => {
 
         <TabsContent value="rewards">
           <RedemptionItemsManager />
+        </TabsContent>
+
+        <TabsContent value="refs">
+          <BrokenReferencesCard />
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
