@@ -160,6 +160,7 @@ export type Database = {
           edited_by: string | null
           id: string
           is_active: boolean
+          parsed_sections: Json | null
           source_disciplinary_key: string
           title: string
           updated_at: string
@@ -176,6 +177,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_disciplinary_key: string
           title: string
           updated_at?: string
@@ -192,6 +194,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_disciplinary_key?: string
           title?: string
           updated_at?: string
@@ -211,6 +214,7 @@ export type Database = {
           edited_by: string | null
           id: string
           is_active: boolean
+          parsed_sections: Json | null
           source_policy_key: string
           title: string
           updated_at: string
@@ -227,6 +231,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_policy_key: string
           title: string
           updated_at?: string
@@ -243,6 +248,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_policy_key?: string
           title?: string
           updated_at?: string
@@ -262,6 +268,7 @@ export type Database = {
           edited_by: string | null
           id: string
           is_active: boolean
+          parsed_sections: Json | null
           source_safety_key: string
           title: string
           updated_at: string
@@ -278,6 +285,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_safety_key: string
           title: string
           updated_at?: string
@@ -294,6 +302,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_safety_key?: string
           title?: string
           updated_at?: string
@@ -347,6 +356,7 @@ export type Database = {
           edited_by: string | null
           id: string
           is_active: boolean
+          parsed_sections: Json | null
           source_sop_key: string
           title: string
           updated_at: string
@@ -360,6 +370,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_sop_key: string
           title: string
           updated_at?: string
@@ -373,6 +384,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_sop_key?: string
           title?: string
           updated_at?: string
@@ -391,6 +403,7 @@ export type Database = {
           edited_by: string | null
           id: string
           is_active: boolean
+          parsed_sections: Json | null
           source_training_key: string
           title: string
           updated_at: string
@@ -407,6 +420,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_training_key: string
           title: string
           updated_at?: string
@@ -423,6 +437,7 @@ export type Database = {
           edited_by?: string | null
           id?: string
           is_active?: boolean
+          parsed_sections?: Json | null
           source_training_key?: string
           title?: string
           updated_at?: string
@@ -1667,6 +1682,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      backfill_parsed_sections: {
+        Args: never
+        Returns: {
+          rows_updated: number
+          table_name: string
+        }[]
+      }
       get_leaderboard: {
         Args: never
         Returns: {
@@ -1746,6 +1768,7 @@ export type Database = {
         Returns: boolean
       }
       org_has_ai_enabled: { Args: { _org_id: string }; Returns: boolean }
+      parse_document_sections: { Args: { _content: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "employee"
