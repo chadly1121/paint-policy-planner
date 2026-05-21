@@ -109,6 +109,11 @@ const QuizModal = ({
 
         {!loading && !quizComplete && currentQuestion && (
           <div className="space-y-6">
+            {previousWrongCount > 0 && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-200">
+                You missed {previousWrongCount} {previousWrongCount === 1 ? "question" : "questions"} last time. Focus on those — review them in the doc and try again.
+              </div>
+            )}
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
