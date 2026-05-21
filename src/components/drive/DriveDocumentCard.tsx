@@ -176,20 +176,20 @@ export function DriveDocumentCard({
       const trimmed = line.trim();
       if (!trimmed) return <br key={idx} />;
       if (trimmed.startsWith('## ')) {
-        return <h3 key={idx} className="font-semibold mt-4 mb-2 text-primary">{trimmed.substring(3)}</h3>;
+        return <h3 key={idx} className="font-semibold mt-4 mb-2 text-primary"><DocReferenceText text={trimmed.substring(3)} /></h3>;
       }
       if (trimmed.startsWith('# ')) {
-        return <h2 key={idx} className="font-bold mt-4 mb-2 text-primary text-lg">{trimmed.substring(2)}</h2>;
+        return <h2 key={idx} className="font-bold mt-4 mb-2 text-primary text-lg"><DocReferenceText text={trimmed.substring(2)} /></h2>;
       }
       if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
         return (
           <li key={idx} className="ml-4 text-muted-foreground flex items-start gap-2">
             <span className="text-primary mt-1.5">•</span>
-            <span>{trimmed.substring(2)}</span>
+            <span><DocReferenceText text={trimmed.substring(2)} /></span>
           </li>
         );
       }
-      return <p key={idx} className="mb-1 text-muted-foreground">{trimmed}</p>;
+      return <p key={idx} className="mb-1 text-muted-foreground"><DocReferenceText text={trimmed} /></p>;
     });
   };
 
