@@ -125,6 +125,16 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Get org jurisdiction for legal citation context
+    const { data: orgRecord } = await supabase
+      .from("orgs")
+      .select("jurisdiction")
+      .eq("id", orgUser.org_id)
+      .maybeSingle();
+    const jurisdiction = orgRecord?.jurisdiction || "CA-ON";
+    const jurisdictionContext = jurisdiction === "US"
+      ? "Cite US federal law where relevant: OSHA 29 CFR 1910, OSHA Hazard Communication Standard."
+      : "Cite Canadian law where relevant: Ontario Occupational Health and Safety Act, WHMIS 2015, federal Hazardous Products Regulations.";
 
     // Get AI settings
     const { data: aiSettings, error: aiError } = await supabase
@@ -251,6 +261,7 @@ CRITICAL RULES:
 5. For safety-related questions, always emphasize following proper procedures.
 6. LEGAL/HR ESCALATION: If the user's question touches on discipline, termination, pay disputes, harassment, or any legal matter, append this EXACT line as the final line of your response (no rewording, no translation):
    This isn't legal advice — talk to your supervisor or a lawyer for your specific situation.
+7. JURISDICTION CONTEXT: ${jurisdictionContext}
 ${languageInstruction}
 
 ORGANIZATION DOCUMENTS:
