@@ -106,6 +106,23 @@ export function DriveDocumentCard({
       if (translatedContent) {
         setContent(translatedContent);
         setContentLanguage(currentLanguage);
+
+        // Auto-extract relationships from "Related Procedures" / "Suggested next documents"
+        // sections and upsert them. RLS restricts writes to admins; failure is silent.
+        if (isAdmin && selfDocId && org?.id) {
+          const { relationships } = extractRelationships(translatedContent);
+          if (relationships.length > 0) {
+            try {
+              await syncAuto.mutateAsync({
+                org_id: org.id,
+                from_doc_id_external: selfDocId,
+                extracted: relationships,
+              });
+            } catch (_e) {
+              // non-fatal
+            }
+          }
+        }
       }
     } catch (err) {
       console.error("Error loading content:", err);
