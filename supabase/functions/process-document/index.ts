@@ -12,6 +12,77 @@ interface ProcessedContent {
   summary: string;
 }
 
+// Mirror of public.parse_document_sections (plpgsql). Keep in sync with migration.
+const HEADING_MAP: Array<{ test: (h: string) => boolean; key: string; kind: "string" | "bullets" | "numbered" | "responsibilities" }> = [
+  { test: (h) => h === "purpose" || h === "purpose/overview" || h.startsWith("purpose "), key: "purpose", kind: "string" },
+  { test: (h) => h === "scope", key: "scope", kind: "string" },
+  { test: (h) => h === "non-negotiables" || h === "non negotiables", key: "non_negotiables", kind: "bullets" },
+  { test: (h) => h === "policy statement", key: "policy_statement", kind: "string" },
+  { test: (h) => h === "procedure" || h === "procedures" || h === "step-by-step procedure" || h === "procedure steps", key: "procedure_steps", kind: "numbered" },
+  { test: (h) => h.startsWith("required tools") || h === "tools required" || h.startsWith("materials/equipment") || h.startsWith("materials and equipment"), key: "tools_required", kind: "bullets" },
+  { test: (h) => h === "quality check" || h === "definition of done" || h === "quality standards", key: "quality_check", kind: "string" },
+  { test: (h) => h === "common mistakes to avoid" || h === "common mistakes", key: "common_mistakes", kind: "bullets" },
+  { test: (h) => h === "responsibilities", key: "responsibilities", kind: "responsibilities" },
+  { test: (h) => h === "consequences of non-compliance" || h === "consequences", key: "consequences", kind: "string" },
+  { test: (h) => h === "acknowledgement" || h === "acknowledgment", key: "acknowledgement", kind: "string" },
+];
+
+function parseDocumentSections(content: string): Record<string, unknown> {
+  const result: Record<string, unknown> = {
+    purpose: null, scope: null, non_negotiables: null, policy_statement: null,
+    procedure_steps: null, tools_required: null, quality_check: null,
+    common_mistakes: null, responsibilities: null, consequences: null, acknowledgement: null,
+  };
+  if (!content || !content.trim()) return result;
+
+  const lines = content.split(/\r?\n/);
+  lines.push("## __END__");
+
+  let currentKey: string | null = null;
+  let currentKind: "string" | "bullets" | "numbered" | "responsibilities" | null = null;
+  let buffer: string[] = [];
+
+  const flush = () => {
+    if (!currentKey || !currentKind) return;
+    const text = buffer.join("\n").trim();
+    if (!text) return;
+    if (currentKind === "string") {
+      result[currentKey] = text;
+    } else if (currentKind === "bullets" || currentKind === "numbered") {
+      const items = text.split(/\r?\n/)
+        .map((l) => l.replace(/^\s*(\d+[.)]|[-*•])\s*/, "").trim())
+        .filter((l) => l && !l.startsWith("#"));
+      if (items.length) result[currentKey] = items;
+    } else if (currentKind === "responsibilities") {
+      const arr: Array<{ role: string; duties: string }> = [];
+      for (const raw of text.split(/\r?\n/)) {
+        const l = raw.replace(/^\s*[-*•]\s*/, "").trim();
+        if (!l || l.startsWith("#")) continue;
+        const m = l.match(/^\*{0,2}([^:*]+)\*{0,2}\s*[:\-–]\s*(.+)$/);
+        if (m) arr.push({ role: m[1].trim(), duties: m[2].trim() });
+        else arr.push({ role: l, duties: "" });
+      }
+      if (arr.length) result[currentKey] = arr;
+    }
+  };
+
+  for (const line of lines) {
+    const h2 = line.match(/^\s*##\s+(.+?)\s*$/);
+    if (h2) {
+      flush();
+      buffer = [];
+      const heading = h2[1].toLowerCase().replace(/[/(].*$/, "").trim();
+      const mapping = HEADING_MAP.find((m) => m.test(heading));
+      currentKey = mapping?.key ?? null;
+      currentKind = mapping?.kind ?? null;
+    } else {
+      buffer.push(line);
+    }
+  }
+  flush();
+  return result;
+}
+
 async function detectContentType(documentText: string, fileName?: string): Promise<string> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
