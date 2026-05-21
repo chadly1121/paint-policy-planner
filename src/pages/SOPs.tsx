@@ -34,7 +34,13 @@ const SOPs = () => {
     <DriveRequiredGuard moduleName="SOPs">
       <div className="space-y-4 w-full min-w-0 overflow-hidden">
         {/* AI Assistant - compact at top */}
-        <DocumentAssistant />
+        <DocumentAssistant
+          suggestions={[
+            "How do I clock in correctly?",
+            "What does the foreman check at end of day?",
+            "What's the procedure for site cleanup?",
+          ]}
+        />
         
         {/* Document List - full width */}
         <DriveDocumentList
