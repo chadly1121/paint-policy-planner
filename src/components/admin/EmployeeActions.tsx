@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Pencil, Trash2, Loader2, UserX, ShieldCheck, Shield } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Loader2, UserX, ShieldCheck, Shield, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -57,6 +57,8 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const [isChangingRole, setIsChangingRole] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
   
   // Edit form state
   const [editFullName, setEditFullName] = useState(employee.full_name);
@@ -207,6 +209,10 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
           }}>
             <ShieldCheck className="h-4 w-4 mr-2" />
             Change Role
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setRestartDialogOpen(true)}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Restart Onboarding
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => setRemoveDialogOpen(true)}
