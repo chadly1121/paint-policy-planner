@@ -42,7 +42,8 @@ import {
   Building2,
   Cloud,
   Bot,
-  CreditCard
+  CreditCard,
+  Link2
 } from "lucide-react";
 import { z } from "zod";
 import { languages } from "@/components/LanguageSelector";
