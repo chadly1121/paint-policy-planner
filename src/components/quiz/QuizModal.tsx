@@ -44,6 +44,7 @@ const QuizModal = ({
     answers,
     quizComplete,
     lastAttempt,
+    previousWrongCount,
     generateQuiz,
     selectAnswer,
     nextQuestion,
@@ -108,6 +109,11 @@ const QuizModal = ({
 
         {!loading && !quizComplete && currentQuestion && (
           <div className="space-y-6">
+            {previousWrongCount > 0 && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-200">
+                You missed {previousWrongCount} {previousWrongCount === 1 ? "question" : "questions"} last time. Focus on those — review them in the doc and try again.
+              </div>
+            )}
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
@@ -200,9 +206,9 @@ const QuizModal = ({
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-green-600 mb-2">Perfect Score!</h3>
+                  <h3 className="text-2xl font-bold text-green-600 mb-2">You Passed!</h3>
                   <p className="text-muted-foreground">
-                    You answered all {lastAttempt.total} questions correctly!
+                    You got {lastAttempt.score} out of {lastAttempt.total} correct.
                   </p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
@@ -227,7 +233,7 @@ const QuizModal = ({
                     You got {lastAttempt.score} out of {lastAttempt.total} correct.
                   </p>
                   <p className="text-muted-foreground mt-1">
-                    You need a perfect score (5/5) to unlock the next section.
+                    You need 80% to pass. Review the material and try again.
                   </p>
                 </div>
                 <div className="space-y-4">

@@ -31,6 +31,8 @@ export const useQuiz = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [quizComplete, setQuizComplete] = useState(false);
   const [lastAttempt, setLastAttempt] = useState<QuizAttempt | null>(null);
+  const [previousWrongCount, setPreviousWrongCount] = useState(0);
+  const [lastQuizKey, setLastQuizKey] = useState<string | null>(null);
 
   const generateQuiz = useCallback(async (
     sectionKey: string, 
@@ -48,6 +50,13 @@ export const useQuiz = () => {
     setAnswers({});
     setQuizComplete(false);
     setLastAttempt(null);
+
+    // Reset retake memory when starting a different quiz
+    const quizKey = `${sectionKey}|${quizType ?? ""}|${itemKey ?? ""}`;
+    if (lastQuizKey !== quizKey) {
+      setPreviousWrongCount(0);
+    }
+    setLastQuizKey(quizKey);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-quiz", {
@@ -83,7 +92,7 @@ export const useQuiz = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, toast, lastQuizKey]);
 
   const selectAnswer = useCallback((questionIndex: number, answerIndex: number) => {
     setAnswers((prev) => ({ ...prev, [questionIndex]: answerIndex }));
@@ -140,6 +149,8 @@ export const useQuiz = () => {
       setQuizComplete(true);
 
       if (data.passed) {
+        setPreviousWrongCount(0);
+
         // Send email notification for section completion (fire and forget)
         if (data.pointsEarned > 0) {
           supabase.functions.invoke("send-notification", {
@@ -153,15 +164,20 @@ export const useQuiz = () => {
 
         toast({
           title: "Congratulations! 🎉",
-          description: data.pointsEarned > 0 
-            ? `Perfect score! You earned ${data.pointsEarned} points.`
-            : `Perfect score! (Section already completed)`,
+          description: data.pointsEarned > 0
+            ? `You passed with ${data.score}/${data.total}! You earned ${data.pointsEarned} points.`
+            : `You passed with ${data.score}/${data.total}! (Already completed)`,
         });
       } else {
+        const wrongIds: string[] = Array.isArray(data.wrongQuestionIds)
+          ? data.wrongQuestionIds
+          : [];
+        setPreviousWrongCount(wrongIds.length || (data.total - data.score));
+
         toast({
           variant: "destructive",
           title: "Not quite!",
-          description: `You got ${data.score}/${data.total}. You need ${data.total}/${data.total} to pass. Try again!`,
+          description: `You got ${data.score}/${data.total}. You need 80% to pass. Try again!`,
         });
       }
 
@@ -196,6 +212,7 @@ export const useQuiz = () => {
     answers,
     quizComplete,
     lastAttempt,
+    previousWrongCount,
     generateQuiz,
     selectAnswer,
     nextQuestion,
