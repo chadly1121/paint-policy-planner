@@ -55,7 +55,9 @@ export type Database = {
       }
       awards: {
         Row: {
+          auto_granted: boolean
           awarded_date: string | null
+          code: string | null
           created_at: string
           description: string | null
           id: string
@@ -65,7 +67,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_granted?: boolean
           awarded_date?: string | null
+          code?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -75,7 +79,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_granted?: boolean
           awarded_date?: string | null
+          code?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -500,6 +506,7 @@ export type Database = {
           incident_time: string | null
           injuries_reported: boolean | null
           injury_details: string | null
+          is_near_miss: boolean
           location: string
           org_id: string
           reported_by: string
@@ -523,6 +530,7 @@ export type Database = {
           incident_time?: string | null
           injuries_reported?: boolean | null
           injury_details?: string | null
+          is_near_miss?: boolean
           location: string
           org_id: string
           reported_by: string
@@ -546,6 +554,7 @@ export type Database = {
           incident_time?: string | null
           injuries_reported?: boolean | null
           injury_details?: string | null
+          is_near_miss?: boolean
           location?: string
           org_id?: string
           reported_by?: string
@@ -1243,6 +1252,7 @@ export type Database = {
           completed_at: string | null
           created_at: string
           id: string
+          language_completed_in: string | null
           section_key: string
           updated_at: string
           user_id: string
@@ -1252,6 +1262,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           id?: string
+          language_completed_in?: string | null
           section_key: string
           updated_at?: string
           user_id: string
@@ -1261,6 +1272,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           id?: string
+          language_completed_in?: string | null
           section_key?: string
           updated_at?: string
           user_id?: string
