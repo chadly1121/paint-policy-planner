@@ -102,7 +102,7 @@ const IncidentReports = () => {
       if (response.error) throw response.error;
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["incident-reports"] });
       setIsDialogOpen(false);
       resetForm();
@@ -112,7 +112,27 @@ const IncidentReports = () => {
           ? "Report saved and synced to Google Drive. Admins have been notified."
           : "Report saved. Admins have been notified.",
       });
-      
+
+      // Critical injury alert: severe + injuries + CA jurisdiction
+      const isSevere = variables.severity === "severe" || variables.severity === "critical";
+      const isCA = (org?.jurisdiction ?? "").startsWith("CA");
+      if (isSevere && variables.injuries_reported && isCA && user?.id && org?.id) {
+        supabase.functions.invoke("send-notification", {
+          body: {
+            type: "critical_injury_alert",
+            userId: user.id,
+            data: {
+              orgId: org.id,
+              incidentId: data?.incident_id,
+              incidentDate: variables.incident_date,
+              location: variables.location,
+              description: variables.description,
+              injuryDetails: variables.injury_details,
+            },
+          },
+        }).catch((err) => console.error("Failed to dispatch critical_injury_alert:", err));
+      }
+
       if (data.drive_web_view_link) {
         window.open(data.drive_web_view_link, "_blank");
       }
