@@ -76,6 +76,7 @@ const IncidentReports = () => {
     root_cause: "",
     corrective_actions: "",
     severity: "minor",
+    is_near_miss: false,
   });
 
   const { data: reports, isLoading } = useQuery({
@@ -178,6 +179,7 @@ const IncidentReports = () => {
       root_cause: "",
       corrective_actions: "",
       severity: "minor",
+      is_near_miss: false,
     });
   };
 
@@ -291,6 +293,19 @@ const IncidentReports = () => {
                     onCheckedChange={(checked) => setFormData({ ...formData, injuries_reported: checked })}
                   />
                   <Label htmlFor="injuries_reported">Were there any injuries?</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_near_miss"
+                    checked={formData.is_near_miss}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, is_near_miss: checked })
+                    }
+                  />
+                  <Label htmlFor="is_near_miss">
+                    Near miss? (no injury, but close call — helps us spot hazards)
+                  </Label>
                 </div>
 
                 {formData.injuries_reported && (

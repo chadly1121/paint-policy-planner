@@ -9,7 +9,12 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: "section_completed" | "redemption_processed" | "redemption_requested" | "critical_injury_alert";
+  type:
+    | "section_completed"
+    | "redemption_processed"
+    | "redemption_requested"
+    | "critical_injury_alert"
+    | "award_granted";
   userId: string;
   data: {
     sectionKey?: string;
@@ -23,6 +28,9 @@ interface NotificationRequest {
     location?: string;
     description?: string;
     injuryDetails?: string;
+    awardCode?: string;
+    awardTitle?: string;
+    awardDescription?: string;
   };
 }
 
@@ -118,34 +126,40 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const {
-      data: authData,
-      error: authError,
-    } = await supabase.auth.getUser(jwt);
+    // Service-role bypass: internal cron functions (e.g. grant-awards) call us
+    // with the service role key; trust those callers and skip JWT/user checks.
+    const isServiceRoleCaller = jwt === supabaseServiceKey;
 
-    if (authError || !authData?.user) {
-      return new Response(JSON.stringify({ error: "Invalid JWT" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
+    if (!isServiceRoleCaller) {
+      const {
+        data: authData,
+        error: authError,
+      } = await supabase.auth.getUser(jwt);
 
-    // Only allow sending to the authenticated user, unless the caller is an admin.
-    if (authData.user.id !== userId) {
-      const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
-        _user_id: authData.user.id,
-        _role: "admin",
-      });
-
-      if (roleError) {
-        console.error("Error checking admin role:", roleError);
-      }
-
-      if (!isAdmin) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
+      if (authError || !authData?.user) {
+        return new Response(JSON.stringify({ error: "Invalid JWT" }), {
+          status: 401,
           headers: { "Content-Type": "application/json", ...corsHeaders },
         });
+      }
+
+      // Only allow sending to the authenticated user, unless the caller is an admin.
+      if (authData.user.id !== userId) {
+        const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
+          _user_id: authData.user.id,
+          _role: "admin",
+        });
+
+        if (roleError) {
+          console.error("Error checking admin role:", roleError);
+        }
+
+        if (!isAdmin) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          });
+        }
       }
     }
 
@@ -325,6 +339,23 @@ serve(async (req: Request): Promise<Response> => {
           headers: { "Content-Type": "application/json", ...corsHeaders },
         });
       }
+
+      case "award_granted":
+        subject = `🏆 New Award: ${data.awardTitle ?? "Achievement Unlocked"}`;
+        html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #f59e0b;">Congratulations, ${profile.full_name}! 🏆</h1>
+            <p style="font-size: 18px;">You just earned a new award:</p>
+            <div style="background:#fffbeb; border:2px solid #f59e0b; padding:16px; border-radius:8px; margin: 16px 0;">
+              <h2 style="margin:0 0 8px 0; color:#92400e;">${data.awardTitle ?? "Achievement"}</h2>
+              <p style="margin:0; color:#78350f;">${data.awardDescription ?? ""}</p>
+            </div>
+            <p>Visit your Profile → Awards tab to see all your achievements.</p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+            <p style="color: #6b7280; font-size: 12px;">This is an automated notification from SOPed Pro.</p>
+          </div>
+        `;
+        break;
 
       default:
         throw new Error(`Unknown notification type: ${type}`);

@@ -245,6 +245,7 @@ serve(async (req) => {
       root_cause,
       corrective_actions,
       severity,
+      is_near_miss,
     } = body;
 
     // Validate required fields
@@ -272,6 +273,7 @@ serve(async (req) => {
         root_cause: root_cause || null,
         corrective_actions: corrective_actions || null,
         severity: severity || 'minor',
+        is_near_miss: is_near_miss || false,
       })
       .select()
       .single();
