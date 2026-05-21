@@ -217,6 +217,7 @@ serve(async (req) => {
         pointsEarned: passed && !alreadyCompleted ? pointsEarned : 0,
         questions: questionsWithAnswers,
         wrongQuestionIds,
+        threshold: PASS_THRESHOLD,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
