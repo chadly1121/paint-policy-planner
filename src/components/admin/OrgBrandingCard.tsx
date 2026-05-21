@@ -200,6 +200,24 @@ const OrgBrandingCard = () => {
           </p>
         </div>
 
+        {/* Jurisdiction */}
+        <div className="space-y-2">
+          <Label htmlFor="jurisdiction">Jurisdiction</Label>
+          <Select value={jurisdiction} onValueChange={setJurisdiction}>
+            <SelectTrigger id="jurisdiction">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CA-ON">Canada – Ontario</SelectItem>
+              <SelectItem value="CA-other">Canada – Other province/territory</SelectItem>
+              <SelectItem value="US">United States</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Determines which workplace safety regulations are referenced (e.g. WHMIS vs. OSHA).
+          </p>
+        </div>
+
         {/* Save Button */}
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
