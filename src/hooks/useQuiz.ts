@@ -149,6 +149,8 @@ export const useQuiz = () => {
       setQuizComplete(true);
 
       if (data.passed) {
+        setPreviousWrongCount(0);
+
         // Send email notification for section completion (fire and forget)
         if (data.pointsEarned > 0) {
           supabase.functions.invoke("send-notification", {
@@ -162,15 +164,20 @@ export const useQuiz = () => {
 
         toast({
           title: "Congratulations! 🎉",
-          description: data.pointsEarned > 0 
-            ? `Perfect score! You earned ${data.pointsEarned} points.`
-            : `Perfect score! (Section already completed)`,
+          description: data.pointsEarned > 0
+            ? `You passed with ${data.score}/${data.total}! You earned ${data.pointsEarned} points.`
+            : `You passed with ${data.score}/${data.total}! (Already completed)`,
         });
       } else {
+        const wrongIds: string[] = Array.isArray(data.wrongQuestionIds)
+          ? data.wrongQuestionIds
+          : [];
+        setPreviousWrongCount(wrongIds.length || (data.total - data.score));
+
         toast({
           variant: "destructive",
           title: "Not quite!",
-          description: `You got ${data.score}/${data.total}. You need ${data.total}/${data.total} to pass. Try again!`,
+          description: `You got ${data.score}/${data.total}. You need 80% to pass. Try again!`,
         });
       }
 
