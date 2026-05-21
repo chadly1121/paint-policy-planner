@@ -57,9 +57,9 @@ const QuizModal = ({
 
   useEffect(() => {
     if (open && questions.length === 0) {
-      generateQuiz(sectionKey, sectionContent, quizType, itemKey);
+      generateQuiz(sectionKey, sectionContent, quizType, itemKey, false, documentVersion);
     }
-  }, [open, sectionKey, sectionContent, generateQuiz, questions.length, quizType, itemKey]);
+  }, [open, sectionKey, sectionContent, generateQuiz, questions.length, quizType, itemKey, documentVersion]);
 
   const handleClose = () => {
     resetQuiz();
@@ -67,7 +67,7 @@ const QuizModal = ({
   };
 
   const handleSubmit = async () => {
-    const result = await submitQuiz(sectionKey, quizType, itemKey);
+    const result = await submitQuiz(sectionKey, quizType, itemKey, documentVersion);
     if (result) {
       onComplete(result.passed);
     }
@@ -76,7 +76,7 @@ const QuizModal = ({
   const handleRetry = () => {
     resetQuiz();
     // Force new quiz generation on retry - don't use cached questions
-    generateQuiz(sectionKey, sectionContent, quizType, itemKey, true);
+    generateQuiz(sectionKey, sectionContent, quizType, itemKey, true, documentVersion);
   };
 
   const questionCount = quizType === "mini" ? 5 : quizType === "final" ? 10 : 5;
