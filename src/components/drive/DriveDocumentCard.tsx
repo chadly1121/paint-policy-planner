@@ -29,6 +29,10 @@ import VideoEmbed from "@/components/video/VideoEmbed";
 import { VideoUrlDialog } from "./VideoUrlDialog";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 import { DocReferenceText } from "@/components/docref/DocReferenceText";
+import { RelatedDocumentsPanel } from "@/components/docref/RelatedDocumentsPanel";
+import { extractRelationships, docIdFromFilename } from "@/lib/documentRelationships";
+import { useSyncAutoRelationships } from "@/hooks/useDocumentRelationships";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
@@ -66,6 +70,11 @@ export function DriveDocumentCard({
   // Get display title (remove file extension) and translate it
   const originalTitle = file.name.replace(/\.[^/.]+$/, '');
   const { translatedTitle: displayTitle, loading: titleLoading } = useTranslatedTitle(originalTitle);
+
+  // Self doc id (ROP-XXX-###) parsed from filename — used to look up relationships.
+  const selfDocId = docIdFromFilename(file.name);
+  const { org } = useOrganization();
+  const syncAuto = useSyncAutoRelationships();
 
   // Module prefix for numbering
   const prefixMap = {
