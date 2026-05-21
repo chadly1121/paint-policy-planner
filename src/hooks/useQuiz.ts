@@ -39,7 +39,8 @@ export const useQuiz = () => {
     sectionContent: string,
     quizType?: "mini" | "final",
     itemKey?: string,
-    forceNew?: boolean
+    forceNew?: boolean,
+    documentVersion?: number
   ) => {
     if (!user) return;
 
