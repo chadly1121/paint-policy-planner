@@ -546,6 +546,45 @@ export type Database = {
         }
         Relationships: []
       }
+      document_relationships: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_doc_id_external: string
+          id: string
+          notes: string | null
+          org_id: string
+          relationship_type: Database["public"]["Enums"]["doc_relationship_type"]
+          source: string
+          to_doc_id_external: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_doc_id_external: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          relationship_type?: Database["public"]["Enums"]["doc_relationship_type"]
+          source?: string
+          to_doc_id_external: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_doc_id_external?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          relationship_type?: Database["public"]["Enums"]["doc_relationship_type"]
+          source?: string
+          to_doc_id_external?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       drive_file_metadata: {
         Row: {
           created_at: string
@@ -1847,6 +1886,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "employee"
+      doc_relationship_type:
+        | "related"
+        | "suggested_next"
+        | "depends_on"
+        | "replaces"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1975,6 +2019,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "employee"],
+      doc_relationship_type: [
+        "related",
+        "suggested_next",
+        "depends_on",
+        "replaces",
+      ],
     },
   },
 } as const

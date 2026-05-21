@@ -29,6 +29,10 @@ import VideoEmbed from "@/components/video/VideoEmbed";
 import { VideoUrlDialog } from "./VideoUrlDialog";
 import type { DriveFile } from "@/hooks/useDriveFiles";
 import { DocReferenceText } from "@/components/docref/DocReferenceText";
+import { RelatedDocumentsPanel } from "@/components/docref/RelatedDocumentsPanel";
+import { extractRelationships, docIdFromFilename } from "@/lib/documentRelationships";
+import { useSyncAutoRelationships } from "@/hooks/useDocumentRelationships";
+import { useOrganization } from "@/hooks/useOrganization";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
@@ -67,6 +71,11 @@ export function DriveDocumentCard({
   const originalTitle = file.name.replace(/\.[^/.]+$/, '');
   const { translatedTitle: displayTitle, loading: titleLoading } = useTranslatedTitle(originalTitle);
 
+  // Self doc id (ROP-XXX-###) parsed from filename — used to look up relationships.
+  const selfDocId = docIdFromFilename(file.name);
+  const { org } = useOrganization();
+  const syncAuto = useSyncAutoRelationships();
+
   // Module prefix for numbering
   const prefixMap = {
     sops: "SOP",
@@ -97,6 +106,23 @@ export function DriveDocumentCard({
       if (translatedContent) {
         setContent(translatedContent);
         setContentLanguage(currentLanguage);
+
+        // Auto-extract relationships from "Related Procedures" / "Suggested next documents"
+        // sections and upsert them. RLS restricts writes to admins; failure is silent.
+        if (isAdmin && selfDocId && org?.id) {
+          const { relationships } = extractRelationships(translatedContent);
+          if (relationships.length > 0) {
+            try {
+              await syncAuto.mutateAsync({
+                org_id: org.id,
+                from_doc_id_external: selfDocId,
+                extracted: relationships,
+              });
+            } catch (_e) {
+              // non-fatal
+            }
+          }
+        }
       }
     } catch (err) {
       console.error("Error loading content:", err);
@@ -173,7 +199,10 @@ export function DriveDocumentCard({
 
   // Format content for display
   const formatContent = (text: string) => {
-    return text.split('\n').map((line, idx) => {
+    // Strip "Related Procedures and Documents" / "Suggested next documents" sections —
+    // those are surfaced via the RelatedDocumentsPanel instead.
+    const { bodyLines } = extractRelationships(text);
+    return bodyLines.map((line, idx) => {
       const trimmed = line.trim();
       if (!trimmed) return <br key={idx} />;
       if (trimmed.startsWith('## ')) {
@@ -314,6 +343,9 @@ export function DriveDocumentCard({
                 {formatContent(content)}
               </div>
             )}
+
+            {/* Related Documents (managed via document_relationships, not body text) */}
+            {!loadingContent && <RelatedDocumentsPanel fromDocIdExternal={selfDocId} />}
             
             {/* Metadata */}
             <div className="mt-4 text-xs text-muted-foreground flex items-center gap-4">

@@ -57,6 +57,7 @@ import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { SubscriptionCard } from "@/components/admin/SubscriptionCard";
 import { InvoiceHistory } from "@/components/admin/InvoiceHistory";
 import { BrokenReferencesCard } from "@/components/admin/BrokenReferencesCard";
+import { DocumentRelationshipsManager } from "@/components/admin/DocumentRelationshipsManager";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
 const employeeSchema = z.object({
@@ -489,7 +490,8 @@ const Admin = () => {
           <RedemptionItemsManager />
         </TabsContent>
 
-        <TabsContent value="refs">
+        <TabsContent value="refs" className="space-y-6">
+          <DocumentRelationshipsManager />
           <BrokenReferencesCard />
         </TabsContent>
 
