@@ -44,6 +44,7 @@ const QuizModal = ({
     answers,
     quizComplete,
     lastAttempt,
+    previousWrongCount,
     generateQuiz,
     selectAnswer,
     nextQuestion,
