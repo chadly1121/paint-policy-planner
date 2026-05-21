@@ -8,20 +8,38 @@ const corsHeaders = {
 
 const DRIVE_ENCRYPTION_KEY = Deno.env.get('DRIVE_ENCRYPTION_KEY')!;
 
-// Module type to folder type mapping
+// Module type → org_drive_folders.folder_type
 const MODULE_FOLDER_MAP: Record<string, string> = {
   'sops': 'sops',
   'policies': 'policies',
   'safety': 'safety',
   'training': 'training',
   'disciplinary': 'disciplinary',
+  'forms': 'forms',
 };
 
-// Decryption helper
+// Filename prefix (ROP-XXX-NNN) → expected module type
+const PREFIX_TO_MODULE: Record<string, string> = {
+  POL: 'policies',
+  SOP: 'sops',
+  FRM: 'forms',
+  SAF: 'safety',
+  TRN: 'training',
+  DSC: 'disciplinary',
+};
+
+// Parse "ROP-XXX-NNN..." from a filename. Returns { id, prefix } or null.
+function parseDocIdExternal(name: string): { id: string; prefix: string } | null {
+  const stripped = name.replace(/\.[^/.]+$/, '');
+  const m = stripped.match(/^ROP-(POL|SOP|FRM|SAF|TRN|DSC)-(\d{3})/i);
+  if (!m) return null;
+  const prefix = m[1].toUpperCase();
+  return { id: `ROP-${prefix}-${m[2]}`, prefix };
+}
+
 async function decryptToken(encryptedToken: string): Promise<string> {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-  
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     encoder.encode(DRIVE_ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)),
@@ -29,26 +47,16 @@ async function decryptToken(encryptedToken: string): Promise<string> {
     false,
     ['decrypt']
   );
-  
   const combined = Uint8Array.from(atob(encryptedToken), c => c.charCodeAt(0));
   const iv = combined.slice(0, 12);
   const encrypted = combined.slice(12);
-  
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    keyMaterial,
-    encrypted
-  );
-  
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, keyMaterial, encrypted);
   return decoder.decode(decrypted);
 }
 
-// Get valid access token
 async function getValidAccessToken(tokenRecord: any, supabase: any): Promise<string> {
   const expiresAt = new Date(tokenRecord.token_expires_at);
-  const now = new Date();
-  
-  if (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
+  if (expiresAt.getTime() - Date.now() < 5 * 60 * 1000) {
     const refreshResponse = await fetch(
       `${Deno.env.get('SUPABASE_URL')}/functions/v1/drive-token-refresh`,
       {
@@ -57,20 +65,14 @@ async function getValidAccessToken(tokenRecord: any, supabase: any): Promise<str
         body: JSON.stringify({ token_id: tokenRecord.id }),
       }
     );
-    
-    if (!refreshResponse.ok) {
-      throw new Error('Failed to refresh token');
-    }
-    
+    if (!refreshResponse.ok) throw new Error('Failed to refresh token');
     const { data: refreshedToken } = await supabase
       .from('user_drive_tokens')
       .select('access_token_encrypted')
       .eq('id', tokenRecord.id)
       .single();
-    
     return await decryptToken(refreshedToken.access_token_encrypted);
   }
-  
   return await decryptToken(tokenRecord.access_token_encrypted);
 }
 
@@ -80,6 +82,7 @@ interface SyncResult {
   records_created: number;
   records_updated: number;
   records_marked_removed: number;
+  misplacements: number;
 }
 
 serve(async (req) => {
@@ -91,8 +94,7 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -105,15 +107,13 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await userSupabase.auth.getUser();
     if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const body = await req.json().catch(() => ({}));
-    const { module_type, dry_run = false } = body; // optional: sync specific module or all
+    const { module_type, dry_run = false } = body;
 
-    // Get user's org and verify admin
     const { data: orgUser, error: orgError } = await userSupabase
       .from('org_users')
       .select('org_id, role, id')
@@ -123,16 +123,12 @@ serve(async (req) => {
 
     if (orgError || !orgUser) {
       return new Response(JSON.stringify({ error: 'User not in organization' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    // Only admins can sync
     if (orgUser.role !== 'admin') {
       return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -141,7 +137,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Get primary token
     const { data: tokenRecord, error: tokenError } = await supabase
       .from('user_drive_tokens')
       .select('*')
@@ -152,25 +147,20 @@ serve(async (req) => {
 
     if (tokenError || !tokenRecord) {
       return new Response(JSON.stringify({ error: 'No active Drive connection' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const accessToken = await getValidAccessToken(tokenRecord, supabase);
 
-    // Determine which modules to sync
-    const modulesToSync = module_type 
-      ? [module_type] 
-      : Object.keys(MODULE_FOLDER_MAP);
-
+    const modulesToSync = module_type ? [module_type] : Object.keys(MODULE_FOLDER_MAP);
     const results: SyncResult[] = [];
+    const misplacementWarnings: Array<Record<string, unknown>> = [];
 
     for (const moduleType of modulesToSync) {
       const folderType = MODULE_FOLDER_MAP[moduleType];
       if (!folderType) continue;
 
-      // Get folder ID
       const { data: folderRecord } = await supabase
         .from('org_drive_folders')
         .select('drive_folder_id')
@@ -183,20 +173,17 @@ serve(async (req) => {
         continue;
       }
 
-      // List files in Drive folder
       const query = encodeURIComponent(`'${folderRecord.drive_folder_id}' in parents and trashed = false`);
       const fields = 'files(id,name,mimeType,createdTime,modifiedTime)';
-      
+
       const listResponse = await fetch(
         `https://www.googleapis.com/drive/v3/files?q=${query}&fields=${fields}`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-
       if (!listResponse.ok) {
         console.error(`Failed to list files for ${moduleType}`);
         continue;
       }
-
       const listData = await listResponse.json();
       const driveFiles = listData.files || [];
       const driveFileIds = new Set(driveFiles.map((f: any) => f.id));
@@ -204,67 +191,123 @@ serve(async (req) => {
       let recordsCreated = 0;
       let recordsUpdated = 0;
       let recordsMarkedRemoved = 0;
+      let misplacements = 0;
 
-      // Get existing SOPs for this org with drive_file_id
-      const { data: existingSops } = await supabase
-        .from('sops')
-        .select('id, drive_file_id, title, status')
-        .eq('org_id', orgUser.org_id)
-        .not('drive_file_id', 'is', null);
+      // Detect filename/folder misplacement (e.g. ROP-SAF-005 inside Policies folder)
+      for (const file of driveFiles) {
+        const parsed = parseDocIdExternal(file.name);
+        if (!parsed) continue;
+        const expectedModule = PREFIX_TO_MODULE[parsed.prefix];
+        if (expectedModule && expectedModule !== moduleType) {
+          misplacements++;
+          misplacementWarnings.push({
+            doc_id_external: parsed.id,
+            file_id: file.id,
+            file_name: file.name,
+            current_folder: moduleType,
+            expected_folder: expectedModule,
+          });
+          console.warn(
+            `MISPLACEMENT: ${file.name} (${parsed.id}) is in '${moduleType}' folder but prefix suggests '${expectedModule}'`
+          );
+        }
+      }
 
-      const existingByDriveId = new Map(
-        (existingSops || []).map((s: any) => [s.drive_file_id, s])
-      );
+      if (moduleType === 'forms') {
+        // Forms have their own table — drive-sync populates company_forms metadata.
+        const { data: existingForms } = await supabase
+          .from('company_forms')
+          .select('id, drive_file_id, title, is_active, doc_id_external')
+          .eq('user_id', user.id)
+          .not('drive_file_id', 'is', null);
+        const existingByDriveId = new Map(
+          (existingForms || []).map((s: any) => [s.drive_file_id, s])
+        );
 
-      if (!dry_run) {
-        // Upsert records for each Drive file
-        for (const file of driveFiles) {
-          const existing = existingByDriveId.get(file.id);
-          
-          if (existing) {
-            // Update title if changed
-            if (existing.title !== file.name.replace(/\.[^/.]+$/, '')) {
-              await supabase
-                .from('sops')
-                .update({ 
-                  title: file.name.replace(/\.[^/.]+$/, ''),
-                  status: 'active',
-                  updated_at: new Date().toISOString(),
-                })
-                .eq('id', existing.id);
-              recordsUpdated++;
-            } else if (existing.status === 'removed_from_drive') {
-              // Restore if it was marked removed
-              await supabase
-                .from('sops')
-                .update({ status: 'active' })
-                .eq('id', existing.id);
-              recordsUpdated++;
+        if (!dry_run) {
+          for (const file of driveFiles) {
+            const baseTitle = file.name.replace(/\.[^/.]+$/, '');
+            const parsed = parseDocIdExternal(file.name);
+            const docIdExternal = parsed?.id ?? null;
+            const existing = existingByDriveId.get(file.id);
+            if (existing) {
+              const patch: Record<string, unknown> = {};
+              if (existing.title !== baseTitle) patch.title = baseTitle;
+              if (existing.doc_id_external !== docIdExternal) patch.doc_id_external = docIdExternal;
+              if (!existing.is_active) patch.is_active = true;
+              if (Object.keys(patch).length > 0) {
+                await supabase.from('company_forms').update(patch).eq('id', existing.id);
+                recordsUpdated++;
+              }
+            } else {
+              await supabase.from('company_forms').insert({
+                user_id: user.id,
+                source_form_key: file.id,
+                title: baseTitle,
+                drive_file_id: file.id,
+                drive_folder_id: folderRecord.drive_folder_id,
+                doc_id_external: docIdExternal,
+                is_active: true,
+              });
+              recordsCreated++;
             }
-          } else {
-            // Create new metadata record
-            await supabase.from('sops').insert({
-              org_id: orgUser.org_id,
-              source: 'org',
-              title: file.name.replace(/\.[^/.]+$/, ''),
-              drive_file_id: file.id,
-              content_md: null, // No content stored locally
-              status: 'active',
-              created_by: orgUser.id,
-              updated_by: orgUser.id,
-            });
-            recordsCreated++;
+          }
+          for (const [driveId, form] of existingByDriveId) {
+            if (!driveFileIds.has(driveId) && form.is_active) {
+              await supabase.from('company_forms').update({ is_active: false }).eq('id', form.id);
+              recordsMarkedRemoved++;
+            }
           }
         }
+      } else {
+        // Existing modules: metadata lives in `sops`.
+        const { data: existingSops } = await supabase
+          .from('sops')
+          .select('id, drive_file_id, title, status, doc_id_external')
+          .eq('org_id', orgUser.org_id)
+          .not('drive_file_id', 'is', null);
+        const existingByDriveId = new Map(
+          (existingSops || []).map((s: any) => [s.drive_file_id, s])
+        );
 
-        // Mark records as removed if file no longer in Drive
-        for (const [driveId, sop] of existingByDriveId) {
-          if (!driveFileIds.has(driveId) && sop.status !== 'removed_from_drive') {
-            await supabase
-              .from('sops')
-              .update({ status: 'removed_from_drive' })
-              .eq('id', sop.id);
-            recordsMarkedRemoved++;
+        if (!dry_run) {
+          for (const file of driveFiles) {
+            const baseTitle = file.name.replace(/\.[^/.]+$/, '');
+            const parsed = parseDocIdExternal(file.name);
+            const docIdExternal = parsed?.id ?? null;
+            const existing = existingByDriveId.get(file.id);
+
+            if (existing) {
+              const patch: Record<string, unknown> = {};
+              if (existing.title !== baseTitle) patch.title = baseTitle;
+              if (existing.doc_id_external !== docIdExternal) patch.doc_id_external = docIdExternal;
+              if (existing.status !== 'active') patch.status = 'active';
+              if (Object.keys(patch).length > 0) {
+                patch.updated_at = new Date().toISOString();
+                await supabase.from('sops').update(patch).eq('id', existing.id);
+                recordsUpdated++;
+              }
+            } else {
+              await supabase.from('sops').insert({
+                org_id: orgUser.org_id,
+                source: 'org',
+                title: baseTitle,
+                drive_file_id: file.id,
+                content_md: null,
+                status: 'active',
+                created_by: orgUser.id,
+                updated_by: orgUser.id,
+                doc_id_external: docIdExternal,
+              });
+              recordsCreated++;
+            }
+          }
+
+          for (const [driveId, sop] of existingByDriveId) {
+            if (!driveFileIds.has(driveId) && sop.status !== 'removed_from_drive') {
+              await supabase.from('sops').update({ status: 'removed_from_drive' }).eq('id', sop.id);
+              recordsMarkedRemoved++;
+            }
           }
         }
       }
@@ -275,12 +318,14 @@ serve(async (req) => {
         records_created: recordsCreated,
         records_updated: recordsUpdated,
         records_marked_removed: recordsMarkedRemoved,
+        misplacements,
       });
 
-      console.log(`Synced ${moduleType}: ${driveFiles.length} files, ${recordsCreated} created, ${recordsUpdated} updated, ${recordsMarkedRemoved} marked removed`);
+      console.log(
+        `Synced ${moduleType}: ${driveFiles.length} files, ${recordsCreated} created, ${recordsUpdated} updated, ${recordsMarkedRemoved} removed, ${misplacements} misplaced`
+      );
     }
 
-    // Log audit event
     if (!dry_run) {
       await supabase.from('audit_logs').insert({
         user_id: user.id,
@@ -288,18 +333,32 @@ serve(async (req) => {
         table_name: 'sops',
         new_data: { results, synced_at: new Date().toISOString() },
       });
+
+      // Surface misplacements as their own audit_log rows so admins can see/fix them.
+      if (misplacementWarnings.length > 0) {
+        await supabase.from('audit_logs').insert({
+          user_id: user.id,
+          action: 'drive_sync_misplacement_warning',
+          table_name: 'sops',
+          new_data: {
+            org_id: orgUser.org_id,
+            warnings: misplacementWarnings,
+            detected_at: new Date().toISOString(),
+          },
+        });
+      }
     }
 
     return new Response(JSON.stringify({
       success: true,
       dry_run,
       results,
+      misplacement_warnings: misplacementWarnings,
       synced_at: new Date().toISOString(),
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error: unknown) {
     console.error('Error in drive-sync:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
