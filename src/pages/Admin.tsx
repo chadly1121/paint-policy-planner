@@ -419,7 +419,7 @@ const Admin = () => {
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8 max-w-6xl">
+        <TabsList className="grid w-full grid-cols-9 max-w-6xl">
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Analytics</span>
