@@ -206,9 +206,9 @@ const QuizModal = ({
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-green-600 mb-2">Perfect Score!</h3>
+                  <h3 className="text-2xl font-bold text-green-600 mb-2">You Passed!</h3>
                   <p className="text-muted-foreground">
-                    You answered all {lastAttempt.total} questions correctly!
+                    You got {lastAttempt.score} out of {lastAttempt.total} correct.
                   </p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
