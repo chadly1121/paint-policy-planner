@@ -377,6 +377,27 @@ const IncidentReports = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {(report.severity === "severe" || report.severity === "critical") &&
+                    report.injuries_reported &&
+                    (org?.jurisdiction ?? "").startsWith("CA") && (
+                      <div className="rounded-md border-2 border-amber-400 bg-amber-50 p-4 text-amber-900">
+                        <p className="font-semibold flex items-start gap-2">
+                          <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                          <span>
+                            This may be a critical injury under Ontario OHSA s.51. The employer must notify the Ministry of Labour by telephone within 48 hours, and in writing within 14 days. Notify the JHSC (if applicable) and union (if any).{" "}
+                            <a
+                              href="https://www.ontario.ca/page/report-workplace-incident"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline font-bold text-amber-900 hover:text-amber-700"
+                            >
+                              → Report at ontario.ca
+                            </a>
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {report.description}
                   </p>
