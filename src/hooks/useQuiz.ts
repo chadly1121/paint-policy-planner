@@ -39,7 +39,8 @@ export const useQuiz = () => {
     sectionContent: string,
     quizType?: "mini" | "final",
     itemKey?: string,
-    forceNew?: boolean
+    forceNew?: boolean,
+    documentVersion?: number
   ) => {
     if (!user) return;
 
@@ -68,6 +69,7 @@ export const useQuiz = () => {
           itemKey,
           targetLanguage: i18n.language || 'en',
           forceNew: forceNew || false,
+          documentVersion: documentVersion ?? 1,
         },
       });
 
@@ -113,7 +115,8 @@ export const useQuiz = () => {
   const submitQuiz = useCallback(async (
     sectionKey: string,
     quizType?: "mini" | "final",
-    itemKey?: string
+    itemKey?: string,
+    documentVersion?: number
   ) => {
     if (!user || questions.length === 0) return null;
 
@@ -127,6 +130,7 @@ export const useQuiz = () => {
           userId: user.id,
           quizType,
           itemKey,
+          documentVersion: documentVersion ?? 1,
           targetLanguage: i18n.language || 'en',
         },
       });
