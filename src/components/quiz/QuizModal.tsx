@@ -233,7 +233,7 @@ const QuizModal = ({
                     You got {lastAttempt.score} out of {lastAttempt.total} correct.
                   </p>
                   <p className="text-muted-foreground mt-1">
-                    You need a perfect score (5/5) to unlock the next section.
+                    You need 80% to pass. Review the material and try again.
                   </p>
                 </div>
                 <div className="space-y-4">
