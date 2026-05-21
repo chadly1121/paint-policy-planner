@@ -371,6 +371,14 @@ Return a JSON object with:
 
     console.log("Document processed successfully:", processedContent.title);
 
+    // Parse H2 sections from the formatted content; fall back to the raw text
+    // if the AI output didn't yield any recognized sections.
+    let parsedSections = parseDocumentSections(processedContent.content);
+    const hasAny = Object.values(parsedSections).some((v) => v !== null);
+    if (!hasAny) {
+      parsedSections = parseDocumentSections(documentText);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -380,6 +388,7 @@ Return a JSON object with:
           summary: processedContent.summary,
           type: detectedType,
           autoDetected: autoDetect && !contentType,
+          parsed_sections: parsedSections,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
