@@ -102,7 +102,7 @@ const IncidentReports = () => {
       if (response.error) throw response.error;
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["incident-reports"] });
       setIsDialogOpen(false);
       resetForm();
@@ -112,7 +112,27 @@ const IncidentReports = () => {
           ? "Report saved and synced to Google Drive. Admins have been notified."
           : "Report saved. Admins have been notified.",
       });
-      
+
+      // Critical injury alert: severe + injuries + CA jurisdiction
+      const isSevere = variables.severity === "severe" || variables.severity === "critical";
+      const isCA = (org?.jurisdiction ?? "").startsWith("CA");
+      if (isSevere && variables.injuries_reported && isCA && user?.id && org?.id) {
+        supabase.functions.invoke("send-notification", {
+          body: {
+            type: "critical_injury_alert",
+            userId: user.id,
+            data: {
+              orgId: org.id,
+              incidentId: data?.incident_id,
+              incidentDate: variables.incident_date,
+              location: variables.location,
+              description: variables.description,
+              injuryDetails: variables.injury_details,
+            },
+          },
+        }).catch((err) => console.error("Failed to dispatch critical_injury_alert:", err));
+      }
+
       if (data.drive_web_view_link) {
         window.open(data.drive_web_view_link, "_blank");
       }
@@ -357,6 +377,27 @@ const IncidentReports = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {(report.severity === "severe" || report.severity === "critical") &&
+                    report.injuries_reported &&
+                    (org?.jurisdiction ?? "").startsWith("CA") && (
+                      <div className="rounded-md border-2 border-amber-400 bg-amber-50 p-4 text-amber-900">
+                        <p className="font-semibold flex items-start gap-2">
+                          <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                          <span>
+                            This may be a critical injury under Ontario OHSA s.51. The employer must notify the Ministry of Labour by telephone within 48 hours, and in writing within 14 days. Notify the JHSC (if applicable) and union (if any).{" "}
+                            <a
+                              href="https://www.ontario.ca/page/report-workplace-incident"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline font-bold text-amber-900 hover:text-amber-700"
+                            >
+                              → Report at ontario.ca
+                            </a>
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {report.description}
                   </p>

@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  type: "section_completed" | "redemption_processed" | "redemption_requested";
+  type: "section_completed" | "redemption_processed" | "redemption_requested" | "critical_injury_alert";
   userId: string;
   data: {
     sectionKey?: string;
@@ -17,6 +17,12 @@ interface NotificationRequest {
     status?: string;
     pointsRequested?: number;
     adminNotes?: string;
+    orgId?: string;
+    incidentId?: string;
+    incidentDate?: string;
+    location?: string;
+    description?: string;
+    injuryDetails?: string;
   };
 }
 
@@ -256,6 +262,69 @@ serve(async (req: Request): Promise<Response> => {
           </div>
         `;
         break;
+
+      case "critical_injury_alert": {
+        // Notify all admins of the reporter's org about a potential critical injury.
+        subject = `🚨 CRITICAL INJURY ALERT — Immediate action required`;
+        const reportUrl = "https://www.ontario.ca/page/report-workplace-incident";
+        const adminHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background:#fef3c7; border:2px solid #f59e0b; padding:16px; border-radius:8px;">
+              <h1 style="color:#b45309; margin:0 0 8px 0;">⚠ Possible Critical Injury Reported</h1>
+              <p style="margin:0;">A severe incident with injuries has just been filed. Under Ontario OHSA s.51, the employer must notify the Ministry of Labour by telephone within 48 hours and in writing within 14 days. Notify the JHSC (if applicable) and union (if any).</p>
+            </div>
+            <h2 style="color:#111827; margin-top:24px;">Incident Details</h2>
+            <ul style="line-height:1.8;">
+              <li><strong>Reported by:</strong> ${profile.full_name} (${profile.email})</li>
+              <li><strong>Date:</strong> ${data.incidentDate ?? "—"}</li>
+              <li><strong>Location:</strong> ${data.location ?? "—"}</li>
+              <li><strong>Description:</strong> ${data.description ?? "—"}</li>
+              ${data.injuryDetails ? `<li><strong>Injury Details:</strong> ${data.injuryDetails}</li>` : ""}
+            </ul>
+            <p style="margin-top:24px;">
+              <a href="${reportUrl}" style="background:#dc2626;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:bold;">Report to Ministry of Labour →</a>
+            </p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+            <p style="color: #6b7280; font-size: 12px;">SOPed Pro provides operational guidance only. Confirm reporting obligations with your legal/HR advisor.</p>
+          </div>
+        `;
+
+        try {
+          if (!data.orgId) throw new Error("orgId required for critical_injury_alert");
+          const { data: admins, error: adminsErr } = await supabase
+            .from("org_users")
+            .select("user_id")
+            .eq("org_id", data.orgId)
+            .eq("role", "admin")
+            .eq("is_active", true);
+
+          if (adminsErr) throw adminsErr;
+
+          const adminIds = (admins ?? []).map((a) => a.user_id);
+          if (adminIds.length > 0) {
+            const { data: adminProfiles } = await supabase
+              .from("profiles")
+              .select("email, full_name")
+              .in("user_id", adminIds);
+
+            for (const admin of adminProfiles ?? []) {
+              try {
+                await sendEmail(admin.email, subject, adminHtml);
+                console.log(`Critical injury alert sent to ${admin.email}`);
+              } catch (err) {
+                console.error(`Failed to send critical injury alert to ${admin.email}:`, err);
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error dispatching critical_injury_alert:", err);
+        }
+
+        return new Response(JSON.stringify({ success: true, type: "critical_injury_alert" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
 
       default:
         throw new Error(`Unknown notification type: ${type}`);
