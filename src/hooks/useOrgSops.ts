@@ -167,11 +167,25 @@ export const useOrgSops = () => {
     if (!sop) return { error: new Error("SOP not found") };
 
     try {
+      // Snapshot the user's most recent passing quiz score/total for this SOP, if any.
+      const sectionKey = (sop as any).system_key || sopId;
+      const { data: quiz } = await supabase
+        .from("quiz_attempts")
+        .select("score, total_questions")
+        .eq("user_id", user.id)
+        .eq("section_key", sectionKey)
+        .eq("passed", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
       const { error } = await supabase.from("sop_acks").insert({
         sop_id: sopId,
         user_id: user.id,
         ack_epoch: sop.ack_epoch,
         org_user_id: orgUser?.id || null,
+        quiz_score: quiz?.score ?? null,
+        quiz_total: quiz?.total_questions ?? null,
         user_agent: navigator.userAgent,
       });
 

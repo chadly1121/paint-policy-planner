@@ -107,7 +107,7 @@ export const useSOPAssignments = () => {
       // Snapshot the user's most recent passing quiz score for this section, if any.
       const { data: quiz } = await supabase
         .from("quiz_attempts")
-        .select("score")
+        .select("score, total_questions")
         .eq("user_id", user.id)
         .eq("section_key", sopKey)
         .eq("passed", true)
@@ -136,6 +136,7 @@ export const useSOPAssignments = () => {
           document_version: (sop as any).version ?? sop.ack_epoch,
           org_id: resolvedOrgId,
           quiz_score: quiz?.score ?? null,
+          quiz_total: quiz?.total_questions ?? null,
           user_agent: navigator.userAgent,
         })
         .select("id, user_id, sop_id, ack_epoch, quiz_score, acknowledged_at")

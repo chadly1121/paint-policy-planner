@@ -1463,6 +1463,7 @@ export type Database = {
           org_id: string | null
           org_user_id: string | null
           quiz_score: number | null
+          quiz_total: number | null
           sop_id: string
           user_agent: string | null
           user_id: string
@@ -1476,6 +1477,7 @@ export type Database = {
           org_id?: string | null
           org_user_id?: string | null
           quiz_score?: number | null
+          quiz_total?: number | null
           sop_id: string
           user_agent?: string | null
           user_id: string
@@ -1489,6 +1491,7 @@ export type Database = {
           org_id?: string | null
           org_user_id?: string | null
           quiz_score?: number | null
+          quiz_total?: number | null
           sop_id?: string
           user_agent?: string | null
           user_id?: string
