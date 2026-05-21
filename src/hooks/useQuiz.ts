@@ -69,6 +69,7 @@ export const useQuiz = () => {
           itemKey,
           targetLanguage: i18n.language || 'en',
           forceNew: forceNew || false,
+          documentVersion: documentVersion ?? 1,
         },
       });
 
