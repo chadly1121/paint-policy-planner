@@ -166,22 +166,25 @@ export const useQuiz = () => {
           }).catch(console.error);
         }
 
+        const thresholdPct = Math.round((typeof data.threshold === "number" ? data.threshold : 0.8) * 100);
+
         toast({
           title: "Congratulations! 🎉",
           description: data.pointsEarned > 0
-            ? `You passed with ${data.score}/${data.total}! You earned ${data.pointsEarned} points.`
-            : `You passed with ${data.score}/${data.total}! (Already completed)`,
+            ? `Passed with ${data.score}/${data.total} — nice work! You earned ${data.pointsEarned} points.`
+            : `Passed with ${data.score}/${data.total} — nice work! (Already completed)`,
         });
       } else {
         const wrongIds: string[] = Array.isArray(data.wrongQuestionIds)
           ? data.wrongQuestionIds
           : [];
         setPreviousWrongCount(wrongIds.length || (data.total - data.score));
+        const thresholdPct = Math.round((typeof data.threshold === "number" ? data.threshold : 0.8) * 100);
 
         toast({
           variant: "destructive",
           title: "Not quite!",
-          description: `You got ${data.score}/${data.total}. You need 80% to pass. Try again!`,
+          description: `You got ${data.score}/${data.total}. You need ${thresholdPct}% to pass — review the doc and try again.`,
         });
       }
 
