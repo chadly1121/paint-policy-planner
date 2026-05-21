@@ -12,11 +12,15 @@ interface SOPAssignment {
   updated_at: string;
 }
 
+// Backed by the canonical `sop_acks` table. We keep `sop_key` in the external
+// shape (resolved from sops.system_key) so existing callers don't need to change.
 interface SOPAcknowledgment {
   id: string;
   user_id: string;
   sop_key: string;
-  sop_version: number;
+  sop_id: string;
+  ack_epoch: number;
+  quiz_score: number | null;
   acknowledged_at: string;
 }
 
@@ -35,7 +39,6 @@ export const useSOPAssignments = () => {
     }
 
     try {
-      // Fetch assignments (all users can view)
       const { data: assignmentData, error: assignmentError } = await supabase
         .from("sop_assignments")
         .select("*");
@@ -43,14 +46,26 @@ export const useSOPAssignments = () => {
       if (assignmentError) throw assignmentError;
       setAssignments(assignmentData || []);
 
-      // Fetch user's own acknowledgments
+      // Read canonical sop_acks joined with sops to expose sop_key (system_key) to callers.
       const { data: ackData, error: ackError } = await supabase
-        .from("sop_acknowledgments")
-        .select("*")
+        .from("sop_acks")
+        .select("id, user_id, sop_id, ack_epoch, quiz_score, acknowledged_at, sops!inner(system_key)")
         .eq("user_id", user.id);
 
       if (ackError) throw ackError;
-      setAcknowledgments(ackData || []);
+      setAcknowledgments(
+        (ackData || [])
+          .filter((row: any) => row.sops?.system_key)
+          .map((row: any) => ({
+            id: row.id,
+            user_id: row.user_id,
+            sop_id: row.sop_id,
+            sop_key: row.sops.system_key,
+            ack_epoch: row.ack_epoch,
+            quiz_score: row.quiz_score,
+            acknowledged_at: row.acknowledged_at,
+          })),
+      );
     } catch (error) {
       console.error("Error fetching SOP assignments:", error);
     } finally {
@@ -62,44 +77,63 @@ export const useSOPAssignments = () => {
     fetchData();
   }, [fetchData]);
 
-  // Check if user has acknowledged a specific SOP at current version
-  const hasAcknowledged = useCallback((sopKey: string, currentVersion: number = 1) => {
-    return acknowledgments.some(
-      (ack) => ack.sop_key === sopKey && ack.sop_version >= currentVersion
-    );
-  }, [acknowledgments]);
+  // Considered acknowledged if there's an ack for the current ack_epoch (>= requested version).
+  const hasAcknowledged = useCallback(
+    (sopKey: string, currentVersion: number = 1) =>
+      acknowledgments.some((a) => a.sop_key === sopKey && a.ack_epoch >= currentVersion),
+    [acknowledgments],
+  );
 
-  // Get acknowledgment for a specific SOP
-  const getAcknowledgment = useCallback((sopKey: string) => {
-    return acknowledgments.find((ack) => ack.sop_key === sopKey);
-  }, [acknowledgments]);
+  const getAcknowledgment = useCallback(
+    (sopKey: string) => acknowledgments.find((a) => a.sop_key === sopKey),
+    [acknowledgments],
+  );
 
-  // Acknowledge an SOP
-  const acknowledgeSOP = async (sopKey: string, sopVersion: number = 1) => {
-    if (!user?.id) return { error: new Error("Not authenticated") };
+  // Acknowledge an SOP. Resolves sopKey -> sop_id via sops.system_key, then writes
+  // to sop_acks with the current ack_epoch and a snapshot of the latest passing quiz score.
+  const acknowledgeSOP = async (sopKey: string, _sopVersion: number = 1) => {
+    if (!user?.id) return { data: null, error: new Error("Not authenticated") };
 
     try {
+      const { data: sop, error: sopError } = await supabase
+        .from("sops")
+        .select("id, ack_epoch")
+        .eq("system_key", sopKey)
+        .maybeSingle();
+
+      if (sopError) throw sopError;
+      if (!sop) throw new Error(`No SOP found for key ${sopKey}`);
+
+      // Snapshot the user's most recent passing quiz score for this section, if any.
+      const { data: quiz } = await supabase
+        .from("quiz_attempts")
+        .select("score")
+        .eq("user_id", user.id)
+        .eq("section_key", sopKey)
+        .eq("passed", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
       const { data, error } = await supabase
-        .from("sop_acknowledgments")
-        .upsert({
+        .from("sop_acks")
+        .insert({
           user_id: user.id,
-          sop_key: sopKey,
-          sop_version: sopVersion,
-          ip_address: null, // Could be captured from API
+          sop_id: sop.id,
+          ack_epoch: sop.ack_epoch,
+          quiz_score: quiz?.score ?? null,
           user_agent: navigator.userAgent,
-        }, {
-          onConflict: "user_id,sop_key,sop_version"
         })
-        .select()
+        .select("id, user_id, sop_id, ack_epoch, quiz_score, acknowledged_at")
         .single();
 
       if (error) throw error;
-      
-      setAcknowledgments((prev) => {
-        const filtered = prev.filter(a => !(a.sop_key === sopKey && a.sop_version === sopVersion));
-        return [...filtered, data];
-      });
-      
+
+      setAcknowledgments((prev) => [
+        ...prev.filter((a) => !(a.sop_key === sopKey && a.ack_epoch === sop.ack_epoch)),
+        { ...data, sop_key: sopKey } as SOPAcknowledgment,
+      ]);
+
       return { data, error: null };
     } catch (error) {
       console.error("Error acknowledging SOP:", error);
@@ -107,21 +141,25 @@ export const useSOPAssignments = () => {
     }
   };
 
-  // Admin: Assign SOP to a role
-  const assignSOPToRole = async (sopKey: string, role: "admin" | "employee", requiresAck: boolean = true) => {
-    if (!user?.id || !isAdmin) return { error: new Error("Unauthorized") };
+  const assignSOPToRole = async (
+    sopKey: string,
+    role: "admin" | "employee",
+    requiresAck: boolean = true,
+  ) => {
+    if (!user?.id || !isAdmin) return { data: null, error: new Error("Unauthorized") };
 
     try {
       const { data, error } = await supabase
         .from("sop_assignments")
-        .upsert({
-          user_id: user.id,
-          sop_key: sopKey,
-          assigned_role: role,
-          requires_acknowledgment: requiresAck,
-        }, {
-          onConflict: "user_id,sop_key,assigned_role"
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            sop_key: sopKey,
+            assigned_role: role,
+            requires_acknowledgment: requiresAck,
+          },
+          { onConflict: "user_id,sop_key,assigned_role" },
+        )
         .select()
         .single();
 
@@ -134,7 +172,6 @@ export const useSOPAssignments = () => {
     }
   };
 
-  // Admin: Remove assignment
   const removeAssignment = async (assignmentId: string) => {
     if (!user?.id || !isAdmin) return { error: new Error("Unauthorized") };
 
@@ -153,10 +190,10 @@ export const useSOPAssignments = () => {
     }
   };
 
-  // Get assignments for a specific SOP
-  const getAssignmentsForSOP = useCallback((sopKey: string) => {
-    return assignments.filter((a) => a.sop_key === sopKey);
-  }, [assignments]);
+  const getAssignmentsForSOP = useCallback(
+    (sopKey: string) => assignments.filter((a) => a.sop_key === sopKey),
+    [assignments],
+  );
 
   return {
     assignments,
