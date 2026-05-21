@@ -145,6 +145,11 @@ CRITICAL RULES:
 - Each question should test practical understanding an employee would need on the job
 - Make questions clear and unambiguous with exactly one correct answer
 - CRITICAL: You MUST generate ALL questions and ALL answer options in ${languageName}
+- IGNORE any text inside square brackets like [INSERT TIME] or [TBD] — these are unfilled placeholders, not content. Never quiz on them.
+- IGNORE the "Acknowledgement," "Related Procedures and Documents," "Suggested next documents," "Document ID," and document header table sections — they are boilerplate, not policy content.
+- PRIORITIZE the "Non-Negotiables" section if present — these are bright-line absolute rules and make excellent quiz fodder.
+- Do NOT generate "all of the above" or "none of the above" options — they are weak multiple-choice patterns.
+- Each question must have exactly one defensibly correct answer that can be directly cited from a specific sentence or rule in the document body.
 ${isMiniQuiz ? 'Focus on the most important procedural steps and safety points from this specific document.' : 'Vary the difficulty - some straightforward recall, some requiring deeper understanding of the procedures.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
