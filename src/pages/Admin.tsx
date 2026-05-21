@@ -55,6 +55,7 @@ import { AISettingsCard } from "@/components/admin/AISettingsCard";
 import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { SubscriptionCard } from "@/components/admin/SubscriptionCard";
 import { InvoiceHistory } from "@/components/admin/InvoiceHistory";
+import { BrokenReferencesCard } from "@/components/admin/BrokenReferencesCard";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
 const employeeSchema = z.object({
