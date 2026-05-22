@@ -365,6 +365,11 @@ export function DriveDocumentCard({
               </div>
             )}
             
+            {/* Non-Negotiables callout — bright-line rules surfaced above the body */}
+            {!loadingContent && content && nonNegotiables.length > 0 && (
+              <NonNegotiablesCallout items={nonNegotiables} />
+            )}
+
             {/* Content */}
             {!loadingContent && content && (
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
