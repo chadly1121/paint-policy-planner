@@ -50,6 +50,7 @@ import { languages } from "@/components/LanguageSelector";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
 import RedemptionItemsManager from "@/components/admin/RedemptionItemsManager";
+import { RunAwardsCheckCard } from "@/components/admin/RunAwardsCheckCard";
 
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
 import { AISettingsCard } from "@/components/admin/AISettingsCard";
