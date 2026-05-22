@@ -133,11 +133,18 @@ export function BrokenReferencesCard() {
                     <Badge variant="destructive" className="font-mono">{row.ref}</Badge>
                   </TableCell>
                   <TableCell>
-                    <ul className="space-y-1 text-sm">
+                    <ul className="space-y-2 text-sm">
                       {row.sources.map((s, i) => (
                         <li key={i} className="text-muted-foreground">
-                          <span className="text-foreground">{s.title}</span>{" "}
-                          <span className="text-xs">({s.table})</span>
+                          <div>
+                            <span className="text-foreground font-medium">{s.title}</span>{" "}
+                            <span className="text-xs">({s.table})</span>
+                          </div>
+                          {s.sentence && (
+                            <div className="text-xs italic mt-0.5 pl-2 border-l-2 border-border">
+                              …{s.sentence}…
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
