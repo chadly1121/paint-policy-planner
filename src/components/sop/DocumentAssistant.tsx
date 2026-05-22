@@ -266,7 +266,7 @@ export function DocumentAssistant({ suggestions = [] }: DocumentAssistantProps =
               >
                 {message.role === "assistant" ? (
                   <div className="prose prose-xs dark:prose-invert max-w-none break-words overflow-hidden text-xs [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
-                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                    <ReactMarkdown components={markdownComponents}>{message.content}</ReactMarkdown>
                   </div>
                 ) : (
                   <p>{message.content}</p>
