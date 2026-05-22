@@ -25,6 +25,26 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import i18n from "@/i18n";
 import ReactMarkdown from "react-markdown";
+import { DocReferenceText } from "@/components/docref/DocReferenceText";
+
+// Walk markdown children and linkify any plain-string nodes so doc refs
+// like "ROP-POL-003" become clickable Links with tooltips.
+const linkifyChildren = (children: React.ReactNode): React.ReactNode => {
+  if (typeof children === "string") return <DocReferenceText text={children} />;
+  if (Array.isArray(children)) {
+    return children.map((c, i) =>
+      typeof c === "string" ? <DocReferenceText key={i} text={c} /> : c
+    );
+  }
+  return children;
+};
+
+const markdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => <p>{linkifyChildren(children)}</p>,
+  li: ({ children }: { children?: React.ReactNode }) => <li>{linkifyChildren(children)}</li>,
+  strong: ({ children }: { children?: React.ReactNode }) => <strong>{linkifyChildren(children)}</strong>,
+  em: ({ children }: { children?: React.ReactNode }) => <em>{linkifyChildren(children)}</em>,
+};
 
 interface Message {
   role: "user" | "assistant";
