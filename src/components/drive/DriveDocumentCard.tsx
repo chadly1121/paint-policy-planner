@@ -208,7 +208,29 @@ export function DriveDocumentCard({
     // Strip "Related Procedures and Documents" / "Suggested next documents" sections —
     // those are surfaced via the RelatedDocumentsPanel instead.
     const { bodyLines } = extractRelationships(text);
-    return bodyLines.map((line, idx) => {
+
+    // Also strip the "Non-Negotiables" H2 section when we're showing the dedicated
+    // callout above the body (avoids duplicate rendering).
+    const filtered: string[] = [];
+    let skippingNonNeg = false;
+    const stripNonNeg = nonNegotiables.length > 0;
+    for (const line of bodyLines) {
+      const h2 = line.match(/^\s*##\s+(.+?)\s*$/);
+      if (h2) {
+        const heading = h2[1].replace(/[:*_]/g, "").trim().toLowerCase();
+        if (stripNonNeg && (heading === "non-negotiables" || heading === "non negotiables")) {
+          skippingNonNeg = true;
+          continue;
+        }
+        skippingNonNeg = false;
+        filtered.push(line);
+        continue;
+      }
+      if (skippingNonNeg) continue;
+      filtered.push(line);
+    }
+
+    return filtered.map((line, idx) => {
       const trimmed = line.trim();
       if (!trimmed) return <br key={idx} />;
       if (trimmed.startsWith('## ')) {
