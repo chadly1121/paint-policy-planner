@@ -33,6 +33,8 @@ import { RelatedDocumentsPanel } from "@/components/docref/RelatedDocumentsPanel
 import { extractRelationships, docIdFromFilename } from "@/lib/documentRelationships";
 import { useSyncAutoRelationships } from "@/hooks/useDocumentRelationships";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useDriveParsedSections } from "@/hooks/useDriveParsedSections";
+import { NonNegotiablesCallout } from "./NonNegotiablesCallout";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
@@ -75,6 +77,10 @@ export function DriveDocumentCard({
   const selfDocId = docIdFromFilename(file.name);
   const { org } = useOrganization();
   const syncAuto = useSyncAutoRelationships();
+  const { data: parsedSections } = useDriveParsedSections(file.id, moduleType, selfDocId);
+  const nonNegotiables = Array.isArray(parsedSections?.non_negotiables)
+    ? parsedSections!.non_negotiables!.filter((s) => typeof s === "string" && s.trim().length > 0)
+    : [];
 
   // Module prefix for numbering
   const prefixMap = {
@@ -202,7 +208,29 @@ export function DriveDocumentCard({
     // Strip "Related Procedures and Documents" / "Suggested next documents" sections —
     // those are surfaced via the RelatedDocumentsPanel instead.
     const { bodyLines } = extractRelationships(text);
-    return bodyLines.map((line, idx) => {
+
+    // Also strip the "Non-Negotiables" H2 section when we're showing the dedicated
+    // callout above the body (avoids duplicate rendering).
+    const filtered: string[] = [];
+    let skippingNonNeg = false;
+    const stripNonNeg = nonNegotiables.length > 0;
+    for (const line of bodyLines) {
+      const h2 = line.match(/^\s*##\s+(.+?)\s*$/);
+      if (h2) {
+        const heading = h2[1].replace(/[:*_]/g, "").trim().toLowerCase();
+        if (stripNonNeg && (heading === "non-negotiables" || heading === "non negotiables")) {
+          skippingNonNeg = true;
+          continue;
+        }
+        skippingNonNeg = false;
+        filtered.push(line);
+        continue;
+      }
+      if (skippingNonNeg) continue;
+      filtered.push(line);
+    }
+
+    return filtered.map((line, idx) => {
       const trimmed = line.trim();
       if (!trimmed) return <br key={idx} />;
       if (trimmed.startsWith('## ')) {
@@ -337,6 +365,11 @@ export function DriveDocumentCard({
               </div>
             )}
             
+            {/* Non-Negotiables callout — bright-line rules surfaced above the body */}
+            {!loadingContent && content && nonNegotiables.length > 0 && (
+              <NonNegotiablesCallout items={nonNegotiables} />
+            )}
+
             {/* Content */}
             {!loadingContent && content && (
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
