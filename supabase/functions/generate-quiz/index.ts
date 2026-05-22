@@ -204,6 +204,33 @@ CRITICAL RULES:
 ${isMiniQuiz ? 'Focus on the most important procedural steps and safety points from this specific document.' : 'Vary the difficulty - some straightforward recall, some requiring deeper understanding of the procedures.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
+    // Build structured priority blocks from parsed_sections when available
+    const nonNegArr = Array.isArray((parsedSections as any)?.non_negotiables)
+      ? ((parsedSections as any).non_negotiables as unknown[]).filter((x) => typeof x === "string" && x.trim().length > 0) as string[]
+      : [];
+    const hasPriorityNonNeg = nonNegArr.length >= 2;
+    const policyStatement = typeof (parsedSections as any)?.policy_statement === "string"
+      ? (parsedSections as any).policy_statement as string
+      : null;
+    const procSteps = Array.isArray((parsedSections as any)?.procedure_steps)
+      ? ((parsedSections as any).procedure_steps as unknown[]).filter((x) => typeof x === "string" && x.trim().length > 0) as string[]
+      : [];
+
+    const priorityBlock = hasPriorityNonNeg
+      ? `\nPRIORITY CONTENT — draw at least 2 questions from this section if generating 5 or more total questions (these are bright-line, non-negotiable rules):\n${nonNegArr.map((n, i) => `${i + 1}. ${n}`).join("\n")}\n`
+      : "";
+
+    let structuredBody = "";
+    if (policyStatement && policyStatement.trim().length > 0) {
+      structuredBody += `\nPOLICY STATEMENT:\n${policyStatement}\n`;
+    }
+    if (procSteps.length > 0) {
+      structuredBody += `\nPROCEDURE STEPS:\n${procSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n`;
+    }
+
+    // Fall back to raw sectionContent if we have no structured body (some docs predate the parser)
+    const bodyForPrompt = structuredBody.trim().length > 0 ? structuredBody : sectionContent;
+
     const userPrompt = `Generate ${questionCount} multiple choice questions testing employee knowledge of this ${isMiniQuiz ? 'procedure document' : 'training material'}.
 
 IMPORTANT RULES:
@@ -211,9 +238,9 @@ IMPORTANT RULES:
 - Questions must be about the CONTENT and PROCEDURES described, NOT about document metadata
 - Focus on practical knowledge: what employees should DO, AVOID, or UNDERSTAND
 - Do NOT ask about document titles, authors, or formatting
-
+${priorityBlock}
 Document content to create questions from:
-${sectionContent}
+${bodyForPrompt}
 
 For each question, provide:
 1. A clear, practical question about the procedures or policies (in ${languageName})
