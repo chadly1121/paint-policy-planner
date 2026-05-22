@@ -33,6 +33,8 @@ import { RelatedDocumentsPanel } from "@/components/docref/RelatedDocumentsPanel
 import { extractRelationships, docIdFromFilename } from "@/lib/documentRelationships";
 import { useSyncAutoRelationships } from "@/hooks/useDocumentRelationships";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useDriveParsedSections } from "@/hooks/useDriveParsedSections";
+import { NonNegotiablesCallout } from "./NonNegotiablesCallout";
 
 interface DriveDocumentCardProps {
   file: DriveFile;
