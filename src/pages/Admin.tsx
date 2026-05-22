@@ -486,7 +486,8 @@ const Admin = () => {
           <AISettingsCard />
         </TabsContent>
 
-        <TabsContent value="rewards">
+        <TabsContent value="rewards" className="space-y-6">
+          <RunAwardsCheckCard />
           <RedemptionItemsManager />
         </TabsContent>
 
