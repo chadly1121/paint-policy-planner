@@ -16,9 +16,44 @@ const SOURCE_TABLES = [
   { table: "company_disciplinary" as const, label: "Disciplinary" },
 ];
 
+interface BrokenRefSource {
+  table: string;
+  title: string;
+  sentence: string;
+}
+
 interface BrokenRef {
   ref: string;
-  sources: { table: string; title: string }[];
+  sources: BrokenRefSource[];
+}
+
+// Pull the sentence (or short window) around the match so admins can see context.
+function sentenceAround(text: string, index: number, length: number): string {
+  const start = Math.max(0, text.lastIndexOf(".", index - 1) + 1);
+  let end = text.indexOf(".", index + length);
+  if (end === -1) end = Math.min(text.length, index + length + 120);
+  return text.slice(start, end + 1).replace(/\s+/g, " ").trim().slice(0, 240);
+}
+
+// Merge body content + parsed_sections.policy_statement + procedure_steps into one
+// scannable string per row so a ref anywhere in the structured doc is caught.
+function collectScannable(row: {
+  content: string | null;
+  parsed_sections: Record<string, unknown> | null;
+}): string {
+  const parts: string[] = [];
+  if (row.content) parts.push(row.content);
+  const ps = row.parsed_sections as any;
+  if (ps && typeof ps === "object") {
+    if (typeof ps.policy_statement === "string") parts.push(ps.policy_statement);
+    if (Array.isArray(ps.procedure_steps)) {
+      parts.push(ps.procedure_steps.filter((s: unknown) => typeof s === "string").join(". "));
+    }
+    if (Array.isArray(ps.non_negotiables)) {
+      parts.push(ps.non_negotiables.filter((s: unknown) => typeof s === "string").join(". "));
+    }
+  }
+  return parts.join("\n\n");
 }
 
 export function BrokenReferencesCard() {
@@ -34,19 +69,20 @@ export function BrokenReferencesCard() {
         SOURCE_TABLES.map(async ({ table, label }) => {
           const { data: rows } = await supabase
             .from(table)
-            .select("title, content")
-            .not("content", "is", null);
+            .select("title, content, parsed_sections");
           if (!rows) return;
-          for (const row of rows as Array<{ title: string; content: string | null }>) {
-            if (!row.content) continue;
+          for (const row of rows as Array<{ title: string; content: string | null; parsed_sections: Record<string, unknown> | null }>) {
+            const scannable = collectScannable(row);
+            if (!scannable) continue;
             const regex = new RegExp(DOC_REF_REGEX.source, "g");
             let m: RegExpExecArray | null;
-            while ((m = regex.exec(row.content)) !== null) {
+            while ((m = regex.exec(scannable)) !== null) {
               const key = m[0].toUpperCase();
               if (registry!.has(key)) continue;
+              const sentence = sentenceAround(scannable, m.index, m[0].length);
               const existing = broken.get(key) ?? { ref: key, sources: [] };
-              if (!existing.sources.some((s) => s.table === label && s.title === row.title)) {
-                existing.sources.push({ table: label, title: row.title });
+              if (!existing.sources.some((s) => s.table === label && s.title === row.title && s.sentence === sentence)) {
+                existing.sources.push({ table: label, title: row.title, sentence });
               }
               broken.set(key, existing);
             }
