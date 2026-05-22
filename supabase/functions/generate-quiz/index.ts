@@ -88,9 +88,12 @@ serve(async (req) => {
     const userLanguage = targetLanguage || "en";
     const languageName = languageNames[userLanguage] || "English";
     
-    // Look up the latest drive_modified_time for this document across all doc tables
-    // so the cache key naturally rotates when the source doc is edited in Drive.
+    // Look up the latest drive_modified_time + parsed_sections for this document
+    // across all doc tables. The drive_modified_time naturally rotates the cache key
+    // when the source doc is edited in Drive; parsed_sections (when present) gives
+    // us structured anchors so we can steer the prompt to non-negotiables/policy.
     let driveModifiedMillis = 0;
+    let parsedSections: Record<string, unknown> | null = null;
     if (driveFileId) {
       const docTables = [
         "company_policies",
@@ -99,11 +102,29 @@ serve(async (req) => {
         "company_training",
         "company_disciplinary",
         "company_forms",
-        "sops",
       ];
       for (const tbl of docTables) {
         const { data: row } = await supabase
           .from(tbl)
+          .select("drive_modified_time, parsed_sections")
+          .eq("drive_file_id", driveFileId)
+          .order("drive_modified_time", { ascending: false, nullsFirst: false })
+          .limit(1)
+          .maybeSingle();
+        if (row) {
+          if (row.drive_modified_time) {
+            driveModifiedMillis = new Date(row.drive_modified_time).getTime();
+          }
+          if (row.parsed_sections && typeof row.parsed_sections === "object") {
+            parsedSections = row.parsed_sections as Record<string, unknown>;
+          }
+          if (driveModifiedMillis || parsedSections) break;
+        }
+      }
+      // Fallback: sops table doesn't carry parsed_sections, just modified time.
+      if (!driveModifiedMillis) {
+        const { data: row } = await supabase
+          .from("sops")
           .select("drive_modified_time")
           .eq("drive_file_id", driveFileId)
           .not("drive_modified_time", "is", null)
@@ -112,7 +133,6 @@ serve(async (req) => {
           .maybeSingle();
         if (row?.drive_modified_time) {
           driveModifiedMillis = new Date(row.drive_modified_time).getTime();
-          break;
         }
       }
     }
@@ -184,6 +204,33 @@ CRITICAL RULES:
 ${isMiniQuiz ? 'Focus on the most important procedural steps and safety points from this specific document.' : 'Vary the difficulty - some straightforward recall, some requiring deeper understanding of the procedures.'}
 Do NOT repeat the same question patterns. Make each question unique.`;
 
+    // Build structured priority blocks from parsed_sections when available
+    const nonNegArr = Array.isArray((parsedSections as any)?.non_negotiables)
+      ? ((parsedSections as any).non_negotiables as unknown[]).filter((x) => typeof x === "string" && x.trim().length > 0) as string[]
+      : [];
+    const hasPriorityNonNeg = nonNegArr.length >= 2;
+    const policyStatement = typeof (parsedSections as any)?.policy_statement === "string"
+      ? (parsedSections as any).policy_statement as string
+      : null;
+    const procSteps = Array.isArray((parsedSections as any)?.procedure_steps)
+      ? ((parsedSections as any).procedure_steps as unknown[]).filter((x) => typeof x === "string" && x.trim().length > 0) as string[]
+      : [];
+
+    const priorityBlock = hasPriorityNonNeg
+      ? `\nPRIORITY CONTENT — draw at least 2 questions from this section if generating 5 or more total questions (these are bright-line, non-negotiable rules):\n${nonNegArr.map((n, i) => `${i + 1}. ${n}`).join("\n")}\n`
+      : "";
+
+    let structuredBody = "";
+    if (policyStatement && policyStatement.trim().length > 0) {
+      structuredBody += `\nPOLICY STATEMENT:\n${policyStatement}\n`;
+    }
+    if (procSteps.length > 0) {
+      structuredBody += `\nPROCEDURE STEPS:\n${procSteps.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n`;
+    }
+
+    // Fall back to raw sectionContent if we have no structured body (some docs predate the parser)
+    const bodyForPrompt = structuredBody.trim().length > 0 ? structuredBody : sectionContent;
+
     const userPrompt = `Generate ${questionCount} multiple choice questions testing employee knowledge of this ${isMiniQuiz ? 'procedure document' : 'training material'}.
 
 IMPORTANT RULES:
@@ -191,9 +238,9 @@ IMPORTANT RULES:
 - Questions must be about the CONTENT and PROCEDURES described, NOT about document metadata
 - Focus on practical knowledge: what employees should DO, AVOID, or UNDERSTAND
 - Do NOT ask about document titles, authors, or formatting
-
+${priorityBlock}
 Document content to create questions from:
-${sectionContent}
+${bodyForPrompt}
 
 For each question, provide:
 1. A clear, practical question about the procedures or policies (in ${languageName})

@@ -216,6 +216,42 @@ serve(async (req) => {
     let sopContext = "";
     const citedDocs: { title: string; fileId: string; webViewLink: string }[] = [];
 
+    // Helper: build a structured block from parsed_sections for a given doc title
+    const buildStructuredBlock = (title: string, parsed: Record<string, unknown> | null): string | null => {
+      if (!parsed || typeof parsed !== "object") return null;
+      const parts: string[] = [];
+      const nonNeg = Array.isArray((parsed as any).non_negotiables)
+        ? ((parsed as any).non_negotiables as unknown[]).filter((x) => typeof x === "string" && (x as string).trim().length > 0) as string[]
+        : [];
+      if (nonNeg.length > 0) {
+        parts.push(`Non-Negotiables: ${nonNeg.join("; ")}.`);
+      }
+      const policy = typeof (parsed as any).policy_statement === "string" ? (parsed as any).policy_statement as string : null;
+      if (policy && policy.trim()) parts.push(`Policy Statement: ${policy.trim()}.`);
+      const purpose = typeof (parsed as any).purpose === "string" ? (parsed as any).purpose as string : null;
+      if (purpose && purpose.trim()) parts.push(`Purpose: ${purpose.trim()}.`);
+      const scope = typeof (parsed as any).scope === "string" ? (parsed as any).scope as string : null;
+      if (scope && scope.trim()) parts.push(`Scope: ${scope.trim()}.`);
+      const steps = Array.isArray((parsed as any).procedure_steps)
+        ? ((parsed as any).procedure_steps as unknown[]).filter((x) => typeof x === "string" && (x as string).trim().length > 0) as string[]
+        : [];
+      if (steps.length > 0) {
+        parts.push(`Procedure Steps: ${steps.map((s, i) => `(${i + 1}) ${s}`).join(" ")}.`);
+      }
+      const resp = Array.isArray((parsed as any).responsibilities) ? (parsed as any).responsibilities as any[] : [];
+      if (resp.length > 0) {
+        const respText = resp
+          .map((r) => r && typeof r === "object" ? `${r.role}: ${r.duties}` : null)
+          .filter(Boolean)
+          .join("; ");
+        if (respText) parts.push(`Responsibilities: ${respText}.`);
+      }
+      const cons = typeof (parsed as any).consequences === "string" ? (parsed as any).consequences as string : null;
+      if (cons && cons.trim()) parts.push(`Consequences: ${cons.trim()}.`);
+      if (parts.length === 0) return null;
+      return `\n\n--- Document: ${title} ---\nFrom ${title}, ${parts.join(" ")}`;
+    };
+
     if (driveToken) {
       // Get list of SOPs
       const { data: sops } = await supabase
@@ -228,18 +264,53 @@ serve(async (req) => {
 
       if (sops && sops.length > 0) {
         const accessToken = await refreshDriveToken(driveToken.refresh_token_encrypted, encryptionKey);
-        
+
         if (accessToken) {
-          // Fetch content from each SOP (limit to prevent token overflow)
+          const docTables = [
+            "company_sops",
+            "company_policies",
+            "company_safety",
+            "company_training",
+            "company_disciplinary",
+            "company_forms",
+          ];
+
           for (const sop of sops.slice(0, 10)) {
-            const content = await fetchDriveContent(sop.drive_file_id!, accessToken);
-            if (content) {
-              sopContext += `\n\n--- Document: ${sop.title} ---\n${content.slice(0, 3000)}`;
+            // Try to find parsed_sections by drive_file_id across company_* tables
+            let parsed: Record<string, unknown> | null = null;
+            for (const tbl of docTables) {
+              const { data: row } = await supabase
+                .from(tbl)
+                .select("parsed_sections")
+                .eq("drive_file_id", sop.drive_file_id!)
+                .not("parsed_sections", "is", null)
+                .limit(1)
+                .maybeSingle();
+              if (row?.parsed_sections && typeof row.parsed_sections === "object") {
+                parsed = row.parsed_sections as Record<string, unknown>;
+                break;
+              }
+            }
+
+            const structured = buildStructuredBlock(sop.title, parsed);
+            if (structured) {
+              sopContext += structured;
               citedDocs.push({
                 title: sop.title,
                 fileId: sop.drive_file_id!,
                 webViewLink: `https://docs.google.com/document/d/${sop.drive_file_id}/edit`,
               });
+            } else {
+              // Fall back to raw Drive content
+              const content = await fetchDriveContent(sop.drive_file_id!, accessToken);
+              if (content) {
+                sopContext += `\n\n--- Document: ${sop.title} ---\n${content.slice(0, 3000)}`;
+                citedDocs.push({
+                  title: sop.title,
+                  fileId: sop.drive_file_id!,
+                  webViewLink: `https://docs.google.com/document/d/${sop.drive_file_id}/edit`,
+                });
+              }
             }
           }
         }
