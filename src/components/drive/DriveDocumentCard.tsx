@@ -77,6 +77,10 @@ export function DriveDocumentCard({
   const selfDocId = docIdFromFilename(file.name);
   const { org } = useOrganization();
   const syncAuto = useSyncAutoRelationships();
+  const { data: parsedSections } = useDriveParsedSections(file.id, moduleType, selfDocId);
+  const nonNegotiables = Array.isArray(parsedSections?.non_negotiables)
+    ? parsedSections!.non_negotiables!.filter((s) => typeof s === "string" && s.trim().length > 0)
+    : [];
 
   // Module prefix for numbering
   const prefixMap = {
