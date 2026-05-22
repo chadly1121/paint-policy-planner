@@ -58,7 +58,25 @@ export function DocReferenceText({ text }: Props) {
         </TooltipProvider>
       );
     } else {
-      parts.push(match[0]);
+      // Unknown reference: render with warning styling so broken refs are
+      // visible instead of silently passing as plain text.
+      parts.push(
+        <TooltipProvider key={`bad-${i++}`} delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="font-mono text-destructive underline decoration-wavy decoration-destructive/70 underline-offset-2 cursor-help"
+                aria-label={`Unresolved document reference ${match[0]}`}
+              >
+                {match[0]}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="text-xs">Unresolved reference — this doc isn't in your library.</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     }
     lastIndex = match.index + match[0].length;
   }
