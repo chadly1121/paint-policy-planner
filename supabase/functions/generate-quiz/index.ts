@@ -88,9 +88,12 @@ serve(async (req) => {
     const userLanguage = targetLanguage || "en";
     const languageName = languageNames[userLanguage] || "English";
     
-    // Look up the latest drive_modified_time for this document across all doc tables
-    // so the cache key naturally rotates when the source doc is edited in Drive.
+    // Look up the latest drive_modified_time + parsed_sections for this document
+    // across all doc tables. The drive_modified_time naturally rotates the cache key
+    // when the source doc is edited in Drive; parsed_sections (when present) gives
+    // us structured anchors so we can steer the prompt to non-negotiables/policy.
     let driveModifiedMillis = 0;
+    let parsedSections: Record<string, unknown> | null = null;
     if (driveFileId) {
       const docTables = [
         "company_policies",
@@ -99,11 +102,29 @@ serve(async (req) => {
         "company_training",
         "company_disciplinary",
         "company_forms",
-        "sops",
       ];
       for (const tbl of docTables) {
         const { data: row } = await supabase
           .from(tbl)
+          .select("drive_modified_time, parsed_sections")
+          .eq("drive_file_id", driveFileId)
+          .order("drive_modified_time", { ascending: false, nullsFirst: false })
+          .limit(1)
+          .maybeSingle();
+        if (row) {
+          if (row.drive_modified_time) {
+            driveModifiedMillis = new Date(row.drive_modified_time).getTime();
+          }
+          if (row.parsed_sections && typeof row.parsed_sections === "object") {
+            parsedSections = row.parsed_sections as Record<string, unknown>;
+          }
+          if (driveModifiedMillis || parsedSections) break;
+        }
+      }
+      // Fallback: sops table doesn't carry parsed_sections, just modified time.
+      if (!driveModifiedMillis) {
+        const { data: row } = await supabase
+          .from("sops")
           .select("drive_modified_time")
           .eq("drive_file_id", driveFileId)
           .not("drive_modified_time", "is", null)
@@ -112,7 +133,6 @@ serve(async (req) => {
           .maybeSingle();
         if (row?.drive_modified_time) {
           driveModifiedMillis = new Date(row.drive_modified_time).getTime();
-          break;
         }
       }
     }
