@@ -366,6 +366,90 @@ serve(async (req: Request): Promise<Response> => {
         `;
         break;
 
+      case "doc_change_alert": {
+        const deadline = data.reackDeadline
+          ? new Date(data.reackDeadline).toLocaleDateString()
+          : "soon";
+        subject = `📄 Document updated — re-acknowledgement required: ${data.docTitle ?? "Document"}`;
+        html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #1d4ed8;">Hi ${profile.full_name},</h1>
+            <p>The document <strong>${data.docTitle ?? "a policy/SOP"}</strong> has been updated.</p>
+            ${data.changeSummary ? `<p><strong>What changed:</strong> ${data.changeSummary}</p>` : `<p>Please review the latest version and complete the new quiz.</p>`}
+            <div style="background:#eff6ff; border:1px solid #1d4ed8; padding:12px 16px; border-radius:8px; margin: 16px 0;">
+              <p style="margin:0;"><strong>Deadline to re-acknowledge:</strong> ${deadline}</p>
+            </div>
+            <p>Open SOPed Pro to read the new version and take the updated quiz.</p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+            <p style="color: #6b7280; font-size: 12px;">SOPed Pro · Per POL-010 §4.4, you have until the deadline above to re-acknowledge updated documents.</p>
+          </div>
+        `;
+        break;
+      }
+
+      case "reack_overdue": {
+        const deadline = data.reackDeadline
+          ? new Date(data.reackDeadline).toLocaleDateString()
+          : "the deadline";
+        if (data.isAdminCopy) {
+          subject = `⚠ Re-acknowledgement overdue: ${data.forEmployeeName ?? "An employee"}`;
+          html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #b91c1c;">Overdue re-acknowledgement</h1>
+              <p><strong>${data.forEmployeeName ?? "An employee"}</strong> has not re-acknowledged <strong>${data.docTitle ?? "an updated document"}</strong> by the deadline (${deadline}).</p>
+              <p>Visit the Admin → Re-acknowledgement Status panel for the full list.</p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+              <p style="color: #6b7280; font-size: 12px;">SOPed Pro automated admin notification.</p>
+            </div>
+          `;
+        } else {
+          subject = `⚠ Overdue: re-acknowledge ${data.docTitle ?? "updated document"}`;
+          html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #b91c1c;">Hi ${profile.full_name},</h1>
+              <p>Your deadline (${deadline}) to re-acknowledge <strong>${data.docTitle ?? "an updated document"}</strong> has passed.</p>
+              <p>Please open SOPed Pro and complete the re-acknowledgement as soon as possible. Your supervisor has been notified.</p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+              <p style="color: #6b7280; font-size: 12px;">SOPed Pro · Per POL-010 §4.4.</p>
+            </div>
+          `;
+        }
+        break;
+      }
+
+      case "monthly_reack_digest": {
+        const items = data.pendingItems ?? [];
+        if (items.length === 0) {
+          return new Response(JSON.stringify({ success: true, skipped: "no_pending" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          });
+        }
+        subject = `📋 Your monthly re-acknowledgement digest (${items.length} pending)`;
+        const rows = items
+          .map(
+            (i) =>
+              `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;">${i.title}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;color:#b91c1c;">${new Date(i.deadline).toLocaleDateString()}</td></tr>`
+          )
+          .join("");
+        html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #1d4ed8;">Hi ${profile.full_name},</h1>
+            <p>You have <strong>${items.length}</strong> document${items.length === 1 ? "" : "s"} pending re-acknowledgement.</p>
+            <table style="width:100%; border-collapse:collapse; margin: 16px 0;">
+              <thead><tr style="background:#f3f4f6;"><th align="left" style="padding:8px;">Document</th><th align="left" style="padding:8px;">Deadline</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <p>Open SOPed Pro to read each updated document and complete the new quiz.</p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+            <p style="color: #6b7280; font-size: 12px;">Monthly digest from SOPed Pro. You're only receiving this because you have open items.</p>
+          </div>
+        `;
+        break;
+      }
+
+
+
       default:
         throw new Error(`Unknown notification type: ${type}`);
     }
