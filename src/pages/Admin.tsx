@@ -498,6 +498,8 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
+          <ReackStatusCard />
+          <OrgReackSettingsCard />
           {/* Create Employee Card */}
           <Card>
             <CardHeader>
