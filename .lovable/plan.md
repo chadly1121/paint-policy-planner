@@ -1,35 +1,79 @@
-## Guided First-Session Onboarding Wizard
+# Doc-Change Re-Acknowledgement Workflow
 
-### Database changes (one migration)
+Wire up the full user-facing workflow for the existing `ack_reset_on_change` infrastructure. POL-010 §4.4: users have 14 days (org-configurable) to re-acknowledge updated docs.
 
-1. `orgs.onboarding_welcome_message text` (nullable) — admin-configurable welcome paragraph.
-2. `profiles.onboarding_completed_at timestamptz` (nullable) — set once all originally-assigned sections have passing quiz attempts.
-3. Trigger on `quiz_attempts` (AFTER INSERT): when a passing attempt is inserted, check if the user has passing attempts for every section assigned to them at signup. If yes and `onboarding_completed_at` is NULL, set it. ("Originally assigned at signup" interpretation: the sections currently assigned to that user via `get_user_assigned_sops` — simplest, and matches reality for new hires whose assignments rarely change before they finish onboarding.)
+## 1. Database (single migration)
 
-### Frontend
+**New table `public.doc_reack_required`:**
+- `id uuid PK default gen_random_uuid()`
+- `org_id uuid NOT NULL` (FK orgs)
+- `org_user_id uuid NOT NULL` (FK org_users)
+- `user_id uuid NOT NULL` (denormalized for query convenience + RLS)
+- `sop_id uuid NOT NULL` (FK sops)
+- `new_ack_epoch int NOT NULL`
+- `previous_ack_epoch int NOT NULL`
+- `detected_at timestamptz NOT NULL DEFAULT now()`
+- `first_notified_at timestamptz`
+- `sent_overdue_at timestamptz`
+- `reack_deadline timestamptz NOT NULL`
+- `completed_at timestamptz`
+- UNIQUE `(org_user_id, sop_id, new_ack_epoch)`
+- RLS: user sees own rows; org admins see org rows; service role manages all
 
-**`src/hooks/useOnboardingStatus.ts`** (new) — returns `{ shouldShow, loading }`:
-- `shouldShow = true` when `profiles.onboarding_completed_at IS NULL` AND `section_progress` has zero rows for the user.
+**New org columns:**
+- `orgs.reack_grace_days int NOT NULL DEFAULT 14`
+- `orgs.auto_block_uncompliant boolean NOT NULL DEFAULT false`
 
-**`src/components/onboarding/OnboardingWizard.tsx`** (new) — full-screen modal with 3 steps:
-1. **Welcome** — org logo, tagline, `onboarding_welcome_message`, Continue button.
-2. **Disclaimer** — reuse existing disclaimer text; checkbox + Accept writes to `disclaimer_acceptances` (skip insert if a row already exists for this user).
-3. **Your sections** — fetches `get_user_assigned_sops`, lists titles with "~5 min read" each, total estimated time, Start button.
-4. On Start: navigate to the first assigned section's reader view (use existing SOP route, e.g. `/sops/:id` — confirm route while implementing).
+**New trigger on `sops`:** AFTER UPDATE where `ack_epoch` increments → for each user with a `sop_acks` row at the previous epoch (and same `org_id` resolvable), insert a `doc_reack_required` row with `reack_deadline = now() + (orgs.reack_grace_days || 14) days`. ON CONFLICT DO NOTHING.
 
-**Wizard gating** — render in `src/pages/Dashboard.tsx` (or the top-level user dashboard) above the normal content when `shouldShow`. Do not block admins.
+**New trigger on `sop_acks`:** AFTER INSERT → if a matching open `doc_reack_required` row exists for `(user_id, sop_id, new_ack_epoch = NEW.ack_epoch)`, set `completed_at = now()`.
 
-**Admin "Restart onboarding"** — in the existing employee management UI (the per-user actions menu in `src/pages/admin/...` or `OrgMembers` view), add a button that:
-- Clears `profiles.onboarding_completed_at` to NULL for that user.
-- Deletes that user's rows from `section_progress` (so the gate trips again).
-- Confirms with a toast.
+## 2. Edge functions
 
-### Admin settings UI
+**`reack-notifier`** (daily 08:00 UTC):
+- Fetch open rows where `completed_at IS NULL`.
+  - If `first_notified_at IS NULL` → invoke `send-notification` with `type: 'doc_change_alert'` (doc title, change_summary if column exists, deadline). Set `first_notified_at = now()`.
+  - Else if `now() > reack_deadline AND sent_overdue_at IS NULL` → notify user (`reack_overdue`) and each org admin. Set `sent_overdue_at = now()`.
+- Returns `{processed, alerts_sent, overdue_sent}`.
 
-In `OrgBrandingCard` (or wherever org tagline lives), add a textarea for `onboarding_welcome_message` (max ~500 chars). Saves to `orgs`.
+**`reack-monthly-digest`** (1st of month 08:00 UTC):
+- Group open rows by `user_id`; skip empty groups; one `monthly_reack_digest` email per user listing all pending sorted by deadline asc.
 
-### Out of scope
+**Cron via `supabase--insert`** (per scheduling guide — not migration).
 
-- No new quiz/grading logic — the trigger just observes `quiz_attempts.passed`.
-- No changes to disclaimer copy or to the section reader.
-- Re-onboarding after a user gains new section assignments: not handled (one-shot per user).
+## 3. `send-notification` additions
+
+Add three cases: `doc_change_alert`, `reack_overdue`, `monthly_reack_digest`. Each branded HTML with deadline and CTA back to dashboard. Extend `NotificationRequest.data` with `docTitle`, `changeSummary`, `reackDeadline`, `pendingItems[]`.
+
+## 4. UI
+
+**`src/components/dashboard/PendingReacksCard.tsx`** (new):
+- Fetches own open rows; if 0, render nothing.
+- Shows count, most-urgent deadline (with overdue badge), button → `/sops?reack=<sop_id>` for the most urgent.
+
+**`src/pages/Index.tsx`:** mount `PendingReacksCard` above the welcome card.
+
+**`src/components/admin/ReackStatusCard.tsx`** (new):
+- Lists users in org with open rows; columns: name, pending count, overdue count, oldest deadline. Sortable.
+
+**`src/pages/Admin.tsx`:** add card to admin tab.
+
+**`src/components/admin/OrgSettingsCard.tsx`** (extend or new section): inputs for `reack_grace_days` and `auto_block_uncompliant`.
+
+## 5. Auto-completion path
+Trigger handles it server-side; no client change needed beyond ensuring `sop_acks` insert uses correct `ack_epoch`.
+
+## 6. Testing
+Note in closing message: bump a sop's `ack_epoch` manually to verify trigger fires; invoke `reack-notifier` manually via admin button (optional, not building now).
+
+## Technical details
+- Trigger uses `org_users.org_id` lookup for each acker.
+- For system SOPs (no org_id on sops), pull org from `org_users` of the acker.
+- All edge functions: `verify_jwt = false`, manual JWT for admin trigger if exposed, but scheduled invocations use service role.
+- Cron scheduled with `supabase--insert` (contains anon key + URL).
+- No changes to `process-document`/`generate-quiz` (already done).
+
+## Out of scope (won't do unless asked)
+- Auto-block enforcement logic in assignment paths (column stored only; wiring later).
+- Localizing email copy.
+- Manual "run reack-notifier now" admin button.

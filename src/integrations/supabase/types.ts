@@ -564,6 +564,76 @@ export type Database = {
         }
         Relationships: []
       }
+      doc_reack_required: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          detected_at: string
+          first_notified_at: string | null
+          id: string
+          new_ack_epoch: number
+          org_id: string
+          org_user_id: string
+          previous_ack_epoch: number
+          reack_deadline: string
+          sent_overdue_at: string | null
+          sop_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          detected_at?: string
+          first_notified_at?: string | null
+          id?: string
+          new_ack_epoch: number
+          org_id: string
+          org_user_id: string
+          previous_ack_epoch: number
+          reack_deadline: string
+          sent_overdue_at?: string | null
+          sop_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          detected_at?: string
+          first_notified_at?: string | null
+          id?: string
+          new_ack_epoch?: number
+          org_id?: string
+          org_user_id?: string
+          previous_ack_epoch?: number
+          reack_deadline?: string
+          sent_overdue_at?: string | null
+          sop_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_reack_required_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_reack_required_org_user_id_fkey"
+            columns: ["org_user_id"]
+            isOneToOne: false
+            referencedRelation: "org_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_reack_required_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_relationships: {
         Row: {
           created_at: string
@@ -1014,30 +1084,36 @@ export type Database = {
       }
       orgs: {
         Row: {
+          auto_block_uncompliant: boolean
           created_at: string
           id: string
           jurisdiction: string
           logo_url: string | null
           name: string
           onboarding_welcome_message: string | null
+          reack_grace_days: number
           tagline: string | null
         }
         Insert: {
+          auto_block_uncompliant?: boolean
           created_at?: string
           id?: string
           jurisdiction?: string
           logo_url?: string | null
           name: string
           onboarding_welcome_message?: string | null
+          reack_grace_days?: number
           tagline?: string | null
         }
         Update: {
+          auto_block_uncompliant?: boolean
           created_at?: string
           id?: string
           jurisdiction?: string
           logo_url?: string | null
           name?: string
           onboarding_welcome_message?: string | null
+          reack_grace_days?: number
           tagline?: string | null
         }
         Relationships: []
