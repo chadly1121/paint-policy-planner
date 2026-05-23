@@ -14,7 +14,10 @@ interface NotificationRequest {
     | "redemption_processed"
     | "redemption_requested"
     | "critical_injury_alert"
-    | "award_granted";
+    | "award_granted"
+    | "doc_change_alert"
+    | "reack_overdue"
+    | "monthly_reack_digest";
   userId: string;
   data: {
     sectionKey?: string;
@@ -31,6 +34,12 @@ interface NotificationRequest {
     awardCode?: string;
     awardTitle?: string;
     awardDescription?: string;
+    docTitle?: string;
+    changeSummary?: string;
+    reackDeadline?: string;
+    forEmployeeName?: string;
+    isAdminCopy?: boolean;
+    pendingItems?: Array<{ title: string; deadline: string }>;
   };
 }
 
