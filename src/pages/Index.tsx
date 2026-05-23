@@ -23,6 +23,9 @@ const Index = () => {
     <div className="space-y-6">
       <OnboardingWizard open={shouldShow} onComplete={dismiss} />
 
+      <PendingReacksCard />
+
+
       {/* Points Display */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <PointsDisplay />
