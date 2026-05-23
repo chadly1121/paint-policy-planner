@@ -7,6 +7,7 @@ import CertificateGenerator from "@/components/gamification/CertificateGenerator
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import AssignedTasks from "@/components/dashboard/AssignedTasks";
 import CertificateReminders from "@/components/dashboard/CertificateReminders";
+import PendingReacksCard from "@/components/dashboard/PendingReacksCard";
 import { useProgress } from "@/hooks/useProgress";
 import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
