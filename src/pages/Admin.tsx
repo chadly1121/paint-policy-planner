@@ -51,6 +51,8 @@ import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import OrgBrandingCard from "@/components/admin/OrgBrandingCard";
 import RedemptionItemsManager from "@/components/admin/RedemptionItemsManager";
 import { RunAwardsCheckCard } from "@/components/admin/RunAwardsCheckCard";
+import ReackStatusCard from "@/components/admin/ReackStatusCard";
+import OrgReackSettingsCard from "@/components/admin/OrgReackSettingsCard";
 
 import { DriveConnectionCard } from "@/components/admin/DriveConnectionCard";
 import { AISettingsCard } from "@/components/admin/AISettingsCard";
@@ -498,6 +500,8 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
+          <ReackStatusCard />
+          <OrgReackSettingsCard />
           {/* Create Employee Card */}
           <Card>
             <CardHeader>

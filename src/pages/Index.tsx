@@ -7,6 +7,7 @@ import CertificateGenerator from "@/components/gamification/CertificateGenerator
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import AssignedTasks from "@/components/dashboard/AssignedTasks";
 import CertificateReminders from "@/components/dashboard/CertificateReminders";
+import PendingReacksCard from "@/components/dashboard/PendingReacksCard";
 import { useProgress } from "@/hooks/useProgress";
 import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
@@ -21,6 +22,9 @@ const Index = () => {
   return (
     <div className="space-y-6">
       <OnboardingWizard open={shouldShow} onComplete={dismiss} />
+
+      <PendingReacksCard />
+
 
       {/* Points Display */}
       <div className="flex flex-wrap items-center justify-between gap-4">

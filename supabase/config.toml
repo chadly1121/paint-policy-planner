@@ -101,3 +101,9 @@ verify_jwt = false
 
 [functions.create-incident-report]
 verify_jwt = false
+
+[functions.reack-notifier]
+verify_jwt = false
+
+[functions.reack-monthly-digest]
+verify_jwt = false
