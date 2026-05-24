@@ -14,7 +14,9 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
-import { Award, Calendar, Building2, ExternalLink, Trash2, AlertTriangle } from "lucide-react";
+import { Award, Calendar, Building2, Trash2, AlertTriangle, Download, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface CertificateCardProps {
   id: string;
@@ -38,6 +40,39 @@ const CertificateCard = ({
   onDelete,
 }: CertificateCardProps) => {
   const [deleting, setDeleting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!certificateUrl) return;
+    setDownloading(true);
+    try {
+      let downloadUrl = certificateUrl;
+      // If URL points at our supabase storage bucket, sign it
+      const match = certificateUrl.match(/\/storage\/v1\/object\/(?:public\/)?employee-files\/(.+?)(\?|$)/);
+      if (match) {
+        const path = decodeURIComponent(match[1]);
+        const { data, error } = await supabase.storage
+          .from("employee-files")
+          .createSignedUrl(path, 300);
+        if (error) throw error;
+        downloadUrl = data.signedUrl;
+      }
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = name;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast.success("Download started");
+    } catch (err) {
+      console.error("Certificate download error:", err);
+      toast.error("Failed to download certificate");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const getExpiryStatus = () => {
     if (!expiryDate) return null;
@@ -108,18 +143,24 @@ const CertificateCard = ({
           </div>
           
           <div className="flex items-center gap-1">
-            {certificateUrl && (
+            {certificateUrl && canEdit && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                asChild
+                onClick={handleDownload}
+                disabled={downloading}
+                title="Download certificate"
               >
-                <a href={certificateUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                </a>
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
               </Button>
             )}
+
+
             
             {canEdit && (
               <AlertDialog>
