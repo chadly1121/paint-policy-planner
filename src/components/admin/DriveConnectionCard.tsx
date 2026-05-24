@@ -42,6 +42,46 @@ export function DriveConnectionCard() {
   const [isCreatingFolders, setIsCreatingFolders] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState<string | null>(null);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+
+  const handleSyncAll = async () => {
+    setIsSyncingAll(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+      const { data, error: fnError } = await supabase.functions.invoke('drive-sync', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {},
+      });
+      if (fnError) throw fnError;
+      const results = (data?.results ?? []) as Array<{
+        module_type: string;
+        files_found: number;
+        records_created: number;
+        records_updated: number;
+        records_marked_removed: number;
+        misplacements: number;
+      }>;
+      const totals = results.reduce(
+        (acc, r) => ({
+          found: acc.found + r.files_found,
+          created: acc.created + r.records_created,
+          updated: acc.updated + r.records_updated,
+          removed: acc.removed + r.records_marked_removed,
+          misplaced: acc.misplaced + r.misplacements,
+        }),
+        { found: 0, created: 0, updated: 0, removed: 0, misplaced: 0 }
+      );
+      toast.success('All folders synced', {
+        description: `${totals.found} files • ${totals.created} new • ${totals.updated} updated • ${totals.removed} removed${totals.misplaced ? ` • ${totals.misplaced} misplaced` : ''}`,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Sync failed';
+      toast.error('Sync failed', { description: message });
+    } finally {
+      setIsSyncingAll(false);
+    }
+  };
 
   const handleConnect = async () => {
     setIsConnecting(true);
