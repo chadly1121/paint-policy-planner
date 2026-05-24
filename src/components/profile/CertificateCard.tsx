@@ -14,7 +14,7 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
-import { Award, Calendar, Building2, ExternalLink, Trash2, AlertTriangle, Download, Loader2 } from "lucide-react";
+import { Award, Calendar, Building2, Trash2, AlertTriangle, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
