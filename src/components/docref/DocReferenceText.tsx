@@ -1,9 +1,9 @@
-// Renders a string, replacing doc-ID references (ROP-POL-006, etc.) with clickable links + tooltips.
-// Unknown references are left as plain text and logged once per render for admin visibility.
+// Renders a string, replacing doc-ID references (ROP-POL-006, etc.) with preview-drawer links + tooltips.
+// Unknown references are left as plain text with a red squiggle and logged once per render for admin visibility.
 import { Fragment, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DOC_REF_REGEX, useDocRegistry } from "@/hooks/useDocRegistry";
+import { DocReferenceLink } from "./DocReferenceLink";
 
 interface Props {
   text: string;
@@ -40,26 +40,8 @@ export function DocReferenceText({ text }: Props) {
     const key = match[0].toUpperCase();
     const entry = registry?.get(key);
     if (entry) {
-      parts.push(
-        <TooltipProvider key={`ref-${i++}`} delayDuration={150}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                to={entry.route}
-                className="font-mono text-primary underline decoration-dotted underline-offset-2 hover:decoration-solid"
-              >
-                {match[0]}
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>
-              <span className="text-xs">{entry.title}</span>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
+      parts.push(<DocReferenceLink key={`ref-${i++}`} entry={entry} label={match[0]} />);
     } else {
-      // Unknown reference: render with warning styling so broken refs are
-      // visible instead of silently passing as plain text.
       parts.push(
         <TooltipProvider key={`bad-${i++}`} delayDuration={150}>
           <Tooltip>
