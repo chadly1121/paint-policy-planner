@@ -308,8 +308,8 @@ export function DriveDocumentCard({
                 </Button>
               )}
               
-              {/* Open in Drive */}
-              {file.webViewLink && (
+              {/* Open in Drive — admin only */}
+              {isAdmin && file.webViewLink && (
                 <Button
                   size="sm"
                   variant="ghost"
