@@ -81,16 +81,6 @@ serve(async (req) => {
 </body>
 </html>`
       );
-`<!DOCTYPE html>
-<html>
-<body>
-<h1>Invalid Request</h1>
-<p>Missing authorization code or state</p>
-<script>window.close();</script>
-</body>
-</html>`,
-        { status: 400, headers: htmlHeaders }
-      );
     }
 
     try {
