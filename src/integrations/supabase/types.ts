@@ -163,6 +163,7 @@ export type Database = {
           id: string
           is_active: boolean
           parsed_sections: Json | null
+          sop_id: string | null
           source_disciplinary_key: string
           title: string
           updated_at: string
@@ -182,6 +183,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_disciplinary_key: string
           title: string
           updated_at?: string
@@ -201,6 +203,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_disciplinary_key?: string
           title?: string
           updated_at?: string
@@ -208,7 +211,15 @@ export type Database = {
           version?: number
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_disciplinary_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_forms: {
         Row: {
@@ -223,6 +234,7 @@ export type Database = {
           id: string
           is_active: boolean
           parsed_sections: Json | null
+          sop_id: string | null
           source_form_key: string
           title: string
           updated_at: string
@@ -242,6 +254,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_form_key: string
           title: string
           updated_at?: string
@@ -261,6 +274,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_form_key?: string
           title?: string
           updated_at?: string
@@ -268,7 +282,15 @@ export type Database = {
           version?: number
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_forms_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_policies: {
         Row: {
@@ -283,6 +305,7 @@ export type Database = {
           id: string
           is_active: boolean
           parsed_sections: Json | null
+          sop_id: string | null
           source_policy_key: string
           title: string
           updated_at: string
@@ -302,6 +325,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_policy_key: string
           title: string
           updated_at?: string
@@ -321,6 +345,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_policy_key?: string
           title?: string
           updated_at?: string
@@ -328,7 +353,15 @@ export type Database = {
           version?: number
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_policies_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_safety: {
         Row: {
@@ -343,6 +376,7 @@ export type Database = {
           id: string
           is_active: boolean
           parsed_sections: Json | null
+          sop_id: string | null
           source_safety_key: string
           title: string
           updated_at: string
@@ -362,6 +396,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_safety_key: string
           title: string
           updated_at?: string
@@ -381,6 +416,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_safety_key?: string
           title?: string
           updated_at?: string
@@ -388,7 +424,15 @@ export type Database = {
           version?: number
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_safety_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_settings: {
         Row: {
@@ -437,6 +481,7 @@ export type Database = {
           id: string
           is_active: boolean
           parsed_sections: Json | null
+          sop_id: string | null
           source_sop_key: string
           title: string
           updated_at: string
@@ -453,6 +498,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_sop_key: string
           title: string
           updated_at?: string
@@ -469,13 +515,22 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_sop_key?: string
           title?: string
           updated_at?: string
           user_id?: string
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_sops_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_training: {
         Row: {
@@ -490,6 +545,7 @@ export type Database = {
           id: string
           is_active: boolean
           parsed_sections: Json | null
+          sop_id: string | null
           source_training_key: string
           title: string
           updated_at: string
@@ -509,6 +565,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_training_key: string
           title: string
           updated_at?: string
@@ -528,6 +585,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           parsed_sections?: Json | null
+          sop_id?: string | null
           source_training_key?: string
           title?: string
           updated_at?: string
@@ -535,7 +593,15 @@ export type Database = {
           version?: number
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_training_sop_id_fkey"
+            columns: ["sop_id"]
+            isOneToOne: false
+            referencedRelation: "sops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       disclaimer_acceptances: {
         Row: {
@@ -1846,6 +1912,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sops_link_backfill_orphans: {
+        Row: {
+          drive_file_id: string | null
+          id: string
+          reason: string
+          recorded_at: string
+          source_row_id: string
+          source_table: string
+          user_id: string | null
+        }
+        Insert: {
+          drive_file_id?: string | null
+          id?: string
+          reason: string
+          recorded_at?: string
+          source_row_id: string
+          source_table: string
+          user_id?: string | null
+        }
+        Update: {
+          drive_file_id?: string | null
+          id?: string
+          reason?: string
+          recorded_at?: string
+          source_row_id?: string
+          source_table?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       user_drive_tokens: {
         Row: {
