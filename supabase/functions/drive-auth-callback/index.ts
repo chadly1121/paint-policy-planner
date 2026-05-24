@@ -54,7 +54,8 @@ serve(async (req) => {
     const stateParam = url.searchParams.get('state');
     const error = url.searchParams.get('error');
 
-    const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
+
+
 
     if (error) {
       console.error('OAuth error:', error);
