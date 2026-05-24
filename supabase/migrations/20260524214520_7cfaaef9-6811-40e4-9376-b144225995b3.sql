@@ -1,0 +1,1 @@
+ALTER TABLE public.orgs ALTER COLUMN jurisdiction SET DEFAULT 'CA-ON';
