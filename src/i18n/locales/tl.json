@@ -25,7 +25,11 @@
     "sections": "Mga Seksyon",
     "sopsCount": "Mga SOP",
     "safetyRules": "Mga Panuntunan sa Kaligtasan",
-    "manualSections": "Mga Seksyon ng Manwal"
+    "manualSections": "Mga Seksyon ng Manwal",
+    "sectionsCompleted": "Mga Seksyong Natapos",
+    "totalPoints": "Kabuuang Puntos",
+    "availablePoints": "Magagamit na Puntos",
+    "progress": "Pag-unlad"
   },
   "sections": {
     "sops": {

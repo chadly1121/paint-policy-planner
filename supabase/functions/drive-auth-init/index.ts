@@ -72,11 +72,21 @@ serve(async (req) => {
       .replace(/\//g, '_')
       .replace(/=+$/, '');
 
+    // Capture the frontend origin so the callback can redirect the popup back to this app
+    const origin = req.headers.get('Origin') || req.headers.get('Referer') || '';
+    let frontendOrigin = '';
+    try {
+      frontendOrigin = origin ? new URL(origin).origin : '';
+    } catch {
+      frontendOrigin = '';
+    }
+
     // Create state with user info (signed/encrypted in production)
     const state = btoa(JSON.stringify({
       user_id: user.id,
       org_id: orgUser.org_id,
       code_verifier: codeVerifier,
+      frontend_origin: frontendOrigin,
       timestamp: Date.now(),
     }));
 

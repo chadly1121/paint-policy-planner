@@ -24,6 +24,7 @@ import ComplianceGuidance from "./pages/ComplianceGuidance";
 import Pricing from "./pages/Pricing";
 import DocumentBuilder from "./pages/DocumentBuilder";
 import IncidentReports from "./pages/IncidentReports";
+import DriveAuthComplete from "./pages/DriveAuthComplete";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/drive-auth-complete" element={<DriveAuthComplete />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/pricing" element={<Pricing />} />
