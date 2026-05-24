@@ -18,6 +18,15 @@ const MODULE_FOLDER_MAP: Record<string, string> = {
   'forms': 'forms',
 };
 
+// Per-category company_* table mapping (for cross-reference registry)
+const COMPANY_TABLE_MAP: Record<string, { table: string; sourceKeyField: string }> = {
+  policies: { table: 'company_policies', sourceKeyField: 'source_policy_key' },
+  sops: { table: 'company_sops', sourceKeyField: 'source_sop_key' },
+  safety: { table: 'company_safety', sourceKeyField: 'source_safety_key' },
+  training: { table: 'company_training', sourceKeyField: 'source_training_key' },
+  disciplinary: { table: 'company_disciplinary', sourceKeyField: 'source_disciplinary_key' },
+};
+
 // Filename prefix (ROP-XXX-NNN) → expected module type
 const PREFIX_TO_MODULE: Record<string, string> = {
   POL: 'policies',
