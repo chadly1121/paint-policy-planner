@@ -58,7 +58,7 @@ serve(async (req) => {
 
     if (error) {
       console.error('OAuth error:', error);
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -66,13 +66,21 @@ serve(async (req) => {
 <p>Error: ${error}</p>
 <script>window.close();</script>
 </body>
-</html>`,
-        { status: 400, headers: htmlHeaders }
+</html>`
       );
     }
 
     if (!code || !stateParam) {
-      return new Response(
+      return htmlRedirect(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Invalid Request</h1>
+<p>Missing authorization code or state</p>
+<script>window.close();</script>
+</body>
+</html>`
+      );
 `<!DOCTYPE html>
 <html>
 <body>
