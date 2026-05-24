@@ -13,7 +13,7 @@ import {
   Send, 
   Loader2, 
   User, 
-  ExternalLink,
+  
   AlertTriangle,
   FileText,
   Settings
@@ -26,6 +26,37 @@ import { Link } from "react-router-dom";
 import i18n from "@/i18n";
 import ReactMarkdown from "react-markdown";
 import { DocReferenceText } from "@/components/docref/DocReferenceText";
+import { DOC_REF_REGEX, useDocRegistry } from "@/hooks/useDocRegistry";
+import { useDocPreview } from "@/contexts/DocPreviewContext";
+
+// Citation badge. If the title contains a ROP-XXX-### code that resolves in the
+// registry, clicking opens the preview drawer; otherwise it renders as plain text
+// (no Drive link, matching the staff-safe permissions policy).
+function CitationBadge({ title, fileId }: { title: string; fileId: string }) {
+  const { data: registry } = useDocRegistry();
+  const { openDoc } = useDocPreview();
+  const match = title.match(DOC_REF_REGEX);
+  const docId = match?.[0]?.toUpperCase();
+  const entry = docId ? registry?.get(docId) : undefined;
+  if (entry) {
+    return (
+      <button
+        type="button"
+        onClick={() => openDoc(entry.doc_id_external)}
+        className="inline-flex"
+      >
+        <Badge variant="secondary" className="text-[10px] py-0 px-1 hover:bg-secondary/80 cursor-pointer">
+          {title}
+        </Badge>
+      </button>
+    );
+  }
+  return (
+    <Badge variant="outline" className="text-[10px] py-0 px-1 text-muted-foreground">
+      {title}
+    </Badge>
+  );
+}
 
 // Walk markdown children and linkify any plain-string nodes so doc refs
 // like "ROP-POL-003" become clickable Links with tooltips.
@@ -279,30 +310,9 @@ export function DocumentAssistant({ suggestions = [] }: DocumentAssistantProps =
                       {t('sopAssistant.referencedDocs', 'References:')}
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {message.citedDocs.map((doc, docIndex) =>
-                        isAdmin ? (
-                          <a
-                            key={docIndex}
-                            href={doc.webViewLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1"
-                          >
-                            <Badge variant="secondary" className="text-[10px] py-0 px-1 hover:bg-secondary/80">
-                              {doc.title}
-                              <ExternalLink className="h-2 w-2 ml-0.5" />
-                            </Badge>
-                          </a>
-                        ) : (
-                          <Badge
-                            key={docIndex}
-                            variant="outline"
-                            className="text-[10px] py-0 px-1 text-muted-foreground"
-                          >
-                            {doc.title}
-                          </Badge>
-                        )
-                      )}
+                      {message.citedDocs.map((doc, docIndex) => (
+                        <CitationBadge key={docIndex} title={doc.title} fileId={doc.fileId} />
+                      ))}
                     </div>
                   </div>
                 )}

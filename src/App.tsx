@@ -26,6 +26,8 @@ import DocumentBuilder from "./pages/DocumentBuilder";
 import IncidentReports from "./pages/IncidentReports";
 import DriveAuthComplete from "./pages/DriveAuthComplete";
 import NotFound from "./pages/NotFound";
+import { DocPreviewProvider } from "@/contexts/DocPreviewContext";
+import { DocPreviewDrawer } from "@/components/docref/DocPreviewDrawer";
 
 const queryClient = new QueryClient();
 
@@ -42,31 +44,34 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/drive-auth-complete" element={<DriveAuthComplete />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/compliance-guidance" element={<ComplianceGuidance />} />
-              <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-              <Route path="/" element={<Index />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:userId" element={<Profile />} />
-              <Route path="/sops" element={<SOPs />} />
-              <Route path="/safety" element={<Safety />} />
-              <Route path="/sds" element={<SDS />} />
-              <Route path="/policies" element={<Policies />} />
-              <Route path="/training" element={<Training />} />
-              <Route path="/disciplinary" element={<Disciplinary />} />
-              <Route path="/forms" element={<Forms />} />
-              <Route path="/builder" element={<DocumentBuilder />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/incidents" element={<IncidentReports />} />
-              <Route path="/admin" element={<Admin />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <DocPreviewProvider>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/drive-auth-complete" element={<DriveAuthComplete />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/compliance-guidance" element={<ComplianceGuidance />} />
+                <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/:userId" element={<Profile />} />
+                  <Route path="/sops" element={<SOPs />} />
+                  <Route path="/safety" element={<Safety />} />
+                  <Route path="/sds" element={<SDS />} />
+                  <Route path="/policies" element={<Policies />} />
+                  <Route path="/training" element={<Training />} />
+                  <Route path="/disciplinary" element={<Disciplinary />} />
+                  <Route path="/forms" element={<Forms />} />
+                  <Route path="/builder" element={<DocumentBuilder />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/incidents" element={<IncidentReports />} />
+                  <Route path="/admin" element={<Admin />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <DocPreviewDrawer />
+            </DocPreviewProvider>
           </BrowserRouter>
         </TooltipProvider>
       </OrganizationProvider>
