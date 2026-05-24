@@ -37,6 +37,14 @@ async function encryptToken(token: string): Promise<string> {
   return btoa(String.fromCharCode(...combined));
 }
 
+function htmlRedirect(html: string): Response {
+  const encoded = encodeURIComponent(html);
+  return new Response(null, {
+    status: 302,
+    headers: { 'Location': `data:text/html;charset=utf-8,${encoded}` },
+  });
+}
+
 serve(async (req) => {
   const url = new URL(req.url);
   
