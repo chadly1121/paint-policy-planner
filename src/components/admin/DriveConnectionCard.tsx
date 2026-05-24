@@ -72,8 +72,9 @@ export function DriveConnectionCard() {
         }),
         { found: 0, created: 0, updated: 0, removed: 0, misplaced: 0 }
       );
-      toast.success('All folders synced', {
-        description: `${totals.found} files • ${totals.created} new • ${totals.updated} updated • ${totals.removed} removed${totals.misplaced ? ` • ${totals.misplaced} misplaced` : ''}`,
+      const categoriesTouched = results.filter((r) => r.files_found > 0).length;
+      toast.success(`Synced ${totals.found} files across ${categoriesTouched} categories`, {
+        description: `${totals.created} new • ${totals.updated} updated • ${totals.removed} removed${totals.misplaced ? ` • ${totals.misplaced} misplaced` : ''}`,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Sync failed';
