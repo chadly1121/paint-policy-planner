@@ -46,35 +46,35 @@ serve(async (req) => {
     const stateParam = url.searchParams.get('state');
     const error = url.searchParams.get('error');
 
+    const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
+
     if (error) {
       console.error('OAuth error:', error);
-      return new Response(`
-        <html>
-          <body>
-            <h1>Authorization Failed</h1>
-            <p>Error: ${error}</p>
-            <script>window.close();</script>
-          </body>
-        </html>
-      `, { 
-        status: 400, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Authorization Failed</h1>
+<p>Error: ${error}</p>
+<script>window.close();</script>
+</body>
+</html>`,
+        { status: 400, headers: htmlHeaders }
+      );
     }
 
     if (!code || !stateParam) {
-      return new Response(`
-        <html>
-          <body>
-            <h1>Invalid Request</h1>
-            <p>Missing authorization code or state</p>
-            <script>window.close();</script>
-          </body>
-        </html>
-      `, { 
-        status: 400, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Invalid Request</h1>
+<p>Missing authorization code or state</p>
+<script>window.close();</script>
+</body>
+</html>`,
+        { status: 400, headers: htmlHeaders }
+      );
     }
 
     try {
