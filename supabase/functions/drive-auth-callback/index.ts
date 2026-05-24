@@ -238,44 +238,42 @@ setTimeout(() => window.close(), 5000);
       console.log('Token stored successfully for user:', user_id, 'primary:', isPrimary);
 
       // Return success HTML that closes the popup
-      return new Response(`
-        <html>
-          <body>
-            <h1>Google Drive Connected!</h1>
-            <p>You can close this window now.</p>
-            <script>
-              if (window.opener) {
-                window.opener.postMessage({ type: 'DRIVE_AUTH_SUCCESS' }, '*');
-              }
-              setTimeout(() => window.close(), 2000);
-            </script>
-          </body>
-        </html>
-      `, { 
-        status: 200, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 2rem; text-align: center;">
+<h1 style="color: #2563eb;">Google Drive Connected!</h1>
+<p>You can close this window now.</p>
+<script>
+if (window.opener) {
+  window.opener.postMessage({ type: 'DRIVE_AUTH_SUCCESS' }, '*');
+}
+setTimeout(() => window.close(), 2000);
+</script>
+</body>
+</html>`,
+        { status: 200, headers: htmlHeaders }
+      );
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Callback error:', error);
-      return new Response(`
-        <html>
-          <body>
-            <h1>Authorization Failed</h1>
-            <p>Error: ${errorMessage}</p>
-            <script>
-              if (window.opener) {
-                window.opener.postMessage({ type: 'DRIVE_AUTH_ERROR', error: '${errorMessage}' }, '*');
-              }
-              setTimeout(() => window.close(), 3000);
-            </script>
-          </body>
-        </html>
-      `, { 
-        status: 400, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Authorization Failed</h1>
+<p>Error: ${errorMessage}</p>
+<script>
+if (window.opener) {
+  window.opener.postMessage({ type: 'DRIVE_AUTH_ERROR', error: '${errorMessage}' }, '*');
+}
+setTimeout(() => window.close(), 3000);
+</script>
+</body>
+</html>`,
+        { status: 400, headers: htmlHeaders }
+      );
     }
   }
 
