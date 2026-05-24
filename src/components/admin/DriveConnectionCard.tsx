@@ -7,17 +7,20 @@ import { Separator } from '@/components/ui/separator';
 import { useDriveConnection } from '@/hooks/useDriveConnection';
 import { DriveTestPanel } from './DriveTestPanel';
 import DriveMigrationPanel from './DriveMigrationPanel';
-import { 
-  Cloud, 
-  CloudOff, 
-  RefreshCw, 
-  FolderPlus, 
-  Link2, 
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  FolderPlus,
+  Link2,
   Unlink,
   CheckCircle,
   AlertCircle,
   Loader2,
-  User
+  User,
+  FolderSync,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -39,6 +42,46 @@ export function DriveConnectionCard() {
   const [isCreatingFolders, setIsCreatingFolders] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState<string | null>(null);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+
+  const handleSyncAll = async () => {
+    setIsSyncingAll(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+      const { data, error: fnError } = await supabase.functions.invoke('drive-sync', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: {},
+      });
+      if (fnError) throw fnError;
+      const results = (data?.results ?? []) as Array<{
+        module_type: string;
+        files_found: number;
+        records_created: number;
+        records_updated: number;
+        records_marked_removed: number;
+        misplacements: number;
+      }>;
+      const totals = results.reduce(
+        (acc, r) => ({
+          found: acc.found + r.files_found,
+          created: acc.created + r.records_created,
+          updated: acc.updated + r.records_updated,
+          removed: acc.removed + r.records_marked_removed,
+          misplaced: acc.misplaced + r.misplacements,
+        }),
+        { found: 0, created: 0, updated: 0, removed: 0, misplaced: 0 }
+      );
+      toast.success('All folders synced', {
+        description: `${totals.found} files • ${totals.created} new • ${totals.updated} updated • ${totals.removed} removed${totals.misplaced ? ` • ${totals.misplaced} misplaced` : ''}`,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Sync failed';
+      toast.error('Sync failed', { description: message });
+    } finally {
+      setIsSyncingAll(false);
+    }
+  };
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -224,19 +267,37 @@ export function DriveConnectionCard() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Drive Folders</h4>
-              <Button 
-                size="sm" 
-                variant={hasFolders ? "outline" : "default"}
-                onClick={handleCreateFolders}
-                disabled={isCreatingFolders}
-              >
-                {isCreatingFolders ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FolderPlus className="h-4 w-4 mr-2" />
+              <div className="flex gap-2">
+                {hasFolders && (
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={handleSyncAll}
+                    disabled={isSyncingAll}
+                    title="Scan all 6 category folders in Drive and ingest every file"
+                  >
+                    {isSyncingAll ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FolderSync className="h-4 w-4 mr-2" />
+                    )}
+                    Sync All Folders
+                  </Button>
                 )}
-                {hasFolders ? "Sync Folders" : "Create Folders"}
-              </Button>
+                <Button
+                  size="sm"
+                  variant={hasFolders ? "outline" : "default"}
+                  onClick={handleCreateFolders}
+                  disabled={isCreatingFolders}
+                >
+                  {isCreatingFolders ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FolderPlus className="h-4 w-4 mr-2" />
+                  )}
+                  {hasFolders ? "Sync Folders" : "Create Folders"}
+                </Button>
+              </div>
             </div>
             
             {hasFolders ? (
