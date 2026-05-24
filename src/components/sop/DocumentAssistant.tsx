@@ -13,7 +13,7 @@ import {
   Send, 
   Loader2, 
   User, 
-  ExternalLink,
+  
   AlertTriangle,
   FileText,
   Settings
