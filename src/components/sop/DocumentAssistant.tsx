@@ -279,30 +279,9 @@ export function DocumentAssistant({ suggestions = [] }: DocumentAssistantProps =
                       {t('sopAssistant.referencedDocs', 'References:')}
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {message.citedDocs.map((doc, docIndex) =>
-                        isAdmin ? (
-                          <a
-                            key={docIndex}
-                            href={doc.webViewLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1"
-                          >
-                            <Badge variant="secondary" className="text-[10px] py-0 px-1 hover:bg-secondary/80">
-                              {doc.title}
-                              <ExternalLink className="h-2 w-2 ml-0.5" />
-                            </Badge>
-                          </a>
-                        ) : (
-                          <Badge
-                            key={docIndex}
-                            variant="outline"
-                            className="text-[10px] py-0 px-1 text-muted-foreground"
-                          >
-                            {doc.title}
-                          </Badge>
-                        )
-                      )}
+                      {message.citedDocs.map((doc, docIndex) => (
+                        <CitationBadge key={docIndex} title={doc.title} fileId={doc.fileId} />
+                      ))}
                     </div>
                   </div>
                 )}
