@@ -46,35 +46,35 @@ serve(async (req) => {
     const stateParam = url.searchParams.get('state');
     const error = url.searchParams.get('error');
 
+    const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
+
     if (error) {
       console.error('OAuth error:', error);
-      return new Response(`
-        <html>
-          <body>
-            <h1>Authorization Failed</h1>
-            <p>Error: ${error}</p>
-            <script>window.close();</script>
-          </body>
-        </html>
-      `, { 
-        status: 400, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Authorization Failed</h1>
+<p>Error: ${error}</p>
+<script>window.close();</script>
+</body>
+</html>`,
+        { status: 400, headers: htmlHeaders }
+      );
     }
 
     if (!code || !stateParam) {
-      return new Response(`
-        <html>
-          <body>
-            <h1>Invalid Request</h1>
-            <p>Missing authorization code or state</p>
-            <script>window.close();</script>
-          </body>
-        </html>
-      `, { 
-        status: 400, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Invalid Request</h1>
+<p>Missing authorization code or state</p>
+<script>window.close();</script>
+</body>
+</html>`,
+        { status: 400, headers: htmlHeaders }
+      );
     }
 
     try {
@@ -125,27 +125,23 @@ serve(async (req) => {
           return s;
         }).join(', ');
         
-        return new Response(`
-          <html>
-            <body>
-              <h1>Insufficient Permissions</h1>
-              <p>The following permissions were not granted: <strong>${scopeNames}</strong></p>
-              <p>Please try connecting again and make sure to grant all requested permissions.</p>
-              <script>
-                if (window.opener) {
-                  window.opener.postMessage({ 
-                    type: 'DRIVE_AUTH_ERROR', 
-                    error: 'Missing required permissions: ${scopeNames}. Please reconnect and grant all permissions.' 
-                  }, '*');
-                }
-                setTimeout(() => window.close(), 5000);
-              </script>
-            </body>
-          </html>
-        `, { 
-          status: 400, 
-          headers: { 'Content-Type': 'text/html' } 
-        });
+        return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Insufficient Permissions</h1>
+<p>The following permissions were not granted: <strong>${scopeNames}</strong></p>
+<p>Please try connecting again and make sure to grant all requested permissions.</p>
+<script>
+if (window.opener) {
+  window.opener.postMessage({ type: 'DRIVE_AUTH_ERROR', error: 'Missing required permissions: ${scopeNames}. Please reconnect and grant all permissions.' }, '*');
+}
+setTimeout(() => window.close(), 5000);
+</script>
+</body>
+</html>`,
+          { status: 400, headers: htmlHeaders }
+        );
       }
 
       // Get Google user info
@@ -242,44 +238,42 @@ serve(async (req) => {
       console.log('Token stored successfully for user:', user_id, 'primary:', isPrimary);
 
       // Return success HTML that closes the popup
-      return new Response(`
-        <html>
-          <body>
-            <h1>Google Drive Connected!</h1>
-            <p>You can close this window now.</p>
-            <script>
-              if (window.opener) {
-                window.opener.postMessage({ type: 'DRIVE_AUTH_SUCCESS' }, '*');
-              }
-              setTimeout(() => window.close(), 2000);
-            </script>
-          </body>
-        </html>
-      `, { 
-        status: 200, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 2rem; text-align: center;">
+<h1 style="color: #2563eb;">Google Drive Connected!</h1>
+<p>You can close this window now.</p>
+<script>
+if (window.opener) {
+  window.opener.postMessage({ type: 'DRIVE_AUTH_SUCCESS' }, '*');
+}
+setTimeout(() => window.close(), 2000);
+</script>
+</body>
+</html>`,
+        { status: 200, headers: htmlHeaders }
+      );
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Callback error:', error);
-      return new Response(`
-        <html>
-          <body>
-            <h1>Authorization Failed</h1>
-            <p>Error: ${errorMessage}</p>
-            <script>
-              if (window.opener) {
-                window.opener.postMessage({ type: 'DRIVE_AUTH_ERROR', error: '${errorMessage}' }, '*');
-              }
-              setTimeout(() => window.close(), 3000);
-            </script>
-          </body>
-        </html>
-      `, { 
-        status: 400, 
-        headers: { 'Content-Type': 'text/html' } 
-      });
+      return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Authorization Failed</h1>
+<p>Error: ${errorMessage}</p>
+<script>
+if (window.opener) {
+  window.opener.postMessage({ type: 'DRIVE_AUTH_ERROR', error: '${errorMessage}' }, '*');
+}
+setTimeout(() => window.close(), 3000);
+</script>
+</body>
+</html>`,
+        { status: 400, headers: htmlHeaders }
+      );
     }
   }
 
