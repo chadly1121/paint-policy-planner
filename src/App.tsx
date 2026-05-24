@@ -24,6 +24,7 @@ import ComplianceGuidance from "./pages/ComplianceGuidance";
 import Pricing from "./pages/Pricing";
 import DocumentBuilder from "./pages/DocumentBuilder";
 import IncidentReports from "./pages/IncidentReports";
+import DriveAuthComplete from "./pages/DriveAuthComplete";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
