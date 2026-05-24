@@ -262,7 +262,7 @@ setTimeout(() => window.close(), 2000);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Callback error:', error);
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -275,8 +275,7 @@ if (window.opener) {
 setTimeout(() => window.close(), 3000);
 </script>
 </body>
-</html>`,
-        { status: 400, headers: htmlHeaders }
+</html>`
       );
     }
   }
