@@ -37,6 +37,14 @@ async function encryptToken(token: string): Promise<string> {
   return btoa(String.fromCharCode(...combined));
 }
 
+function htmlRedirect(html: string): Response {
+  const encoded = encodeURIComponent(html);
+  return new Response(null, {
+    status: 302,
+    headers: { 'Location': `data:text/html;charset=utf-8,${encoded}` },
+  });
+}
+
 serve(async (req) => {
   const url = new URL(req.url);
   
@@ -46,11 +54,12 @@ serve(async (req) => {
     const stateParam = url.searchParams.get('state');
     const error = url.searchParams.get('error');
 
-    const htmlHeaders = { 'Content-Type': 'text/html; charset=utf-8' };
+
+
 
     if (error) {
       console.error('OAuth error:', error);
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -58,13 +67,12 @@ serve(async (req) => {
 <p>Error: ${error}</p>
 <script>window.close();</script>
 </body>
-</html>`,
-        { status: 400, headers: htmlHeaders }
+</html>`
       );
     }
 
     if (!code || !stateParam) {
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -72,8 +80,7 @@ serve(async (req) => {
 <p>Missing authorization code or state</p>
 <script>window.close();</script>
 </body>
-</html>`,
-        { status: 400, headers: htmlHeaders }
+</html>`
       );
     }
 
@@ -125,7 +132,7 @@ serve(async (req) => {
           return s;
         }).join(', ');
         
-        return new Response(
+        return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -139,8 +146,7 @@ if (window.opener) {
 setTimeout(() => window.close(), 5000);
 </script>
 </body>
-</html>`,
-          { status: 400, headers: htmlHeaders }
+</html>`
         );
       }
 
@@ -238,7 +244,7 @@ setTimeout(() => window.close(), 5000);
       console.log('Token stored successfully for user:', user_id, 'primary:', isPrimary);
 
       // Return success HTML that closes the popup
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 2rem; text-align: center;">
@@ -251,14 +257,13 @@ if (window.opener) {
 setTimeout(() => window.close(), 2000);
 </script>
 </body>
-</html>`,
-        { status: 200, headers: htmlHeaders }
+</html>`
       );
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Callback error:', error);
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -271,8 +276,7 @@ if (window.opener) {
 setTimeout(() => window.close(), 3000);
 </script>
 </body>
-</html>`,
-        { status: 400, headers: htmlHeaders }
+</html>`
       );
     }
   }
