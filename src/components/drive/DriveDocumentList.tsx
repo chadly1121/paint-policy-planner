@@ -60,23 +60,29 @@ export function DriveDocumentList({
   const handleRefresh = async () => {
     setSyncing(true);
     try {
-      // First sync titles from document headers to filenames
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const syncResponse = await supabase.functions.invoke("drive-sync-titles", {
+        const syncResponse = await supabase.functions.invoke("drive-sync", {
           headers: { Authorization: `Bearer ${session.access_token}` },
-          body: { folder_type: moduleType },
+          body: { module_type: moduleType },
         });
-        
-        if (syncResponse.data?.renamed > 0) {
+
+        if (syncResponse.error) throw syncResponse.error;
+        const result = syncResponse.data?.results?.[0];
+        if (result) {
           toast({
-            title: "Titles synced",
-            description: `${syncResponse.data.renamed} file(s) renamed to match document headers`,
+            title: "Folder synced",
+            description: `${result.files_found} file(s) • ${result.records_created} new • ${result.records_updated} updated${result.records_marked_removed ? ` • ${result.records_marked_removed} removed` : ''}`,
           });
         }
       }
     } catch (err) {
-      console.error("Title sync error:", err);
+      console.error("Drive sync error:", err);
+      toast({
+        variant: "destructive",
+        title: "Sync failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
     }
     await refresh();
     await refreshProgress();
