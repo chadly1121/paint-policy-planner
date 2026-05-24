@@ -388,33 +388,38 @@ export function DriveDocumentCard({
             
             {/* Actions */}
             <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDownload("docx")}
-                disabled={downloading}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {downloading ? "Downloading..." : "Download DOCX"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDownload("pdf")}
-                disabled={downloading}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
-              {file.webViewLink && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(file.webViewLink, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Edit in Drive
-                </Button>
+              {/* Download & Drive actions — admin/owner only */}
+              {isAdmin && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload("docx")}
+                    disabled={downloading}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {downloading ? "Downloading..." : "Download DOCX"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload("pdf")}
+                    disabled={downloading}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PDF
+                  </Button>
+                  {file.webViewLink && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(file.webViewLink, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Edit in Drive
+                    </Button>
+                  )}
+                </>
               )}
               {onStartQuiz && (
                 <Button onClick={onStartQuiz} size="sm" className="flex-1">
