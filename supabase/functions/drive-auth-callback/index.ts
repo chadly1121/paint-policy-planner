@@ -131,7 +131,7 @@ serve(async (req) => {
           return s;
         }).join(', ');
         
-        return new Response(
+        return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body>
@@ -145,8 +145,7 @@ if (window.opener) {
 setTimeout(() => window.close(), 5000);
 </script>
 </body>
-</html>`,
-          { status: 400, headers: htmlHeaders }
+</html>`
         );
       }
 
