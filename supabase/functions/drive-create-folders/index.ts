@@ -277,6 +277,68 @@ List required forms and records.
 ───────────────────────────────────────────────────────────────
 `,
   },
+  forms: {
+    title: '_TEMPLATE - Form',
+    body: `FORM
+
+═══════════════════════════════════════════════════════════════
+
+⚠️ TEMPLATE INSTRUCTIONS: Keep this file as your template. To create a new form, use "Create New" in the app or make a copy of this document. Replace this text with your content.
+
+═══════════════════════════════════════════════════════════════
+
+FORM TITLE: [Enter Form Title]
+FORM NUMBER: FORM-[XXX]
+EFFECTIVE DATE: [Date]
+REVISION: [1.0]
+
+───────────────────────────────────────────────────────────────
+
+1. PURPOSE
+Describe what this form is used for and when it should be completed.
+
+2. WHO COMPLETES THIS FORM
+Define the role(s) responsible for filling out this form.
+
+3. INSTRUCTIONS
+Provide step-by-step instructions for completing the form.
+
+4. FORM FIELDS
+
+Employee Name: ______________________________
+Date: ______________________________
+Department / Location: ______________________________
+
+Section A — [Title]
+• Field 1: ______________________________
+• Field 2: ______________________________
+• Field 3: ______________________________
+
+Section B — [Title]
+☐ Option 1
+☐ Option 2
+☐ Option 3
+
+Notes / Comments:
+________________________________________________
+________________________________________________
+
+5. SIGNATURES
+
+Employee Signature: ______________________  Date: __________
+Supervisor Signature: ____________________  Date: __________
+
+6. SUBMISSION
+Describe where and how the completed form should be submitted/stored.
+
+7. REVISION HISTORY
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | [Date] | [Name] | Initial release |
+
+───────────────────────────────────────────────────────────────
+`,
+  },
 };
 
 // Decryption helper
