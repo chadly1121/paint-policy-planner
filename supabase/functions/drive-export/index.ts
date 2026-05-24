@@ -1,6 +1,30 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import JSZip from "npm:jszip@3.10.1";
+
+// Extract plain text from a .docx buffer by unzipping word/document.xml and stripping tags
+async function extractTextFromDocx(buffer: ArrayBuffer): Promise<string> {
+  const zip = await JSZip.loadAsync(buffer);
+  const docXml = await zip.file("word/document.xml")?.async("string");
+  if (!docXml) return "";
+  const withBreaks = docXml
+    .replace(/<w:p[^>]*\/>/g, "\n")
+    .replace(/<\/w:p>/g, "\n")
+    .replace(/<w:br[^>]*\/?>/g, "\n")
+    .replace(/<w:tab[^>]*\/?>/g, "\t");
+  return withBreaks
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
