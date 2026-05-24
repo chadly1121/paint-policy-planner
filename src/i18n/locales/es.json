@@ -25,7 +25,11 @@
     "sections": "Secciones",
     "sopsCount": "POEs",
     "safetyRules": "Reglas de Seguridad",
-    "manualSections": "Secciones del Manual"
+    "manualSections": "Secciones del Manual",
+    "sectionsCompleted": "Secciones Completadas",
+    "totalPoints": "Puntos Totales",
+    "availablePoints": "Puntos Disponibles",
+    "progress": "Progreso"
   },
   "sections": {
     "sops": {
