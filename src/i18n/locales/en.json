@@ -54,7 +54,11 @@
     "sections": "Sections",
     "sopsCount": "SOPs",
     "safetyRules": "Safety Rules",
-    "manualSections": "Manual Sections"
+    "manualSections": "Manual Sections",
+    "sectionsCompleted": "Sections Completed",
+    "totalPoints": "Total Points",
+    "availablePoints": "Available Points",
+    "progress": "Progress"
   },
   "sections": {
     "sops": {
