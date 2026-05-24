@@ -125,27 +125,23 @@ serve(async (req) => {
           return s;
         }).join(', ');
         
-        return new Response(`
-          <html>
-            <body>
-              <h1>Insufficient Permissions</h1>
-              <p>The following permissions were not granted: <strong>${scopeNames}</strong></p>
-              <p>Please try connecting again and make sure to grant all requested permissions.</p>
-              <script>
-                if (window.opener) {
-                  window.opener.postMessage({ 
-                    type: 'DRIVE_AUTH_ERROR', 
-                    error: 'Missing required permissions: ${scopeNames}. Please reconnect and grant all permissions.' 
-                  }, '*');
-                }
-                setTimeout(() => window.close(), 5000);
-              </script>
-            </body>
-          </html>
-        `, { 
-          status: 400, 
-          headers: { 'Content-Type': 'text/html' } 
-        });
+        return new Response(
+`<!DOCTYPE html>
+<html>
+<body>
+<h1>Insufficient Permissions</h1>
+<p>The following permissions were not granted: <strong>${scopeNames}</strong></p>
+<p>Please try connecting again and make sure to grant all requested permissions.</p>
+<script>
+if (window.opener) {
+  window.opener.postMessage({ type: 'DRIVE_AUTH_ERROR', error: 'Missing required permissions: ${scopeNames}. Please reconnect and grant all permissions.' }, '*');
+}
+setTimeout(() => window.close(), 5000);
+</script>
+</body>
+</html>`,
+          { status: 400, headers: htmlHeaders }
+        );
       }
 
       // Get Google user info
