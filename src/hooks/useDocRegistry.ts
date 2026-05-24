@@ -89,7 +89,7 @@ export function useDocRegistry() {
                 category,
                 moduleType: CATEGORY_MODULE[category],
                 route: `${CATEGORY_ROUTE[category]}?docId=${key}`,
-                drive_file_id: row.drive_file_id ?? null,
+                drive_file_id: driveMap.get(key) ?? null,
               });
             }
           }
