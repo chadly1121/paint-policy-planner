@@ -365,7 +365,7 @@ serve(async (req) => {
                 user_id: user.id,
                 [companyMap.sourceKeyField]: file.id,
                 title: baseTitle,
-                content: null,
+                content: moduleType === 'sops' ? '' : null,
                 drive_file_id: file.id,
                 drive_folder_id: folderRecord.drive_folder_id,
                 doc_id_external: docIdExternal,
