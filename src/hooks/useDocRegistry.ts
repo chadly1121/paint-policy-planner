@@ -59,18 +59,26 @@ export function useDocRegistry() {
       const map = new Map<string, DocRegistryEntry>();
       await Promise.all(
         TABLES.map(async ({ table, category, hasDriveFileId }) => {
-          const select = hasDriveFileId
-            ? "doc_id_external, title, drive_file_id"
-            : "doc_id_external, title";
           const { data, error } = await supabase
             .from(table)
-            .select(select)
+            .select("doc_id_external, title")
             .not("doc_id_external", "is", null);
           if (error || !data) return;
+          // Fetch drive_file_id separately when the table supports it.
+          const driveMap = new Map<string, string>();
+          if (hasDriveFileId) {
+            const { data: dfData } = await (supabase as any)
+              .from(table)
+              .select("doc_id_external, drive_file_id")
+              .not("doc_id_external", "is", null)
+              .not("drive_file_id", "is", null);
+            for (const r of (dfData ?? []) as Array<{ doc_id_external: string; drive_file_id: string }>) {
+              driveMap.set(r.doc_id_external.toUpperCase(), r.drive_file_id);
+            }
+          }
           for (const row of data as Array<{
             doc_id_external: string | null;
             title: string;
-            drive_file_id?: string | null;
           }>) {
             if (!row.doc_id_external) continue;
             const key = row.doc_id_external.toUpperCase();
