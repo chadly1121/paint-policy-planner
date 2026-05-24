@@ -1,6 +1,30 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import JSZip from "npm:jszip@3.10.1";
+
+// Extract plain text from a .docx buffer by unzipping word/document.xml and stripping tags
+async function extractTextFromDocx(buffer: ArrayBuffer): Promise<string> {
+  const zip = await JSZip.loadAsync(buffer);
+  const docXml = await zip.file("word/document.xml")?.async("string");
+  if (!docXml) return "";
+  const withBreaks = docXml
+    .replace(/<w:p[^>]*\/>/g, "\n")
+    .replace(/<\/w:p>/g, "\n")
+    .replace(/<w:br[^>]*\/?>/g, "\n")
+    .replace(/<w:tab[^>]*\/?>/g, "\t");
+  return withBreaks
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -170,22 +194,55 @@ serve(async (req) => {
     const fileMetadata = await metadataResponse.json();
     console.log('Exporting file:', fileMetadata.name, 'as', exportFormat);
 
-    // Export file
-    const exportResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${file_id}/export?mimeType=${encodeURIComponent(mimeTypes[exportFormat])}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+    const isGoogleNative = typeof fileMetadata.mimeType === "string" && fileMetadata.mimeType.startsWith("application/vnd.google-apps.");
 
-    if (!exportResponse.ok) {
-      const error = await exportResponse.text();
-      throw new Error(`Failed to export file: ${error}`);
+    let fileBuffer: ArrayBuffer;
+    let textContent: string | null = null;
+
+    if (isGoogleNative) {
+      // Native Google Doc/Sheet/Slides → use /export with target MIME
+      const exportResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${file_id}/export?mimeType=${encodeURIComponent(mimeTypes[exportFormat])}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!exportResponse.ok) {
+        const error = await exportResponse.text();
+        throw new Error(`Failed to export file: ${error}`);
+      }
+      if (exportFormat === "text") {
+        textContent = await exportResponse.text();
+      } else {
+        fileBuffer = await exportResponse.arrayBuffer();
+      }
+    } else {
+      // Uploaded binary file (.docx, .pdf, etc.) → download raw bytes via alt=media
+      const downloadResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${file_id}?alt=media`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!downloadResponse.ok) {
+        const error = await downloadResponse.text();
+        throw new Error(`Failed to download file: ${error}`);
+      }
+      const rawBuffer = await downloadResponse.arrayBuffer();
+
+      if (exportFormat === "text") {
+        // Only .docx is supported for inline reading. PDFs etc. fall back to empty.
+        if (fileMetadata.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+          textContent = await extractTextFromDocx(rawBuffer);
+        } else {
+          textContent = "";
+        }
+      } else if (exportFormat === "docx" || exportFormat === "pdf") {
+        // Return raw bytes only if the source format matches; otherwise we don't convert.
+        fileBuffer = rawBuffer;
+      } else {
+        fileBuffer = rawBuffer;
+      }
     }
 
-    // For text format, return content directly without base64 encoding
-    if (exportFormat === 'text') {
-      const textContent = await exportResponse.text();
-      
-      // Update last_used_at
+    // Text response path
+    if (exportFormat === "text") {
       await supabase
         .from('user_drive_tokens')
         .update({ last_used_at: new Date().toISOString() })
@@ -195,18 +252,18 @@ serve(async (req) => {
         success: true,
         file_name: fileMetadata.name,
         format: 'text',
-        content: textContent,
+        content: textContent ?? "",
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const fileBuffer = await exportResponse.arrayBuffer();
-    const fileBase64 = btoa(String.fromCharCode(...new Uint8Array(fileBuffer)));
+    const fileBase64 = btoa(String.fromCharCode(...new Uint8Array(fileBuffer!)));
     const fileName = `${fileMetadata.name.replace(/\.[^/.]+$/, '')}.${exportFormat}`;
 
-    console.log('File exported, size:', fileBuffer.byteLength, 'bytes');
+    console.log('File exported, size:', fileBuffer!.byteLength, 'bytes');
+
 
     // Update last_used_at
     await supabase
