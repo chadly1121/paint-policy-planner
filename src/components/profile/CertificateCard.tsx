@@ -73,6 +73,8 @@ const CertificateCard = ({
       setDownloading(false);
     }
   };
+
+  const getExpiryStatus = () => {
     if (!expiryDate) return null;
     
     const expiry = new Date(expiryDate);
@@ -141,18 +143,24 @@ const CertificateCard = ({
           </div>
           
           <div className="flex items-center gap-1">
-            {certificateUrl && (
+            {certificateUrl && canEdit && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                asChild
+                onClick={handleDownload}
+                disabled={downloading}
+                title="Download certificate"
               >
-                <a href={certificateUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                </a>
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
               </Button>
             )}
+
+
             
             {canEdit && (
               <AlertDialog>
