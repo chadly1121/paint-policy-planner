@@ -243,7 +243,7 @@ setTimeout(() => window.close(), 5000);
       console.log('Token stored successfully for user:', user_id, 'primary:', isPrimary);
 
       // Return success HTML that closes the popup
-      return new Response(
+      return htmlRedirect(
 `<!DOCTYPE html>
 <html>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 2rem; text-align: center;">
@@ -256,8 +256,7 @@ if (window.opener) {
 setTimeout(() => window.close(), 2000);
 </script>
 </body>
-</html>`,
-        { status: 200, headers: htmlHeaders }
+</html>`
       );
 
     } catch (error: unknown) {
