@@ -194,22 +194,55 @@ serve(async (req) => {
     const fileMetadata = await metadataResponse.json();
     console.log('Exporting file:', fileMetadata.name, 'as', exportFormat);
 
-    // Export file
-    const exportResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${file_id}/export?mimeType=${encodeURIComponent(mimeTypes[exportFormat])}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
+    const isGoogleNative = typeof fileMetadata.mimeType === "string" && fileMetadata.mimeType.startsWith("application/vnd.google-apps.");
 
-    if (!exportResponse.ok) {
-      const error = await exportResponse.text();
-      throw new Error(`Failed to export file: ${error}`);
+    let fileBuffer: ArrayBuffer;
+    let textContent: string | null = null;
+
+    if (isGoogleNative) {
+      // Native Google Doc/Sheet/Slides → use /export with target MIME
+      const exportResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${file_id}/export?mimeType=${encodeURIComponent(mimeTypes[exportFormat])}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!exportResponse.ok) {
+        const error = await exportResponse.text();
+        throw new Error(`Failed to export file: ${error}`);
+      }
+      if (exportFormat === "text") {
+        textContent = await exportResponse.text();
+      } else {
+        fileBuffer = await exportResponse.arrayBuffer();
+      }
+    } else {
+      // Uploaded binary file (.docx, .pdf, etc.) → download raw bytes via alt=media
+      const downloadResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${file_id}?alt=media`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      if (!downloadResponse.ok) {
+        const error = await downloadResponse.text();
+        throw new Error(`Failed to download file: ${error}`);
+      }
+      const rawBuffer = await downloadResponse.arrayBuffer();
+
+      if (exportFormat === "text") {
+        // Only .docx is supported for inline reading. PDFs etc. fall back to empty.
+        if (fileMetadata.mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+          textContent = await extractTextFromDocx(rawBuffer);
+        } else {
+          textContent = "";
+        }
+      } else if (exportFormat === "docx" || exportFormat === "pdf") {
+        // Return raw bytes only if the source format matches; otherwise we don't convert.
+        fileBuffer = rawBuffer;
+      } else {
+        fileBuffer = rawBuffer;
+      }
     }
 
-    // For text format, return content directly without base64 encoding
-    if (exportFormat === 'text') {
-      const textContent = await exportResponse.text();
-      
-      // Update last_used_at
+    // Text response path
+    if (exportFormat === "text") {
       await supabase
         .from('user_drive_tokens')
         .update({ last_used_at: new Date().toISOString() })
@@ -219,18 +252,18 @@ serve(async (req) => {
         success: true,
         file_name: fileMetadata.name,
         format: 'text',
-        content: textContent,
+        content: textContent ?? "",
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const fileBuffer = await exportResponse.arrayBuffer();
-    const fileBase64 = btoa(String.fromCharCode(...new Uint8Array(fileBuffer)));
+    const fileBase64 = btoa(String.fromCharCode(...new Uint8Array(fileBuffer!)));
     const fileName = `${fileMetadata.name.replace(/\.[^/.]+$/, '')}.${exportFormat}`;
 
-    console.log('File exported, size:', fileBuffer.byteLength, 'bytes');
+    console.log('File exported, size:', fileBuffer!.byteLength, 'bytes');
+
 
     // Update last_used_at
     await supabase
