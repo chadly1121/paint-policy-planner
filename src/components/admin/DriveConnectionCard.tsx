@@ -7,17 +7,20 @@ import { Separator } from '@/components/ui/separator';
 import { useDriveConnection } from '@/hooks/useDriveConnection';
 import { DriveTestPanel } from './DriveTestPanel';
 import DriveMigrationPanel from './DriveMigrationPanel';
-import { 
-  Cloud, 
-  CloudOff, 
-  RefreshCw, 
-  FolderPlus, 
-  Link2, 
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  FolderPlus,
+  Link2,
   Unlink,
   CheckCircle,
   AlertCircle,
   Loader2,
-  User
+  User,
+  FolderSync,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
