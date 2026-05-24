@@ -329,7 +329,60 @@ serve(async (req) => {
             }
           }
         }
+
+        // Also populate per-category company_* table so useDocRegistry resolves cross-references.
+        const companyMap = COMPANY_TABLE_MAP[moduleType];
+        if (companyMap && !dry_run) {
+          const { data: existingCompany } = await supabase
+            .from(companyMap.table)
+            .select(`id, drive_file_id, title, doc_id_external, drive_modified_time, is_active`)
+            .eq('user_id', user.id)
+            .not('drive_file_id', 'is', null);
+          const existingCompanyByDriveId = new Map(
+            (existingCompany || []).map((s: any) => [s.drive_file_id, s])
+          );
+
+          for (const file of driveFiles) {
+            const baseTitle = file.name.replace(/\.[^/.]+$/, '');
+            const parsed = parseDocIdExternal(file.name);
+            const docIdExternal = parsed?.id ?? null;
+            const driveModifiedTime = file.modifiedTime ?? null;
+            const existing = existingCompanyByDriveId.get(file.id);
+
+            if (existing) {
+              const patch: Record<string, unknown> = {};
+              if (existing.title !== baseTitle) patch.title = baseTitle;
+              if (existing.doc_id_external !== docIdExternal) patch.doc_id_external = docIdExternal;
+              if (!existing.is_active) patch.is_active = true;
+              const existingMs = existing.drive_modified_time ? new Date(existing.drive_modified_time).getTime() : null;
+              const incomingMs = driveModifiedTime ? new Date(driveModifiedTime).getTime() : null;
+              if (existingMs !== incomingMs) patch.drive_modified_time = driveModifiedTime;
+              if (Object.keys(patch).length > 0) {
+                await supabase.from(companyMap.table).update(patch).eq('id', existing.id);
+              }
+            } else {
+              await supabase.from(companyMap.table).insert({
+                user_id: user.id,
+                [companyMap.sourceKeyField]: file.id,
+                title: baseTitle,
+                content: null,
+                drive_file_id: file.id,
+                drive_folder_id: folderRecord.drive_folder_id,
+                doc_id_external: docIdExternal,
+                drive_modified_time: driveModifiedTime,
+                is_active: true,
+              });
+            }
+          }
+
+          for (const [driveId, row] of existingCompanyByDriveId) {
+            if (!driveFileIds.has(driveId) && row.is_active) {
+              await supabase.from(companyMap.table).update({ is_active: false }).eq('id', row.id);
+            }
+          }
+        }
       }
+
 
 
       results.push({
