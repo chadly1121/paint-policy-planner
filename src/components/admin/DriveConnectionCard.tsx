@@ -267,19 +267,37 @@ export function DriveConnectionCard() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Drive Folders</h4>
-              <Button 
-                size="sm" 
-                variant={hasFolders ? "outline" : "default"}
-                onClick={handleCreateFolders}
-                disabled={isCreatingFolders}
-              >
-                {isCreatingFolders ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FolderPlus className="h-4 w-4 mr-2" />
+              <div className="flex gap-2">
+                {hasFolders && (
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={handleSyncAll}
+                    disabled={isSyncingAll}
+                    title="Scan all 6 category folders in Drive and ingest every file"
+                  >
+                    {isSyncingAll ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FolderSync className="h-4 w-4 mr-2" />
+                    )}
+                    Sync All Folders
+                  </Button>
                 )}
-                {hasFolders ? "Sync Folders" : "Create Folders"}
-              </Button>
+                <Button
+                  size="sm"
+                  variant={hasFolders ? "outline" : "default"}
+                  onClick={handleCreateFolders}
+                  disabled={isCreatingFolders}
+                >
+                  {isCreatingFolders ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <FolderPlus className="h-4 w-4 mr-2" />
+                  )}
+                  {hasFolders ? "Sync Folders" : "Create Folders"}
+                </Button>
+              </div>
             </div>
             
             {hasFolders ? (
