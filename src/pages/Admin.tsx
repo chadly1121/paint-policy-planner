@@ -275,21 +275,21 @@ const Admin = () => {
 
     setCreating(true);
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: { 
-            full_name: fullName,
-            preferred_language: preferredLanguage
-          },
+      // Use edge function with service role so the admin stays logged in
+      const { data, error } = await supabase.functions.invoke("admin-create-employee", {
+        body: {
+          email,
+          password,
+          fullName,
+          preferredLanguage,
+          role: "painter",
         },
       });
 
-      if (error) {
-        console.error("Signup error details:", error);
-        if (error.message.includes("already registered") || error.message.toLowerCase().includes("already exists")) {
+      if (error || (data && (data as any).error)) {
+        const msg = (data as any)?.error || error?.message || "Unknown error";
+        console.error("Create employee error:", error, data);
+        if (/already|exists|registered/i.test(msg)) {
           toast({
             variant: "destructive",
             title: "User already exists",
@@ -299,7 +299,7 @@ const Admin = () => {
           toast({
             variant: "destructive",
             title: "Failed to create employee",
-            description: error.message || "Unknown error — check browser console for details.",
+            description: msg,
           });
         }
       } else {
@@ -311,11 +311,10 @@ const Admin = () => {
         setPassword("");
         setFullName("");
         setPreferredLanguage("en");
-        // Refresh employee list and subscription after short delay to allow DB trigger to complete
         setTimeout(() => {
           fetchEmployees();
           checkSubscription();
-        }, 1000);
+        }, 500);
       }
     } catch (error: any) {
       console.error("Error creating employee:", error);
