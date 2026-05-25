@@ -288,14 +288,19 @@ const Admin = () => {
       });
 
       if (error) {
-        if (error.message.includes("already registered")) {
+        console.error("Signup error details:", error);
+        if (error.message.includes("already registered") || error.message.toLowerCase().includes("already exists")) {
           toast({
             variant: "destructive",
             title: "User already exists",
             description: "An account with this email already exists.",
           });
         } else {
-          throw error;
+          toast({
+            variant: "destructive",
+            title: "Failed to create employee",
+            description: error.message || "Unknown error — check browser console for details.",
+          });
         }
       } else {
         toast({
@@ -312,12 +317,12 @@ const Admin = () => {
           checkSubscription();
         }, 1000);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating employee:", error);
       toast({
         variant: "destructive",
         title: "Failed to create employee",
-        description: "Please try again.",
+        description: error?.message || "Please try again.",
       });
     } finally {
       setCreating(false);
