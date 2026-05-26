@@ -12,14 +12,28 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "documents": "Mga Dokumento",
+    "report": "Mag-ulat",
+    "me": "Ako",
+    "adminOnly": "Para sa Admin lamang",
     "sops": "Mga SOP",
     "safetyProtocols": "Mga Protokol sa Kaligtasan",
     "companyPolicies": "Mga Patakaran ng Kumpanya",
     "trainingRequirements": "Mga Kinakailangan sa Pagsasanay",
-    "disciplinaryProcedures": "Mga Pamamaraan sa Disiplina"
+    "disciplinaryProcedures": "Mga Pamamaraan sa Disiplina",
+    "sds": "Mga Safety Data Sheet",
+    "forms": "Mga Form",
+    "incidentReports": "Mga Ulat ng Insidente",
+    "myProfile": "Aking Profile",
+    "settings": "Mga Setting",
+    "adminPanel": "Panel ng Admin",
+    "admin": "Admin"
+  },
+  "auth": {
+    "signOut": "Mag-log out"
   },
   "dashboard": {
-    "welcome": "Maligayang pagdating sa Manwal ng Empleyado",
+    "welcome": "Maligayang pagdating sa training portal ng {{orgName}}",
     "welcomeDescription": "Ang manwal na ito ay naglalaman ng lahat ng mahahalagang impormasyon na kailangan mo bilang miyembro ng koponan. Tingnan ang mga seksyon sa ibaba para mahanap ang mga patakaran, pamamaraan, at gabay para sa iyong tungkulin. Kung may mga katanungan ka, makipag-usap sa iyong superbisor.",
     "totalPolicies": "Kabuuang Patakaran",
     "sections": "Mga Seksyon",

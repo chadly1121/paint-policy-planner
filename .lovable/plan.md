@@ -1,79 +1,67 @@
-# Doc-Change Re-Acknowledgement Workflow
+## Sprint 3 — UX & UI cleanup
 
-Wire up the full user-facing workflow for the existing `ack_reset_on_change` infrastructure. POL-010 §4.4: users have 14 days (org-configurable) to re-acknowledge updated docs.
+Six grouped changes shipped together. Below is the plan for each part with the specific files touched and any decisions I'll resolve before coding.
 
-## 1. Database (single migration)
+---
 
-**New table `public.doc_reack_required`:**
-- `id uuid PK default gen_random_uuid()`
-- `org_id uuid NOT NULL` (FK orgs)
-- `org_user_id uuid NOT NULL` (FK org_users)
-- `user_id uuid NOT NULL` (denormalized for query convenience + RLS)
-- `sop_id uuid NOT NULL` (FK sops)
-- `new_ack_epoch int NOT NULL`
-- `previous_ack_epoch int NOT NULL`
-- `detected_at timestamptz NOT NULL DEFAULT now()`
-- `first_notified_at timestamptz`
-- `sent_overdue_at timestamptz`
-- `reack_deadline timestamptz NOT NULL`
-- `completed_at timestamptz`
-- UNIQUE `(org_user_id, sop_id, new_ack_epoch)`
-- RLS: user sees own rows; org admins see org rows; service role manages all
+### Part 1 — Remove Document Builder
 
-**New org columns:**
-- `orgs.reack_grace_days int NOT NULL DEFAULT 14`
-- `orgs.auto_block_uncompliant boolean NOT NULL DEFAULT false`
+- Delete `src/pages/DocumentBuilder.tsx`.
+- Delete edge functions `document-builder` and `drive-save-builder-doc` (code + dashboard via `delete_edge_functions`, remove from `supabase/config.toml`).
+- Remove the `/builder` route + import from `src/App.tsx`.
+- Remove "Document Builder" item from sidebar nav.
+- Grep for `DocumentBuilder`, `document-builder`, `drive-save-builder-doc`, `/builder` and clean up any stragglers (hooks, types, references).
+- Verify build.
 
-**New trigger on `sops`:** AFTER UPDATE where `ack_epoch` increments → for each user with a `sop_acks` row at the previous epoch (and same `org_id` resolvable), insert a `doc_reack_required` row with `reack_deadline = now() + (orgs.reack_grace_days || 14) days`. ON CONFLICT DO NOTHING.
+### Part 2 — Stop auto-creating placeholder templates
 
-**New trigger on `sop_acks`:** AFTER INSERT → if a matching open `doc_reack_required` row exists for `(user_id, sop_id, new_ack_epoch = NEW.ack_epoch)`, set `completed_at = now()`.
+- In `supabase/functions/drive-create-folders/index.ts`, strip the block that creates the 6 starter Google Doc templates. Keep folder creation (Policies, SOPs, Safety, Training, Disciplinary, Forms, SDS, Incident-Reports, Employee-Credentials).
+- No data backfill; admins clean existing placeholders themselves.
 
-## 2. Edge functions
+### Part 3 — Sidebar grouping
 
-**`reack-notifier`** (daily 08:00 UTC):
-- Fetch open rows where `completed_at IS NULL`.
-  - If `first_notified_at IS NULL` → invoke `send-notification` with `type: 'doc_change_alert'` (doc title, change_summary if column exists, deadline). Set `first_notified_at = now()`.
-  - Else if `now() > reack_deadline AND sent_overdue_at IS NULL` → notify user (`reack_overdue`) and each org admin. Set `sent_overdue_at = now()`.
-- Returns `{processed, alerts_sent, overdue_sent}`.
+- Rewrite `src/components/layout/Sidebar.tsx` from flat `navItems` to a `navSections` array with 5 groups (Dashboard ungrouped, Documents, Report, Me, Admin Only).
+- Render group headers with `text-xs uppercase tracking-wider text-muted-foreground mb-1 mt-4`. Ungrouped items render with no header.
+- Search filter flattens across groups when `searchQuery` is non-empty; no headers in search results.
+- Add i18n keys to all 4 locales (en/es/fr/tl):
+  - `nav.documents`, `nav.report`, `nav.me`, `nav.adminOnly`
+  - `nav.sds`, `nav.forms`, `nav.incidentReports`, `nav.myProfile`, `nav.settings`, `nav.adminPanel`
 
-**`reack-monthly-digest`** (1st of month 08:00 UTC):
-- Group open rows by `user_id`; skip empty groups; one `monthly_reack_digest` email per user listing all pending sorted by deadline asc.
+### Part 4 — Header consistency
 
-**Cron via `supabase--insert`** (per scheduling guide — not migration).
+- Refactor the global header (likely `src/components/layout/Header.tsx`):
+  - Left: hamburger (mobile) + org logo + org name from `useOrganization`
+  - Right: language toggle + user avatar dropdown
+  - Remove the per-page H1 prop and the tagline.
+- Audit each page (Policies, SOPs, Safety, SDS, Training, Disciplinary, Forms, Incidents, Profile, Settings, Admin, Index) to ensure they render their own H1 as the first content element. Add where missing.
 
-## 3. `send-notification` additions
+### Part 5 — Dashboard polish (`src/pages/Index.tsx`)
 
-Add three cases: `doc_change_alert`, `reack_overdue`, `monthly_reack_digest`. Each branded HTML with deadline and CTA back to dashboard. Extend `NotificationRequest.data` with `docTitle`, `changeSummary`, `reackDeadline`, `pendingItems[]`.
+1. **Welcome banner** — pull `org_name` + `tagline` + `onboarding_welcome_message` from `useOrganization`. Default text "Welcome to {orgName}'s training portal". i18n key `dashboard.welcome` with `{{orgName}}` interpolation. Tagline rendered below in muted italic, hidden when empty.
+2. **Dynamic `totalSections`** — count distinct doc categories with ≥1 doc visible to user (target categories: Policies, SOPs, Safety, SDS, Training, Disciplinary, Forms). If 0, hide `<CertificateGenerator />` entirely.
+3. **Working at Heights duplicate** — keep the "Expired" card, filter Recent Activity to exclude cert events older than 60 days (also de-dupes against the expired-card display).
+4. **Redeem Points button** — in `PointsDisplay`, hide the button when `availablePoints === 0` and render greyed guidance text "Earn points by completing acknowledgements to redeem rewards." instead.
+5. **Five empty stars** — grep for "streak" first. If no streak logic exists, remove the cluster outright.
 
-## 4. UI
+### Part 6 — Translation key cleanup
 
-**`src/components/dashboard/PendingReacksCard.tsx`** (new):
-- Fetches own open rows; if 0, render nothing.
-- Shows count, most-urgent deadline (with overdue badge), button → `/sops?reack=<sop_id>` for the most urgent.
+- Audit hardcoded user-facing strings in `Index.tsx`, `IncidentReports.tsx`, `Admin.tsx`, `InvitationsManager.tsx`, `AcceptInvite.tsx`. Move to i18n keys and add translations for en/es/fr/tl. Scope: visible labels, buttons, empty states, toast titles — not internal log strings.
 
-**`src/pages/Index.tsx`:** mount `PendingReacksCard` above the welcome card.
+---
 
-**`src/components/admin/ReackStatusCard.tsx`** (new):
-- Lists users in org with open rows; columns: name, pending count, overdue count, oldest deadline. Sortable.
+### Order of execution
 
-**`src/pages/Admin.tsx`:** add card to admin tab.
+1. Part 1 deletions (rip out Document Builder first so nothing else references it).
+2. Part 2 edge function cleanup.
+3. Part 4 header refactor + per-page H1 audit (sets the layout baseline).
+4. Part 3 sidebar grouping + nav i18n keys.
+5. Part 5 dashboard polish.
+6. Part 6 translation key sweep.
+7. Final grep for orphan references + build verification.
 
-**`src/components/admin/OrgSettingsCard.tsx`** (extend or new section): inputs for `reack_grace_days` and `auto_block_uncompliant`.
+### Notes / open items
 
-## 5. Auto-completion path
-Trigger handles it server-side; no client change needed beyond ensuring `sop_acks` insert uses correct `ack_epoch`.
-
-## 6. Testing
-Note in closing message: bump a sop's `ack_epoch` manually to verify trigger fires; invoke `reack-notifier` manually via admin button (optional, not building now).
-
-## Technical details
-- Trigger uses `org_users.org_id` lookup for each acker.
-- For system SOPs (no org_id on sops), pull org from `org_users` of the acker.
-- All edge functions: `verify_jwt = false`, manual JWT for admin trigger if exposed, but scheduled invocations use service role.
-- Cron scheduled with `supabase--insert` (contains anon key + URL).
-- No changes to `process-document`/`generate-quiz` (already done).
-
-## Out of scope (won't do unless asked)
-- Auto-block enforcement logic in assignment paths (column stored only; wiring later).
-- Localizing email copy.
-- Manual "run reack-notifier now" admin button.
+- **Section count for CertificateGenerator**: I'll use a `useMemo` derived count from existing document queries already in `Index.tsx` (whichever hooks list category doc counts). If counts aren't available in one hook, I'll add a lightweight aggregate query.
+- **Tagline removal from header**: confirming the header is the only place to remove — I won't strip it from the dashboard banner, where Part 5 explicitly wants it.
+- **i18n locale files**: I'll match the existing key style/casing in `src/locales/*.json` (or equivalent).
+- I will NOT delete the cron-scheduled `drive-sync-cron` or any cron migrations — those are unrelated.

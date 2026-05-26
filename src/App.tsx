@@ -22,7 +22,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import ComplianceGuidance from "./pages/ComplianceGuidance";
 import Pricing from "./pages/Pricing";
-import DocumentBuilder from "./pages/DocumentBuilder";
+
 import IncidentReports from "./pages/IncidentReports";
 import DriveAuthComplete from "./pages/DriveAuthComplete";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -65,7 +65,7 @@ const App = () => (
                   <Route path="/training" element={<Training />} />
                   <Route path="/disciplinary" element={<Disciplinary />} />
                   <Route path="/forms" element={<Forms />} />
-                  <Route path="/builder" element={<DocumentBuilder />} />
+                  
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/incidents" element={<IncidentReports />} />
                   <Route path="/admin" element={<Admin />} />

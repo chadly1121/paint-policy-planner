@@ -119,7 +119,14 @@ const RecentActivity = () => {
           });
         }
 
+        // Exclude certificate activity older than 60 days — those already
+        // surface in CertificateReminders / expired cards, so they would just
+        // create duplicate noise in Recent Activity.
+        const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
         certs?.forEach((c) => {
+          if (!c.created_at) return;
+          if (now - new Date(c.created_at).getTime() > SIXTY_DAYS_MS) return;
           items.push({
             id: `cert-${c.id}`,
             type: "cert_added",

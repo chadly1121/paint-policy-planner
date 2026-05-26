@@ -1,4 +1,4 @@
-import { Menu, X, LogOut, User, Settings } from "lucide-react";
+import { Menu, X, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,14 +13,15 @@ import LanguageSelector from "@/components/LanguageSelector";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrganizationContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
-  title: string;
 }
 
-const Header = ({ isSidebarOpen, onToggleSidebar, title }: HeaderProps) => {
+const Header = ({ isSidebarOpen, onToggleSidebar }: HeaderProps) => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { org } = useOrg();
   const navigate = useNavigate();
@@ -34,46 +35,36 @@ const Header = ({ isSidebarOpen, onToggleSidebar, title }: HeaderProps) => {
     ? user.user_metadata.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : user?.email?.slice(0, 2).toUpperCase() || "U";
 
+  const orgName = org?.name || t("common.companyName");
+
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="flex h-16 items-center justify-between gap-4 px-4 lg:px-8">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 min-w-0">
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden shrink-0"
             onClick={onToggleSidebar}
           >
-            {isSidebarOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
+            {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-          
-          {/* Org Logo & Name */}
-          {org?.logo_url && (
+
+          {org?.logo_url ? (
             <img
               src={org.logo_url}
-              alt={org.name}
-              className="h-8 w-8 rounded object-contain"
+              alt={orgName}
+              className="h-8 w-8 rounded object-contain shrink-0"
             />
-          )}
-          <div className="flex flex-col">
-            <h1 className="font-serif text-xl font-semibold text-foreground leading-tight">
-              {title}
-            </h1>
-            {org?.tagline && (
-              <p className="text-xs text-muted-foreground leading-tight hidden sm:block">
-                {org.tagline}
-              </p>
-            )}
-          </div>
+          ) : null}
+          <h1 className="font-serif text-lg font-semibold text-foreground leading-tight truncate">
+            {orgName}
+          </h1>
         </div>
-        
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-3 shrink-0">
           <LanguageSelector />
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -98,12 +89,12 @@ const Header = ({ isSidebarOpen, onToggleSidebar, title }: HeaderProps) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                {t("nav.settings")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
-                Log out
+                {t("auth.signOut")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
