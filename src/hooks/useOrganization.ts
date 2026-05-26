@@ -21,6 +21,11 @@ interface OrgUser {
   role: OrgRole;
   is_active: boolean;
   created_at: string;
+  is_hsr?: boolean;
+  is_safety_supervisor?: boolean;
+  hsr_designated_at?: string | null;
+  hsr_training_completed_at?: string | null;
+  safety_supervisor_designated_at?: string | null;
 }
 
 interface OrgMember extends OrgUser {
