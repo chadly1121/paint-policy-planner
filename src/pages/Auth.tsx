@@ -254,14 +254,15 @@ const Auth = () => {
               className="w-full mb-4"
               disabled={loading}
               onClick={async () => {
-                const { error } = await supabase.auth.signInWithOAuth({
-                  provider: "google",
-                  options: { redirectTo: `${window.location.origin}/` },
+                const { lovable } = await import("@/integrations/lovable");
+                const result = await lovable.auth.signInWithOAuth("google", {
+                  redirect_uri: window.location.origin,
                 });
-                if (error) {
-                  const friendly = /provider is not enabled|Unsupported provider/i.test(error.message)
+                if (result.error) {
+                  const msg = String(result.error?.message || result.error);
+                  const friendly = /provider is not enabled|Unsupported provider|missing OAuth secret/i.test(msg)
                     ? "Google sign-in not configured. Contact your admin."
-                    : error.message;
+                    : msg;
                   toast({ variant: "destructive", title: "Google sign-in failed", description: friendly });
                 }
               }}
