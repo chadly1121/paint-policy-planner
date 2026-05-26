@@ -438,49 +438,67 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9 max-w-6xl">
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Analytics</span>
-          </TabsTrigger>
-          <TabsTrigger value="billing" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            <span className="hidden sm:inline">Billing</span>
-          </TabsTrigger>
-          <TabsTrigger value="branding" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Branding</span>
-          </TabsTrigger>
-          <TabsTrigger value="drive" className="flex items-center gap-2">
-            <Cloud className="h-4 w-4" />
-            <span className="hidden sm:inline">Drive</span>
-          </TabsTrigger>
-          <TabsTrigger value="ai" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">AI</span>
-          </TabsTrigger>
-          <TabsTrigger value="employees" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Employees</span>
-          </TabsTrigger>
-          <TabsTrigger value="rewards" className="flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
-            <span className="hidden sm:inline">Rewards</span>
-          </TabsTrigger>
-          <TabsTrigger value="redemptions" className="flex items-center gap-2">
-            <Gift className="h-4 w-4" />
-            <span className="hidden sm:inline">Requests</span>
-            {pendingRequests.length > 0 && (
-              <Badge variant="destructive" className="ml-1">
-                {pendingRequests.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="refs" className="flex items-center gap-2">
-            <Link2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Refs</span>
-          </TabsTrigger>
+      <Tabs defaultValue={perms.isAdmin ? "analytics" : "employees"} className="space-y-6">
+        <TabsList className="flex flex-wrap w-full max-w-6xl gap-1 h-auto">
+          {perms.isAdmin && (
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageBilling && (
+            <TabsTrigger value="billing" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Billing</span>
+            </TabsTrigger>
+          )}
+          {perms.canConfigureOrg && (
+            <TabsTrigger value="branding" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Branding</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageDrive && (
+            <TabsTrigger value="drive" className="flex items-center gap-2">
+              <Cloud className="h-4 w-4" />
+              <span className="hidden sm:inline">Drive</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageAi && (
+            <TabsTrigger value="ai" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              <span className="hidden sm:inline">AI</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageEmployees && (
+            <TabsTrigger value="employees" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Employees</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageRewards && (
+            <TabsTrigger value="rewards" className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              <span className="hidden sm:inline">Rewards</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageRewards && (
+            <TabsTrigger value="redemptions" className="flex items-center gap-2">
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline">Requests</span>
+              {pendingRequests.length > 0 && (
+                <Badge variant="destructive" className="ml-1">
+                  {pendingRequests.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          )}
+          {perms.isAdmin && (
+            <TabsTrigger value="refs" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Refs</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="analytics">
@@ -516,9 +534,11 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
+          <OHSAComplianceCard refreshKey={employees.length} />
           <ReackStatusCard />
           <OrgReackSettingsCard />
           <InvitationsManager />
+
 
 
           {/* Employee Table */}
