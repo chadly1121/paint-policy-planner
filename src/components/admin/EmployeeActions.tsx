@@ -240,6 +240,76 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
   };
 
 
+  const toggleHsr = async (newValue: boolean, trainingDate?: string) => {
+    if (!org?.id) return;
+    setIsTogglingHsr(true);
+    try {
+      const update: any = {
+        is_hsr: newValue,
+        hsr_designated_at: newValue ? new Date().toISOString() : null,
+      };
+      if (newValue) {
+        update.hsr_training_completed_at = trainingDate || null;
+      }
+      const { error } = await supabase
+        .from("org_users")
+        .update(update)
+        .eq("user_id", employee.user_id)
+        .eq("org_id", org.id);
+      if (error) throw error;
+      toast({
+        title: newValue ? "HSR designated" : "HSR designation removed",
+        description: newValue
+          ? `${employee.full_name} is now the Health & Safety Representative.`
+          : `${employee.full_name} is no longer the HSR.`,
+      });
+      setHsrDialogOpen(false);
+      onUpdate();
+    } catch (error: any) {
+      console.error("HSR toggle error:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to update HSR",
+        description: error?.message ?? "Please try again.",
+      });
+    } finally {
+      setIsTogglingHsr(false);
+    }
+  };
+
+  const toggleSafetySupervisor = async () => {
+    if (!org?.id) return;
+    const newValue = !employee.is_safety_supervisor;
+    setIsTogglingSupervisor(true);
+    try {
+      const { error } = await supabase
+        .from("org_users")
+        .update({
+          is_safety_supervisor: newValue,
+          safety_supervisor_designated_at: newValue
+            ? new Date().toISOString()
+            : null,
+        })
+        .eq("user_id", employee.user_id)
+        .eq("org_id", org.id);
+      if (error) throw error;
+      toast({
+        title: newValue
+          ? "Safety Supervisor designated"
+          : "Safety Supervisor removed",
+      });
+      onUpdate();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Failed to update designation",
+        description: error?.message ?? "Please try again.",
+      });
+    } finally {
+      setIsTogglingSupervisor(false);
+    }
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -257,13 +327,59 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
             <Pencil className="h-4 w-4 mr-2" />
             Edit Details
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {
-            setNewRole("employee");
-            setRoleDialogOpen(true);
-          }}>
-            <ShieldCheck className="h-4 w-4 mr-2" />
-            Change Role
-          </DropdownMenuItem>
+          {canChangeRoles && (
+            <DropdownMenuItem onClick={() => {
+              setNewRole("employee");
+              setRoleDialogOpen(true);
+            }}>
+              <ShieldCheck className="h-4 w-4 mr-2" />
+              Change Role
+            </DropdownMenuItem>
+          )}
+          {canDesignateSafetyRoles && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <DropdownMenuItem
+                      disabled={!hsrEligible && !employee.is_hsr}
+                      onClick={() => {
+                        if (employee.is_hsr) {
+                          void toggleHsr(false);
+                        } else {
+                          setHsrTrainingDate(employee.hsr_training_completed_at ?? "");
+                          setHsrDialogOpen(true);
+                        }
+                      }}
+                    >
+                      <HardHat className="h-4 w-4 mr-2" />
+                      {employee.is_hsr ? "Remove HSR designation" : "Designate as HSR"}
+                    </DropdownMenuItem>
+                  </div>
+                </TooltipTrigger>
+                {!hsrEligible && !employee.is_hsr && (
+                  <TooltipContent>
+                    HSR must be a worker (painter/other), not a manager. Change role first.
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {canDesignateSafetyRoles && (
+            <DropdownMenuItem
+              onClick={() => void toggleSafetySupervisor()}
+              disabled={isTogglingSupervisor}
+            >
+              {employee.is_safety_supervisor ? (
+                <ShieldOff className="h-4 w-4 mr-2" />
+              ) : (
+                <ShieldCheck className="h-4 w-4 mr-2" />
+              )}
+              {employee.is_safety_supervisor
+                ? "Remove Safety Supervisor"
+                : "Designate as Safety Supervisor"}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setRestartDialogOpen(true)}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Restart Onboarding
@@ -277,6 +393,46 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* HSR Designation Dialog */}
+      <Dialog open={hsrDialogOpen} onOpenChange={setHsrDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Designate {employee.full_name} as HSR</DialogTitle>
+            <DialogDescription>
+              Per OHSA s.9.1, an HSR must complete IHSA training. Enter the date
+              training was completed. Only one HSR is allowed per organization —
+              any current HSR will be unset.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            <Label htmlFor="hsr-date">HSR training completed on</Label>
+            <Input
+              id="hsr-date"
+              type="date"
+              value={hsrTrainingDate}
+              onChange={(e) => setHsrTrainingDate(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHsrDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => void toggleHsr(true, hsrTrainingDate)}
+              disabled={!hsrTrainingDate || isTogglingHsr}
+            >
+              {isTogglingHsr ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Designating…</>
+              ) : (
+                "Confirm Designation"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
