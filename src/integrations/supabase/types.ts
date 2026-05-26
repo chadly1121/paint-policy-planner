@@ -774,6 +774,50 @@ export type Database = {
           },
         ]
       }
+      incident_report_attachments: {
+        Row: {
+          drive_file_id: string
+          drive_web_view_link: string
+          file_name: string
+          id: string
+          incident_id: string
+          mime_type: string
+          size_bytes: number
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          drive_file_id: string
+          drive_web_view_link: string
+          file_name: string
+          id?: string
+          incident_id: string
+          mime_type: string
+          size_bytes: number
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          drive_file_id?: string
+          drive_web_view_link?: string
+          file_name?: string
+          id?: string
+          incident_id?: string
+          mime_type?: string
+          size_bytes?: number
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_report_attachments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incident_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       incident_reports: {
         Row: {
           corrective_actions: string | null

@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { useDriveConnection } from '@/hooks/useDriveConnection';
 import { DriveTestPanel } from './DriveTestPanel';
 import DriveMigrationPanel from './DriveMigrationPanel';
+import { ResendStatusCard } from './ResendStatusCard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
@@ -326,6 +327,10 @@ export function DriveConnectionCard() {
     <Separator className="my-6" />
     
     <DriveMigrationPanel isConnected={isConnected} hasFolders={hasFolders} />
+
+    <Separator className="my-6" />
+
+    <ResendStatusCard />
 
     <Separator className="my-6" />
     

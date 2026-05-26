@@ -107,3 +107,12 @@ verify_jwt = false
 
 [functions.reack-monthly-digest]
 verify_jwt = false
+
+[functions.upload-incident-attachment]
+verify_jwt = false
+
+[functions.regenerate-incident-doc]
+verify_jwt = false
+
+[functions.check-resend-status]
+verify_jwt = false
