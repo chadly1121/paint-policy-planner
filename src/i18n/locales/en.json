@@ -72,6 +72,29 @@
     "availablePoints": "Available Points",
     "progress": "Progress"
   },
+  "safetyReps": {
+    "title": "Your Safety Reps",
+    "hsrHeading": "Health & Safety Representative",
+    "supervisorsHeading": "Safety Supervisors",
+    "concernHeading": "Have a safety concern?",
+    "noHsr": "No HSR designated. Contact your admin.",
+    "noSupervisors": "No safety supervisors designated.",
+    "fileIncident": "File an Incident",
+    "contactHsr": "Contact your HSR"
+  },
+  "ohsa": {
+    "cardTitle": "OHSA Compliance Status",
+    "activeWorkers": "Active workers",
+    "hsrDesignated": "HSR designated",
+    "noHsrTitle": "HSR required",
+    "noHsrBody": "OHSA s.8 requires a designated HSR for workplaces with 6–19 workers. Designate one below.",
+    "trainingOverdueTitle": "HSR training overdue",
+    "trainingOverdueBody": "Renew training via",
+    "jhscTitle": "JHSC required",
+    "jhscBody": "Your workplace now requires a Joint Health and Safety Committee (JHSC), not just an HSR. Contact employment counsel.",
+    "compliantTitle": "Compliant",
+    "compliantBody": "Your OHSA designations meet current worker-count requirements."
+  },
   "sections": {
     "sops": {
       "title": "Standard Operating Procedures",
