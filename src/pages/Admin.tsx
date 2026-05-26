@@ -118,6 +118,7 @@ const Admin = () => {
 
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [employeeFilter, setEmployeeFilter] = useState<"active" | "inactive" | "all">("active");
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -524,15 +525,25 @@ const Admin = () => {
                     View all employees, their progress, and points
                   </CardDescription>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fetchEmployees()}
-                  disabled={loadingEmployees}
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loadingEmployees ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Select value={employeeFilter} onValueChange={(v: any) => setEmployeeFilter(v)}>
+                    <SelectTrigger className="w-[130px] h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchEmployees()}
+                    disabled={loadingEmployees}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loadingEmployees ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -564,7 +575,7 @@ const Admin = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {employees.filter(e => e.is_active).map((employee) => (
+                      {employees.filter(e => employeeFilter === "all" ? true : employeeFilter === "active" ? e.is_active : !e.is_active).map((employee) => (
                         <TableRow key={employee.user_id}>
                           <TableCell>
                             <div>
