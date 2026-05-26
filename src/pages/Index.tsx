@@ -81,22 +81,15 @@ const Index = () => {
     Math.round((completedCount / progressDenominator) * 100),
   );
 
+  const availablePoints = points?.available_points ?? 0;
+
   return (
     <div className="space-y-6">
       <OnboardingWizard open={shouldShow} onComplete={dismiss} />
 
-      <PendingReacksCard />
+      <EmptyStateNudge completedCount={completedCount} availablePoints={availablePoints} />
 
-      {/* Points Display */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <PointsDisplay />
-        {totalSections !== null && totalSections > 0 && (
-          <CertificateGenerator
-            completedSections={completedCount}
-            totalSections={totalSections}
-          />
-        )}
-      </div>
+      <PendingReacksCard />
 
       {/* Welcome Card */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
@@ -120,6 +113,9 @@ const Index = () => {
         </CardContent>
       </Card>
 
+      {/* Points Display */}
+      <PointsDisplay />
+
       {/* Progress Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-lg border border-border bg-card p-4 text-center">
@@ -134,7 +130,7 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">{t("dashboard.totalPoints")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 text-center">
-          <p className="text-2xl font-bold text-primary">{points?.available_points ?? 0}</p>
+          <p className="text-2xl font-bold text-primary">{availablePoints}</p>
           <p className="text-sm text-muted-foreground">{t("dashboard.availablePoints")}</p>
         </div>
         <div className="rounded-lg border border-border bg-card p-4 text-center">
@@ -146,13 +142,34 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Certificate of completion — only when there is real progress to certify */}
+      {totalSections !== null && totalSections > 0 && completedCount > 0 && (
+        <Card className="border-primary/20 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/10">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-serif text-lg font-semibold text-foreground">
+                Earn your certificate of completion
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Complete all sections to unlock your printable certificate.
+              </p>
+            </div>
+            <CertificateGenerator
+              completedSections={completedCount}
+              totalSections={totalSections}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Activity & Tasks Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <AssignedTasks />
         <CertificateReminders />
         <RecentActivity />
-        <SafetyRepsCard />
       </div>
+
+      <SafetyRepsCard />
 
       {/* Leaderboard */}
       <Leaderboard />
