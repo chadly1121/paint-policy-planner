@@ -34,7 +34,7 @@
   },
   "dashboard": {
     "welcome": "Bienvenue sur le portail de formation de {{orgName}}",
-    "welcomeDescription": "Ce manuel contient toutes les informations essentielles dont vous avez besoin en tant que membre de l'équipe. Parcourez les sections ci-dessous pour trouver les politiques, procédures et directives pour votre rôle. Si vous avez des questions, veuillez en parler à votre superviseur.",
+    "welcomeDescription": "Ce portail contient vos documents de formation, protocoles de sécurité et politiques d'entreprise. Utilisez la barre latérale pour parcourir par catégorie. Si vous avez des questions, adressez-vous à votre superviseur ou à votre représentant en santé et sécurité.",
     "totalPolicies": "Total des politiques",
     "sections": "Sections",
     "sopsCount": "PON",
