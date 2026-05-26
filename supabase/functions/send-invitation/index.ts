@@ -96,8 +96,12 @@ Deno.serve(async (req) => {
       .eq("is_active", true)
       .maybeSingle();
 
-    if (!callerOrgUser || callerOrgUser.role !== "admin") {
-      return json(403, { error: "Forbidden — admin only" });
+    if (!callerOrgUser || (callerOrgUser.role !== "admin" && callerOrgUser.role !== "office")) {
+      return json(403, { error: "Forbidden — admin or office only" });
+    }
+    // Only admins can invite other admins
+    if (role === "admin" && callerOrgUser.role !== "admin") {
+      return json(403, { error: "Only admins can invite other admins" });
     }
     const orgId = callerOrgUser.org_id;
 

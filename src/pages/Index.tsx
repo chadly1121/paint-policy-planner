@@ -9,6 +9,7 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 import AssignedTasks from "@/components/dashboard/AssignedTasks";
 import CertificateReminders from "@/components/dashboard/CertificateReminders";
 import PendingReacksCard from "@/components/dashboard/PendingReacksCard";
+import SafetyRepsCard from "@/components/dashboard/SafetyRepsCard";
 import { useProgress } from "@/hooks/useProgress";
 import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useOrg } from "@/contexts/OrganizationContext";
@@ -149,6 +150,7 @@ const Index = () => {
         <AssignedTasks />
         <CertificateReminders />
         <RecentActivity />
+        <SafetyRepsCard />
       </div>
 
       {/* Leaderboard */}
