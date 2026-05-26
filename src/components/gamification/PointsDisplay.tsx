@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Star, Gift, Coins } from "lucide-react";
+import { Gift, Coins } from "lucide-react";
 import { useProgress } from "@/hooks/useProgress";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -124,27 +124,20 @@ const PointsDisplay = () => {
             <Progress value={progressPercent} className="h-3" />
           </div>
 
-          <div className="flex items-center gap-2 pt-2">
-            {[...Array(Math.min(5, driveProgress.total || 5))].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-5 w-5 ${
-                  i < driveProgress.completed
-                    ? "text-yellow-500 fill-yellow-500"
-                    : "text-muted-foreground"
-                }`}
-              />
-            ))}
-          </div>
-
-          <Button
-            onClick={() => setRedemptionOpen(true)}
-            className="w-full"
-            variant="outline"
-          >
-            <Gift className="h-4 w-4 mr-2" />
-            Redeem Points
-          </Button>
+          {Math.max(0, driveProgress.points - (points?.redeemed_points || 0)) > 0 ? (
+            <Button
+              onClick={() => setRedemptionOpen(true)}
+              className="w-full"
+              variant="outline"
+            >
+              <Gift className="h-4 w-4 mr-2" />
+              Redeem Points
+            </Button>
+          ) : (
+            <p className="text-xs text-muted-foreground italic text-center pt-2">
+              Earn points by completing acknowledgements to redeem rewards.
+            </p>
+          )}
         </CardContent>
       </Card>
 

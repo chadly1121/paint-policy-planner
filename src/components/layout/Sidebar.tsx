@@ -14,7 +14,6 @@ import {
   UserCircle,
   FlaskConical,
   FileSpreadsheet,
-  Sparkles,
   AlertOctagon,
   Scale,
 } from "lucide-react";
@@ -28,6 +27,17 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
+interface NavItem {
+  path: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface NavSection {
+  group: string | null;
+  items: NavItem[];
+}
+
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -35,25 +45,66 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { org } = useOrg();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const navItems = [
-    { path: "/", label: t("nav.dashboard"), icon: Home },
-    { path: "/profile", label: "My Profile", icon: UserCircle },
-    { path: "/sops", label: t("nav.sops"), icon: ClipboardList },
-    { path: "/safety", label: t("nav.safetyProtocols"), icon: Shield },
-    { path: "/sds", label: "Safety Data Sheets", icon: FlaskConical },
-    { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
-    { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
-    { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
-    { path: "/forms", label: "Forms", icon: FileSpreadsheet },
-    { path: "/incidents", label: "Incident Reports", icon: AlertOctagon },
-    { path: "/builder", label: "Document Builder", icon: Sparkles },
-    { path: "/settings", label: t("nav.settings"), icon: Settings },
-    ...(isAdmin ? [{ path: "/admin", label: t("nav.admin"), icon: ShieldCheck }] : []),
+  const navSections: NavSection[] = [
+    {
+      group: null,
+      items: [{ path: "/", label: t("nav.dashboard"), icon: Home }],
+    },
+    {
+      group: t("nav.documents"),
+      items: [
+        { path: "/policies", label: t("nav.companyPolicies"), icon: FileText },
+        { path: "/sops", label: t("nav.sops"), icon: ClipboardList },
+        { path: "/safety", label: t("nav.safetyProtocols"), icon: Shield },
+        { path: "/sds", label: t("nav.sds"), icon: FlaskConical },
+        { path: "/training", label: t("nav.trainingRequirements"), icon: GraduationCap },
+        { path: "/disciplinary", label: t("nav.disciplinaryProcedures"), icon: AlertTriangle },
+        { path: "/forms", label: t("nav.forms"), icon: FileSpreadsheet },
+      ],
+    },
+    {
+      group: t("nav.report"),
+      items: [{ path: "/incidents", label: t("nav.incidentReports"), icon: AlertOctagon }],
+    },
+    {
+      group: t("nav.me"),
+      items: [
+        { path: "/profile", label: t("nav.myProfile"), icon: UserCircle },
+        { path: "/settings", label: t("nav.settings"), icon: Settings },
+      ],
+    },
+    ...(isAdmin
+      ? [
+          {
+            group: t("nav.adminOnly"),
+            items: [{ path: "/admin", label: t("nav.adminPanel"), icon: ShieldCheck }],
+          },
+        ]
+      : []),
   ];
 
-  const filteredItems = navItems.filter((item) =>
-    item.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const query = searchQuery.trim().toLowerCase();
+  const allItems = navSections.flatMap((s) => s.items);
+  const searchResults = query
+    ? allItems.filter((item) => item.label.toLowerCase().includes(query))
+    : null;
+
+  const renderItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const isActive = location.pathname === item.path;
+    return (
+      <li key={item.path}>
+        <NavLink
+          to={item.path}
+          onClick={onClose}
+          className={`nav-item ${isActive ? "nav-item-active" : ""}`}
+        >
+          <Icon className="h-5 w-5" />
+          <span className="font-medium">{item.label}</span>
+        </NavLink>
+      </li>
+    );
+  };
 
   return (
     <aside
@@ -79,11 +130,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <h1 className="font-serif text-lg font-bold text-sidebar-foreground">
               {org?.name || t("common.companyName")}
             </h1>
-            {org?.tagline && (
-              <p className="text-xs text-sidebar-foreground/60">
-                {org.tagline}
-              </p>
-            )}
           </div>
         </div>
 
@@ -101,26 +147,21 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 scrollbar-thin">
-          <ul className="space-y-1">
-            {filteredItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-
-              return (
-                <li key={item.path}>
-                  <NavLink
-                    to={item.path}
-                    onClick={onClose}
-                    className={`nav-item ${isActive ? "nav-item-active" : ""}`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </NavLink>
-                </li>
-              );
-            })}
-          </ul>
+        <nav className="flex-1 overflow-y-auto px-3 scrollbar-thin pb-4">
+          {searchResults ? (
+            <ul className="space-y-1">{searchResults.map(renderItem)}</ul>
+          ) : (
+            navSections.map((section, idx) => (
+              <div key={section.group ?? `__ungrouped-${idx}`}>
+                {section.group && (
+                  <p className="px-3 mb-1 mt-4 text-xs uppercase tracking-wider text-sidebar-foreground/60">
+                    {section.group}
+                  </p>
+                )}
+                <ul className="space-y-1">{section.items.map(renderItem)}</ul>
+              </div>
+            ))
+          )}
         </nav>
 
         {/* Legal Links */}
@@ -130,22 +171,22 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <span className="text-xs font-medium">Legal & Compliance</span>
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-            <Link 
-              to="/compliance-guidance" 
+            <Link
+              to="/compliance-guidance"
               onClick={onClose}
               className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
             >
               Guidance
             </Link>
-            <Link 
-              to="/terms" 
+            <Link
+              to="/terms"
               onClick={onClose}
               className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
             >
               Terms
             </Link>
-            <Link 
-              to="/privacy" 
+            <Link
+              to="/privacy"
               onClick={onClose}
               className="text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
             >
