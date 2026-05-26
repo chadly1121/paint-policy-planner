@@ -60,6 +60,7 @@ import { EmployeeActions } from "@/components/admin/EmployeeActions";
 import { SubscriptionCard } from "@/components/admin/SubscriptionCard";
 import { InvoiceHistory } from "@/components/admin/InvoiceHistory";
 import { BrokenReferencesCard } from "@/components/admin/BrokenReferencesCard";
+import { InvitationsManager } from "@/components/admin/InvitationsManager";
 import { DocumentRelationshipsManager } from "@/components/admin/DocumentRelationshipsManager";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -506,111 +507,8 @@ const Admin = () => {
         <TabsContent value="employees" className="space-y-6">
           <ReackStatusCard />
           <OrgReackSettingsCard />
-          {/* Create Employee Card */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserPlus className="h-5 w-5" />
-                    Create Employee Account
-                  </CardTitle>
-                  <CardDescription>
-                    Create a new employee account. They will receive login credentials.
-                  </CardDescription>
-                </div>
-                {subscription && (
-                  <Badge variant={canAddUsers(1) ? "secondary" : "destructive"}>
-                    {subscription.current_users} / {subscription.user_limit} seats used
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCreateEmployee} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="John Doe"
-                    />
-                    {errors.fullName && (
-                      <p className="text-sm text-destructive">{errors.fullName}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="john@company.com"
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="password">Initial Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min. 6 characters"
-                    />
-                    {errors.password && (
-                      <p className="text-sm text-destructive">{errors.password}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="preferredLanguage" className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      Preferred Language
-                    </Label>
-                    <Select
-                      value={preferredLanguage}
-                      onValueChange={setPreferredLanguage}
-                    >
-                      <SelectTrigger id="preferredLanguage">
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {languages.map((lang) => (
-                          <SelectItem key={lang.code} value={lang.code}>
-                            <span className="flex items-center gap-2">
-                              <span>{lang.flag}</span>
-                              <span>{lang.name}</span>
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.preferredLanguage && (
-                      <p className="text-sm text-destructive">{errors.preferredLanguage}</p>
-                    )}
-                </div>
-                <Button type="submit" disabled={creating}>
-                  {creating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Create Employee
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <InvitationsManager />
+
 
           {/* Employee Table */}
           <Card>
