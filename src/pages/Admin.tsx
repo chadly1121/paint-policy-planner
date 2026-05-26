@@ -608,9 +608,21 @@ const Admin = () => {
                       {employees.filter(e => employeeFilter === "all" ? true : employeeFilter === "active" ? e.is_active : !e.is_active).map((employee) => (
                         <TableRow key={employee.user_id}>
                           <TableCell>
-                            <div>
-                              <p className="font-medium">{employee.full_name}</p>
-                              <p className="text-sm text-muted-foreground">{employee.email}</p>
+                            <div className="flex items-start gap-2">
+                              <div>
+                                <p className="font-medium flex items-center gap-1.5 flex-wrap">
+                                  {employee.full_name}
+                                  {employee.is_hsr && (
+                                    <Badge className="bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/30 hover:bg-orange-500/20" variant="outline">
+                                      HSR
+                                    </Badge>
+                                  )}
+                                  {employee.is_safety_supervisor && (
+                                    <ShieldCheck className="h-4 w-4 text-emerald-600" aria-label="Safety Supervisor" />
+                                  )}
+                                </p>
+                                <p className="text-sm text-muted-foreground">{employee.email}</p>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>
