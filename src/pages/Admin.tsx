@@ -64,6 +64,8 @@ import { InvitationsManager } from "@/components/admin/InvitationsManager";
 import { DocumentRelationshipsManager } from "@/components/admin/DocumentRelationshipsManager";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
+import { usePermissions } from "@/hooks/usePermissions";
+import OHSAComplianceCard from "@/components/admin/OHSAComplianceCard";
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
@@ -93,6 +95,9 @@ interface EmployeeData {
   created_at: string;
   role: string;
   is_active: boolean;
+  is_hsr: boolean;
+  is_safety_supervisor: boolean;
+  hsr_training_completed_at: string | null;
 }
 
 const TOTAL_SECTIONS = 5;
@@ -101,6 +106,8 @@ const Admin = () => {
   const { t } = useTranslation();
   const { isAdmin, loading: authLoading } = useAuth();
   const { org } = useOrganization();
+  const perms = usePermissions();
+  const canEnter = perms.isAdmin || perms.isOffice;
   const { canAddUsers, subscription, checkSubscription } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -121,27 +128,27 @@ const Admin = () => {
   const [employeeFilter, setEmployeeFilter] = useState<"active" | "inactive" | "all">("active");
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
+    if (!authLoading && !canEnter) {
       navigate("/");
     }
-  }, [isAdmin, authLoading, navigate]);
+  }, [canEnter, authLoading, navigate]);
 
   useEffect(() => {
-    if (isAdmin && org?.id) {
+    if (canEnter && org?.id) {
       fetchRedemptionRequests();
       fetchEmployees();
     }
-  }, [isAdmin, org?.id]);
+  }, [canEnter, org?.id]);
 
   const fetchEmployees = async () => {
     if (!org?.id) return;
     
     setLoadingEmployees(true);
     try {
-      // Fetch org_users for this org (includes role and is_active)
+      // Fetch org_users for this org (includes role, is_active and OHSA flags)
       const { data: orgUsers, error: orgUsersError } = await supabase
         .from("org_users")
-        .select("user_id, role, is_active")
+        .select("user_id, role, is_active, is_hsr, is_safety_supervisor, hsr_training_completed_at")
         .eq("org_id", org.id);
 
       if (orgUsersError) throw orgUsersError;
@@ -188,7 +195,7 @@ const Admin = () => {
 
         const employeeData: EmployeeData[] = profiles.map(profile => {
           const balance = balanceMap.get(profile.user_id);
-          const orgUser = orgUserMap.get(profile.user_id);
+          const orgUser = orgUserMap.get(profile.user_id) as any;
           return {
             user_id: profile.user_id,
             full_name: profile.full_name,
@@ -199,6 +206,9 @@ const Admin = () => {
             created_at: profile.created_at,
             role: orgUser?.role || "employee",
             is_active: orgUser?.is_active ?? true,
+            is_hsr: orgUser?.is_hsr ?? false,
+            is_safety_supervisor: orgUser?.is_safety_supervisor ?? false,
+            hsr_training_completed_at: orgUser?.hsr_training_completed_at ?? null,
           };
         });
 
@@ -409,7 +419,7 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!canEnter) {
     return null;
   }
 
