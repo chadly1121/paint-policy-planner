@@ -39,16 +39,28 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "documents": "Documents",
+    "report": "Report",
+    "me": "Me",
+    "adminOnly": "Admin Only",
     "sops": "SOPs",
     "safetyProtocols": "Safety Protocols",
     "companyPolicies": "Company Policies",
     "trainingRequirements": "Training Requirements",
     "disciplinaryProcedures": "Disciplinary Procedures",
+    "sds": "Safety Data Sheets",
+    "forms": "Forms",
+    "incidentReports": "Incident Reports",
+    "myProfile": "My Profile",
     "settings": "Settings",
+    "adminPanel": "Admin Panel",
     "admin": "Admin"
   },
+  "auth": {
+    "signOut": "Log out"
+  },
   "dashboard": {
-    "welcome": "Welcome to the Employee Handbook",
+    "welcome": "Welcome to {{orgName}}'s training portal",
     "welcomeDescription": "This manual contains all the essential information you need as a team member. Browse through the sections below to find policies, procedures, and guidelines for your role. If you have questions, please speak with your supervisor.",
     "totalPolicies": "Total Policies",
     "sections": "Sections",

@@ -12,14 +12,28 @@
   },
   "nav": {
     "dashboard": "Tableau de bord",
+    "documents": "Documents",
+    "report": "Signaler",
+    "me": "Moi",
+    "adminOnly": "Administrateurs uniquement",
     "sops": "PON",
     "safetyProtocols": "Protocoles de sécurité",
     "companyPolicies": "Politiques de l'entreprise",
     "trainingRequirements": "Exigences de formation",
-    "disciplinaryProcedures": "Procédures disciplinaires"
+    "disciplinaryProcedures": "Procédures disciplinaires",
+    "sds": "Fiches de données de sécurité",
+    "forms": "Formulaires",
+    "incidentReports": "Rapports d'incident",
+    "myProfile": "Mon profil",
+    "settings": "Paramètres",
+    "adminPanel": "Panneau d'administration",
+    "admin": "Administrateur"
+  },
+  "auth": {
+    "signOut": "Déconnexion"
   },
   "dashboard": {
-    "welcome": "Bienvenue dans le Manuel de l'employé",
+    "welcome": "Bienvenue sur le portail de formation de {{orgName}}",
     "welcomeDescription": "Ce manuel contient toutes les informations essentielles dont vous avez besoin en tant que membre de l'équipe. Parcourez les sections ci-dessous pour trouver les politiques, procédures et directives pour votre rôle. Si vous avez des questions, veuillez en parler à votre superviseur.",
     "totalPolicies": "Total des politiques",
     "sections": "Sections",

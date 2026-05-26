@@ -12,14 +12,28 @@
   },
   "nav": {
     "dashboard": "Panel de control",
+    "documents": "Documentos",
+    "report": "Informar",
+    "me": "Mi cuenta",
+    "adminOnly": "Solo administradores",
     "sops": "POEs",
     "safetyProtocols": "Protocolos de Seguridad",
     "companyPolicies": "Políticas de la Empresa",
     "trainingRequirements": "Requisitos de Capacitación",
-    "disciplinaryProcedures": "Procedimientos Disciplinarios"
+    "disciplinaryProcedures": "Procedimientos Disciplinarios",
+    "sds": "Hojas de Datos de Seguridad",
+    "forms": "Formularios",
+    "incidentReports": "Informes de Incidentes",
+    "myProfile": "Mi Perfil",
+    "settings": "Configuración",
+    "adminPanel": "Panel de Administración",
+    "admin": "Administrador"
+  },
+  "auth": {
+    "signOut": "Cerrar sesión"
   },
   "dashboard": {
-    "welcome": "Bienvenido al Manual del Empleado",
+    "welcome": "Bienvenido al portal de capacitación de {{orgName}}",
     "welcomeDescription": "Este manual contiene toda la información esencial que necesita como miembro del equipo. Navegue por las secciones a continuación para encontrar políticas, procedimientos y pautas para su rol. Si tiene preguntas, hable con su supervisor.",
     "totalPolicies": "Total de Políticas",
     "sections": "Secciones",
