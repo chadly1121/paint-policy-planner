@@ -3,10 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
- * Determines whether the guided first-session onboarding wizard should be shown.
- * Shown when: profile.onboarding_completed_at IS NULL AND section_progress is empty.
- * Admins are excluded (they manage the org, they don't need the new-hire flow).
+ * Determines whether the guided onboarding wizard should be shown.
+ * Shown when:
+ *   - First sign-up: onboarding_completed_at IS NULL AND no section_progress yet
+ *   - Monthly refresher: onboarding_completed_at is older than 30 days
+ * Admins are excluded.
  */
+const REFRESH_INTERVAL_DAYS = 30;
+
 export const useOnboardingStatus = () => {
   const { user, isAdmin } = useAuth();
   const [shouldShow, setShouldShow] = useState(false);
@@ -25,11 +29,18 @@ export const useOnboardingStatus = () => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (profile?.onboarding_completed_at) {
-        setShouldShow(false);
+      const completedAt = profile?.onboarding_completed_at
+        ? new Date(profile.onboarding_completed_at)
+        : null;
+
+      if (completedAt) {
+        const ageDays =
+          (Date.now() - completedAt.getTime()) / (1000 * 60 * 60 * 24);
+        setShouldShow(ageDays >= REFRESH_INTERVAL_DAYS);
         return;
       }
 
+      // Never completed — only show on a fresh account with no progress yet
       const { count } = await supabase
         .from("section_progress")
         .select("id", { count: "exact", head: true })
