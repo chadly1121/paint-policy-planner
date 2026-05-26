@@ -10,6 +10,7 @@ import AssignedTasks from "@/components/dashboard/AssignedTasks";
 import CertificateReminders from "@/components/dashboard/CertificateReminders";
 import PendingReacksCard from "@/components/dashboard/PendingReacksCard";
 import SafetyRepsCard from "@/components/dashboard/SafetyRepsCard";
+import EmptyStateNudge from "@/components/dashboard/EmptyStateNudge";
 import { useProgress } from "@/hooks/useProgress";
 import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useOrg } from "@/contexts/OrganizationContext";
