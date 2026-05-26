@@ -34,7 +34,7 @@
   },
   "dashboard": {
     "welcome": "Maligayang pagdating sa training portal ng {{orgName}}",
-    "welcomeDescription": "Ang manwal na ito ay naglalaman ng lahat ng mahahalagang impormasyon na kailangan mo bilang miyembro ng koponan. Tingnan ang mga seksyon sa ibaba para mahanap ang mga patakaran, pamamaraan, at gabay para sa iyong tungkulin. Kung may mga katanungan ka, makipag-usap sa iyong superbisor.",
+    "welcomeDescription": "Ang portal na ito ay naglalaman ng iyong mga materyales sa pagsasanay, mga protokol sa kaligtasan, at mga patakaran ng kumpanya. Gamitin ang sidebar upang mag-browse ayon sa kategorya. Kung may mga katanungan ka, makipag-usap sa iyong superbisor o sa iyong safety rep.",
     "totalPolicies": "Kabuuang Patakaran",
     "sections": "Mga Seksyon",
     "sopsCount": "Mga SOP",
