@@ -61,7 +61,7 @@
   },
   "dashboard": {
     "welcome": "Welcome to {{orgName}}'s training portal",
-    "welcomeDescription": "This manual contains all the essential information you need as a team member. Browse through the sections below to find policies, procedures, and guidelines for your role. If you have questions, please speak with your supervisor.",
+    "welcomeDescription": "This portal contains your training materials, safety protocols, and company policies. Use the sidebar to browse by category. If you have questions, ask your supervisor or your safety rep.",
     "totalPolicies": "Total Policies",
     "sections": "Sections",
     "sopsCount": "SOPs",
