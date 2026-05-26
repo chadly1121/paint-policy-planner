@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Paintbrush, Loader2, Globe, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Paintbrush, Loader2, Globe, ArrowRight, ArrowLeft, CheckCircle2, Chrome } from "lucide-react";
 import { z } from "zod";
 import {
   Select,
@@ -248,6 +248,32 @@ const Auth = () => {
             <CardDescription>Sign in to access your training portal</CardDescription>
           </CardHeader>
           <CardContent>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mb-4"
+              disabled={loading}
+              onClick={async () => {
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: { redirectTo: `${window.location.origin}/` },
+                });
+                if (error) {
+                  const friendly = /provider is not enabled|Unsupported provider/i.test(error.message)
+                    ? "Google sign-in not configured. Contact your admin."
+                    : error.message;
+                  toast({ variant: "destructive", title: "Google sign-in failed", description: friendly });
+                }
+              }}
+            >
+              <Chrome className="h-4 w-4 mr-2" /> Sign in with Google
+            </Button>
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
