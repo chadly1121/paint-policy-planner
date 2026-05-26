@@ -329,6 +329,10 @@ export function DriveConnectionCard() {
     <DriveMigrationPanel isConnected={isConnected} hasFolders={hasFolders} />
 
     <Separator className="my-6" />
+
+    <ResendStatusCard />
+
+    <Separator className="my-6" />
     
     <DriveTestPanel />
   </>
