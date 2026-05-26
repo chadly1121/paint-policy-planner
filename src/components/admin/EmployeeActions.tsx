@@ -34,16 +34,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Pencil, Trash2, Loader2, UserX, ShieldCheck, Shield, RotateCcw } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Loader2, UserX, ShieldCheck, Shield, RotateCcw, HardHat, ShieldOff } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrganization } from "@/hooks/useOrganization";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface EmployeeActionsProps {
   employee: {
     user_id: string;
     full_name: string;
     email: string;
+    role?: string;
+    is_hsr?: boolean;
+    is_safety_supervisor?: boolean;
+    hsr_training_completed_at?: string | null;
   };
   onUpdate: () => void;
 }
@@ -51,6 +62,7 @@ interface EmployeeActionsProps {
 export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
   const { toast } = useToast();
   const { org } = useOrganization();
+  const { canChangeRoles, canDesignateSafetyRoles } = usePermissions();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
@@ -59,7 +71,15 @@ export function EmployeeActions({ employee, onUpdate }: EmployeeActionsProps) {
   const [isChangingRole, setIsChangingRole] = useState(false);
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
-  
+  const [hsrDialogOpen, setHsrDialogOpen] = useState(false);
+  const [hsrTrainingDate, setHsrTrainingDate] = useState<string>(
+    employee.hsr_training_completed_at ?? "",
+  );
+  const [isTogglingHsr, setIsTogglingHsr] = useState(false);
+  const [isTogglingSupervisor, setIsTogglingSupervisor] = useState(false);
+
+  const hsrEligible = employee.role === "painter" || employee.role === "other";
+
   // Edit form state
   const [editFullName, setEditFullName] = useState(employee.full_name);
   const [newRole, setNewRole] = useState<string>("employee");
