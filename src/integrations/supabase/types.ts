@@ -1219,26 +1219,41 @@ export type Database = {
       org_users: {
         Row: {
           created_at: string
+          hsr_designated_at: string | null
+          hsr_training_completed_at: string | null
           id: string
           is_active: boolean
+          is_hsr: boolean
+          is_safety_supervisor: boolean
           org_id: string
           role: string
+          safety_supervisor_designated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
+          hsr_designated_at?: string | null
+          hsr_training_completed_at?: string | null
           id?: string
           is_active?: boolean
+          is_hsr?: boolean
+          is_safety_supervisor?: boolean
           org_id: string
           role: string
+          safety_supervisor_designated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
+          hsr_designated_at?: string | null
+          hsr_training_completed_at?: string | null
           id?: string
           is_active?: boolean
+          is_hsr?: boolean
+          is_safety_supervisor?: boolean
           org_id?: string
           role?: string
+          safety_supervisor_designated_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2147,6 +2162,18 @@ export type Database = {
           table_name: string
         }[]
       }
+      can_approve_time: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_manage_employees: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_manage_rewards: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       get_leaderboard: {
         Args: never
         Returns: {
@@ -2191,6 +2218,10 @@ export type Database = {
         }[]
       }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
+      get_user_org_role: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: string
+      }
       has_acknowledged_sop: {
         Args: { _sop_id: string; _user_id: string }
         Returns: boolean
@@ -2207,6 +2238,14 @@ export type Database = {
         Returns: boolean
       }
       is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_foreman: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_office: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }

@@ -64,6 +64,8 @@ import { InvitationsManager } from "@/components/admin/InvitationsManager";
 import { DocumentRelationshipsManager } from "@/components/admin/DocumentRelationshipsManager";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
+import { usePermissions } from "@/hooks/usePermissions";
+import OHSAComplianceCard from "@/components/admin/OHSAComplianceCard";
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
@@ -93,6 +95,9 @@ interface EmployeeData {
   created_at: string;
   role: string;
   is_active: boolean;
+  is_hsr: boolean;
+  is_safety_supervisor: boolean;
+  hsr_training_completed_at: string | null;
 }
 
 const TOTAL_SECTIONS = 5;
@@ -101,6 +106,8 @@ const Admin = () => {
   const { t } = useTranslation();
   const { isAdmin, loading: authLoading } = useAuth();
   const { org } = useOrganization();
+  const perms = usePermissions();
+  const canEnter = perms.isAdmin || perms.isOffice;
   const { canAddUsers, subscription, checkSubscription } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -121,27 +128,27 @@ const Admin = () => {
   const [employeeFilter, setEmployeeFilter] = useState<"active" | "inactive" | "all">("active");
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
+    if (!authLoading && !canEnter) {
       navigate("/");
     }
-  }, [isAdmin, authLoading, navigate]);
+  }, [canEnter, authLoading, navigate]);
 
   useEffect(() => {
-    if (isAdmin && org?.id) {
+    if (canEnter && org?.id) {
       fetchRedemptionRequests();
       fetchEmployees();
     }
-  }, [isAdmin, org?.id]);
+  }, [canEnter, org?.id]);
 
   const fetchEmployees = async () => {
     if (!org?.id) return;
     
     setLoadingEmployees(true);
     try {
-      // Fetch org_users for this org (includes role and is_active)
+      // Fetch org_users for this org (includes role, is_active and OHSA flags)
       const { data: orgUsers, error: orgUsersError } = await supabase
         .from("org_users")
-        .select("user_id, role, is_active")
+        .select("user_id, role, is_active, is_hsr, is_safety_supervisor, hsr_training_completed_at")
         .eq("org_id", org.id);
 
       if (orgUsersError) throw orgUsersError;
@@ -188,7 +195,7 @@ const Admin = () => {
 
         const employeeData: EmployeeData[] = profiles.map(profile => {
           const balance = balanceMap.get(profile.user_id);
-          const orgUser = orgUserMap.get(profile.user_id);
+          const orgUser = orgUserMap.get(profile.user_id) as any;
           return {
             user_id: profile.user_id,
             full_name: profile.full_name,
@@ -199,6 +206,9 @@ const Admin = () => {
             created_at: profile.created_at,
             role: orgUser?.role || "employee",
             is_active: orgUser?.is_active ?? true,
+            is_hsr: orgUser?.is_hsr ?? false,
+            is_safety_supervisor: orgUser?.is_safety_supervisor ?? false,
+            hsr_training_completed_at: orgUser?.hsr_training_completed_at ?? null,
           };
         });
 
@@ -409,7 +419,7 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin) {
+  if (!canEnter) {
     return null;
   }
 
@@ -428,49 +438,67 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9 max-w-6xl">
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Analytics</span>
-          </TabsTrigger>
-          <TabsTrigger value="billing" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            <span className="hidden sm:inline">Billing</span>
-          </TabsTrigger>
-          <TabsTrigger value="branding" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Branding</span>
-          </TabsTrigger>
-          <TabsTrigger value="drive" className="flex items-center gap-2">
-            <Cloud className="h-4 w-4" />
-            <span className="hidden sm:inline">Drive</span>
-          </TabsTrigger>
-          <TabsTrigger value="ai" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            <span className="hidden sm:inline">AI</span>
-          </TabsTrigger>
-          <TabsTrigger value="employees" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Employees</span>
-          </TabsTrigger>
-          <TabsTrigger value="rewards" className="flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
-            <span className="hidden sm:inline">Rewards</span>
-          </TabsTrigger>
-          <TabsTrigger value="redemptions" className="flex items-center gap-2">
-            <Gift className="h-4 w-4" />
-            <span className="hidden sm:inline">Requests</span>
-            {pendingRequests.length > 0 && (
-              <Badge variant="destructive" className="ml-1">
-                {pendingRequests.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="refs" className="flex items-center gap-2">
-            <Link2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Refs</span>
-          </TabsTrigger>
+      <Tabs defaultValue={perms.isAdmin ? "analytics" : "employees"} className="space-y-6">
+        <TabsList className="flex flex-wrap w-full max-w-6xl gap-1 h-auto">
+          {perms.isAdmin && (
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageBilling && (
+            <TabsTrigger value="billing" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Billing</span>
+            </TabsTrigger>
+          )}
+          {perms.canConfigureOrg && (
+            <TabsTrigger value="branding" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Branding</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageDrive && (
+            <TabsTrigger value="drive" className="flex items-center gap-2">
+              <Cloud className="h-4 w-4" />
+              <span className="hidden sm:inline">Drive</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageAi && (
+            <TabsTrigger value="ai" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              <span className="hidden sm:inline">AI</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageEmployees && (
+            <TabsTrigger value="employees" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Employees</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageRewards && (
+            <TabsTrigger value="rewards" className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              <span className="hidden sm:inline">Rewards</span>
+            </TabsTrigger>
+          )}
+          {perms.canManageRewards && (
+            <TabsTrigger value="redemptions" className="flex items-center gap-2">
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline">Requests</span>
+              {pendingRequests.length > 0 && (
+                <Badge variant="destructive" className="ml-1">
+                  {pendingRequests.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          )}
+          {perms.isAdmin && (
+            <TabsTrigger value="refs" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Refs</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="analytics">
@@ -506,9 +534,11 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
+          <OHSAComplianceCard refreshKey={employees.length} />
           <ReackStatusCard />
           <OrgReackSettingsCard />
           <InvitationsManager />
+
 
 
           {/* Employee Table */}
@@ -578,9 +608,21 @@ const Admin = () => {
                       {employees.filter(e => employeeFilter === "all" ? true : employeeFilter === "active" ? e.is_active : !e.is_active).map((employee) => (
                         <TableRow key={employee.user_id}>
                           <TableCell>
-                            <div>
-                              <p className="font-medium">{employee.full_name}</p>
-                              <p className="text-sm text-muted-foreground">{employee.email}</p>
+                            <div className="flex items-start gap-2">
+                              <div>
+                                <p className="font-medium flex items-center gap-1.5 flex-wrap">
+                                  {employee.full_name}
+                                  {employee.is_hsr && (
+                                    <Badge className="bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/30 hover:bg-orange-500/20" variant="outline">
+                                      HSR
+                                    </Badge>
+                                  )}
+                                  {employee.is_safety_supervisor && (
+                                    <ShieldCheck className="h-4 w-4 text-emerald-600" aria-label="Safety Supervisor" />
+                                  )}
+                                </p>
+                                <p className="text-sm text-muted-foreground">{employee.email}</p>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell>

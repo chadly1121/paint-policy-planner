@@ -45,8 +45,15 @@ Deno.serve(async (req) => {
       .eq("is_active", true)
       .maybeSingle();
 
-    if (orgUserErr || !callerOrgUser || callerOrgUser.role !== "admin") {
-      return new Response(JSON.stringify({ error: "Forbidden — admin only" }), {
+    if (orgUserErr || !callerOrgUser || (callerOrgUser.role !== "admin" && callerOrgUser.role !== "office")) {
+      return new Response(JSON.stringify({ error: "Forbidden — admin or office only" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Only admins can create other admins
+    const requestedRole = (await req.clone().json())?.role ?? "painter";
+    if (requestedRole === "admin" && callerOrgUser.role !== "admin") {
+      return new Response(JSON.stringify({ error: "Only admins can create admin accounts" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

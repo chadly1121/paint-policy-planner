@@ -19,8 +19,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrganizationContext";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -41,9 +41,10 @@ interface NavSection {
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isOffice } = usePermissions();
   const { org } = useOrg();
   const [searchQuery, setSearchQuery] = useState("");
+  const showAdminSection = isAdmin || isOffice;
 
   const navSections: NavSection[] = [
     {
@@ -73,7 +74,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         { path: "/settings", label: t("nav.settings"), icon: Settings },
       ],
     },
-    ...(isAdmin
+    ...(showAdminSection
       ? [
           {
             group: t("nav.adminOnly"),
