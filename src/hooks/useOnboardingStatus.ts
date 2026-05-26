@@ -48,7 +48,18 @@ export const useOnboardingStatus = () => {
     check();
   }, [check]);
 
-  const dismiss = () => setShouldShow(false);
+  const dismiss = useCallback(async () => {
+    setShouldShow(false);
+    if (!user?.id) return;
+    try {
+      await supabase
+        .from("profiles")
+        .update({ onboarding_completed_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+    } catch (e) {
+      console.error("Failed to persist onboarding dismissal", e);
+    }
+  }, [user?.id]);
 
   return { shouldShow, loading, refresh: check, dismiss };
 };
