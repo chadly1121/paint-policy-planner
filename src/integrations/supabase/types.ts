@@ -1060,6 +1060,65 @@ export type Database = {
           },
         ]
       }
+      org_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by_user: string | null
+          created_at: string
+          email: string
+          expired_notice_sent_at: string | null
+          expires_at: string
+          full_name: string | null
+          id: string
+          invitation_token: string
+          invited_by: string
+          org_id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          role: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by_user?: string | null
+          created_at?: string
+          email: string
+          expired_notice_sent_at?: string | null
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invitation_token?: string
+          invited_by: string
+          org_id: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by_user?: string | null
+          created_at?: string
+          email?: string
+          expired_notice_sent_at?: string | null
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invitation_token?: string
+          invited_by?: string
+          org_id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_invitations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_settings: {
         Row: {
           cert_reminder_days_first: number

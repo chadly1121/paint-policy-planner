@@ -116,3 +116,15 @@ verify_jwt = false
 
 [functions.check-resend-status]
 verify_jwt = false
+
+[functions.send-invitation]
+verify_jwt = false
+
+[functions.validate-invitation]
+verify_jwt = false
+
+[functions.accept-invitation]
+verify_jwt = false
+
+[functions.expire-invitations-cron]
+verify_jwt = false

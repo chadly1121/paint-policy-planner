@@ -25,6 +25,7 @@ import Pricing from "./pages/Pricing";
 import DocumentBuilder from "./pages/DocumentBuilder";
 import IncidentReports from "./pages/IncidentReports";
 import DriveAuthComplete from "./pages/DriveAuthComplete";
+import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import { DocPreviewProvider } from "@/contexts/DocPreviewContext";
 import { DocPreviewDrawer } from "@/components/docref/DocPreviewDrawer";
@@ -47,6 +48,7 @@ const App = () => (
             <DocPreviewProvider>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/accept-invite" element={<AcceptInvite />} />
                 <Route path="/drive-auth-complete" element={<DriveAuthComplete />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
