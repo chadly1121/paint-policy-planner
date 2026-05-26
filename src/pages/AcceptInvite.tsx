@@ -179,7 +179,7 @@ export default function AcceptInvite() {
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {info && !info.valid && (
+          {info && info.valid === false && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 flex gap-3">
               <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               <p className="text-sm">{reasonText[info.reason]}</p>
