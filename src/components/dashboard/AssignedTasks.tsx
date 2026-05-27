@@ -134,6 +134,7 @@ const AssignedTasks = () => {
   }
 
   if (pendingItems.length === 0) {
+    const hasAnyCompletion = completedAckCount > 0;
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -143,10 +144,20 @@ const AssignedTasks = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>All caught up! No pending tasks.</span>
-          </div>
+          {hasAnyCompletion ? (
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>All caught up! No pending tasks.</span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No tasks assigned yet.{" "}
+              <Link to="/policies" className="text-primary underline-offset-2 hover:underline">
+                Browse Company Policies
+              </Link>{" "}
+              to get started.
+            </p>
+          )}
         </CardContent>
       </Card>
     );
