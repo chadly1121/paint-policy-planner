@@ -439,7 +439,7 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue={perms.isAdmin ? "analytics" : "employees"} className="space-y-6">
+      <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="space-y-6">
         <TabsList className="flex flex-wrap w-full max-w-6xl gap-1 h-auto">
           {perms.isAdmin && (
             <TabsTrigger value="analytics" className="flex items-center gap-2">
