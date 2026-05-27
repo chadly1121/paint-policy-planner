@@ -546,7 +546,11 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
-          <OHSAComplianceCard refreshKey={employees.length} />
+          <OHSAComplianceCard
+            refreshKey={employees.length}
+            onOpenComplianceTab={() => setActiveAdminTab("compliance")}
+          />
+
           <ReackStatusCard />
           <OrgReackSettingsCard />
           <InvitationsManager />
