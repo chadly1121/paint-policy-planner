@@ -5,14 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Search, RefreshCw, Loader2, FolderOpen, FilePlus } from "lucide-react";
+import { Search, RefreshCw, Loader2, FolderOpen } from "lucide-react";
 import { useDriveFiles, type DriveFile } from "@/hooks/useDriveFiles";
 import { DriveDocumentCard } from "./DriveDocumentCard";
 import { useDriveConnection } from "@/hooks/useDriveConnection";
 import { useSectionItemProgress } from "@/hooks/useSectionItemProgress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CreateDriveDocumentDialog, type DriveFolderType } from "./CreateDriveDocumentDialog";
 
 interface DriveDocumentListProps {
   moduleType: "sops" | "policies" | "safety" | "training" | "disciplinary" | "forms";
@@ -32,8 +31,6 @@ export function DriveDocumentList({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { files, loading, error, refresh } = useDriveFiles(moduleType);
   const { folders } = useDriveConnection();
   const { isItemCompleted, refreshProgress, getCompletedItemCount } = useSectionItemProgress(moduleType);
@@ -47,7 +44,7 @@ export function DriveDocumentList({
     const nonTemplateFiles = files.filter(file => !file.name.startsWith('_TEMPLATE'));
     if (!searchQuery.trim()) return nonTemplateFiles;
     const query = searchQuery.toLowerCase();
-    return nonTemplateFiles.filter(file => 
+    return nonTemplateFiles.filter(file =>
       file.name.toLowerCase().includes(query)
     );
   }, [files, searchQuery]);
@@ -95,48 +92,6 @@ export function DriveDocumentList({
     }
   };
 
-  // Create new doc using backend function (copies template server-side + auto-names)
-  const createNewFromTemplate = async (folderType: DriveFolderType) => {
-    setIsCreating(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
-
-      const response = await supabase.functions.invoke("drive-create-from-template", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        body: {
-          folder_type: folderType,
-        },
-      });
-
-      if (response.error) throw response.error;
-
-      const fromTemplate = response.data.from_template ? " (from template)" : "";
-      const createdName = response.data.file_name ?? "New document";
-      toast({
-        title: "Document created",
-        description: `"${createdName}" created${fromTemplate}`,
-      });
-
-      // Open in new tab for editing
-      if (response.data.web_view_link) {
-        window.open(response.data.web_view_link, "_blank");
-      }
-
-      // Refresh the file list
-      await refresh();
-    } catch (err) {
-      console.error("Create error:", err);
-      toast({
-        variant: "destructive",
-        title: "Failed to create document",
-        description: err instanceof Error ? err.message : "Unknown error",
-      });
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -178,21 +133,6 @@ export function DriveDocumentList({
             {/* Buttons: wrap on small screens */}
             <div className="flex flex-wrap items-center gap-2">
               <Button
-                variant="default"
-                size="sm"
-                onClick={() => setCreateDialogOpen(true)}
-                disabled={isCreating}
-                className="gap-2"
-              >
-                {isCreating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <FilePlus className="h-4 w-4" />
-                )}
-                <span className="hidden xs:inline">{isCreating ? "Creating..." : "Create New"}</span>
-                <span className="xs:hidden">{isCreating ? "..." : "New"}</span>
-              </Button>
-              <Button
                 variant="outline"
                 size="sm"
                 onClick={handleRefresh}
@@ -222,7 +162,7 @@ export function DriveDocumentList({
             </div>
             <Progress value={progressPercent} className="h-2" />
           </div>
-          
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -242,24 +182,14 @@ export function DriveDocumentList({
             <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="font-medium text-lg mb-2">No documents yet</h3>
             <p className="text-muted-foreground mb-4">
-              Create a new document or add files directly in Google Drive.
+              Upload .docx files to this folder in Google Drive, then click Refresh.
             </p>
-            <div className="flex gap-2 justify-center">
-              <Button onClick={() => setCreateDialogOpen(true)} disabled={isCreating}>
-                {isCreating ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FilePlus className="h-4 w-4 mr-2" />
-                )}
-                Create New
+            {folderRecord && (
+              <Button variant="outline" onClick={openInDrive}>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Open Folder
               </Button>
-              {folderRecord && (
-                <Button variant="outline" onClick={openInDrive}>
-                  <FolderOpen className="h-4 w-4 mr-2" />
-                  Open Folder
-                </Button>
-              )}
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -284,14 +214,6 @@ export function DriveDocumentList({
           {t("common.noResults")} "{searchQuery}"
         </p>
       )}
-
-      <CreateDriveDocumentDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        defaultFolderType={moduleType as DriveFolderType}
-        isCreating={isCreating}
-        onCreate={createNewFromTemplate}
-      />
     </div>
   );
 }
