@@ -127,6 +127,7 @@ const Admin = () => {
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
   const [employeeFilter, setEmployeeFilter] = useState<"active" | "inactive" | "all">("active");
+  const [activeAdminTab, setActiveAdminTab] = useState<string>(perms.isAdmin ? "analytics" : "employees");
 
   useEffect(() => {
     if (!authLoading && !canEnter) {
@@ -439,7 +440,7 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue={perms.isAdmin ? "analytics" : "employees"} className="space-y-6">
+      <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab} className="space-y-6">
         <TabsList className="flex flex-wrap w-full max-w-6xl gap-1 h-auto">
           {perms.isAdmin && (
             <TabsTrigger value="analytics" className="flex items-center gap-2">
@@ -545,7 +546,11 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">
-          <OHSAComplianceCard refreshKey={employees.length} />
+          <OHSAComplianceCard
+            refreshKey={employees.length}
+            onOpenComplianceTab={() => setActiveAdminTab("compliance")}
+          />
+
           <ReackStatusCard />
           <OrgReackSettingsCard />
           <InvitationsManager />

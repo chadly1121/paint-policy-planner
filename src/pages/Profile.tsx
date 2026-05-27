@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,19 +11,23 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, User, Award, FileText, Trophy, Save, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployeeProfile } from "@/hooks/useEmployeeProfile";
+import { useOrg } from "@/contexts/OrganizationContext";
+import { supabase } from "@/integrations/supabase/client";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import CertificateCard from "@/components/profile/CertificateCard";
 import AwardCard from "@/components/profile/AwardCard";
-import AddCertificateDialog from "@/components/profile/AddCertificateDialog";
+import AddCertificateDialog, { AddCertificateDialogHandle } from "@/components/profile/AddCertificateDialog";
 import AddAwardDialog from "@/components/profile/AddAwardDialog";
 import ExpiryReminders from "@/components/profile/ExpiryReminders";
 import RedemptionHistory from "@/components/profile/RedemptionHistory";
+import RequiredCertificationsCard from "@/components/profile/RequiredCertificationsCard";
 
 const Profile = () => {
   const { userId } = useParams<{ userId?: string }>();
   const { t } = useTranslation();
   const { toast } = useToast();
-  
+  const { org } = useOrg();
+
   const {
     profile,
     certificates,
@@ -42,11 +46,28 @@ const Profile = () => {
   const [editingBio, setEditingBio] = useState(false);
   const [bio, setBio] = useState("");
   const [savingBio, setSavingBio] = useState(false);
+  const [requiredOptions, setRequiredOptions] = useState<{ cert_type: string; cert_display_name: string }[]>([]);
+  const [reqRefresh, setReqRefresh] = useState(0);
+  const addCertDialogRef = useRef<AddCertificateDialogHandle>(null);
+
+  useEffect(() => {
+    if (!org?.id) return;
+    (supabase as any)
+      .from("org_cert_requirements")
+      .select("cert_type, cert_display_name")
+      .eq("org_id", org.id)
+      .eq("is_active", true)
+      .order("cert_display_name")
+      .then(({ data }: any) => {
+        if (data) setRequiredOptions(data);
+      });
+  }, [org?.id]);
 
   const handleEditBio = () => {
     setBio(profile?.bio || "");
     setEditingBio(true);
   };
+
 
   const handleSaveBio = async () => {
     setSavingBio(true);
@@ -196,6 +217,16 @@ const Profile = () => {
         </TabsList>
 
         <TabsContent value="certificates" className="space-y-4">
+          {isOwnProfile && (
+            <RequiredCertificationsCard
+              userId={userId!}
+              isOwnProfile={isOwnProfile}
+              refreshKey={reqRefresh}
+              onUploadClick={({ certType, displayName }) =>
+                addCertDialogRef.current?.openWithPrefill({ certType, displayName })
+              }
+            />
+          )}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -210,7 +241,13 @@ const Profile = () => {
                 </div>
                 {isOwnProfile && (
                   <AddCertificateDialog
-                    onAdd={addCertificate}
+                    ref={addCertDialogRef}
+                    requiredOptions={requiredOptions}
+                    onAdd={async (cert) => {
+                      const res = await addCertificate(cert);
+                      if (!res.error) setReqRefresh((k) => k + 1);
+                      return res;
+                    }}
                     onUpload={handleCertificateUpload}
                   />
                 )}
@@ -244,6 +281,7 @@ const Profile = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="awards" className="space-y-4">
           <Card>
