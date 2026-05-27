@@ -217,6 +217,16 @@ const Profile = () => {
         </TabsList>
 
         <TabsContent value="certificates" className="space-y-4">
+          {isOwnProfile && (
+            <RequiredCertificationsCard
+              userId={userId!}
+              isOwnProfile={isOwnProfile}
+              refreshKey={reqRefresh}
+              onUploadClick={({ certType, displayName }) =>
+                addCertDialogRef.current?.openWithPrefill({ certType, displayName })
+              }
+            />
+          )}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -231,7 +241,13 @@ const Profile = () => {
                 </div>
                 {isOwnProfile && (
                   <AddCertificateDialog
-                    onAdd={addCertificate}
+                    ref={addCertDialogRef}
+                    requiredOptions={requiredOptions}
+                    onAdd={async (cert) => {
+                      const res = await addCertificate(cert);
+                      if (!res.error) setReqRefresh((k) => k + 1);
+                      return res;
+                    }}
                     onUpload={handleCertificateUpload}
                   />
                 )}
@@ -265,6 +281,7 @@ const Profile = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="awards" className="space-y-4">
           <Card>
