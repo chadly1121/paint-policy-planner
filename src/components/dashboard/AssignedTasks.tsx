@@ -16,6 +16,7 @@ interface PendingItem {
 const AssignedTasks = () => {
   const { user } = useAuth();
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
+  const [completedAckCount, setCompletedAckCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +44,13 @@ const AssignedTasks = () => {
             .filter((f: { name: string }) => !f.name.startsWith("_TEMPLATE"))
             .map((f: { id: string }) => f.id)
         );
+
+        // Count total completed acknowledgments for empty-state branching
+        const { count: ackCount } = await supabase
+          .from("sop_acks")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        setCompletedAckCount(ackCount ?? 0);
 
         if (actualDriveFileIds.size === 0) {
           setPendingItems([]);
