@@ -63,9 +63,11 @@ const Profile = () => {
       });
   }, [org?.id]);
 
+  const handleEditBio = () => {
     setBio(profile?.bio || "");
     setEditingBio(true);
   };
+
 
   const handleSaveBio = async () => {
     setSavingBio(true);
