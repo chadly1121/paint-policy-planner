@@ -275,28 +275,17 @@ export function DriveTestPanel() {
           </Alert>
         )}
 
-        {/* Step 1: Create Test Doc */}
+        {/* Step 1: Provide a File ID */}
         <div className="space-y-3">
-          <h4 className="font-medium">Step 1: Create Test Document</h4>
+          <h4 className="font-medium">Step 1: Target File ID</h4>
           <p className="text-sm text-muted-foreground">
-            Creates a native Google Doc in your SOPs folder
+            Paste a Google Drive file ID (from a doc you uploaded) to run the tests below against it.
           </p>
-          <Button 
-            onClick={handleCreateTestDoc} 
-            disabled={isCreatingDoc}
-          >
-            {isCreatingDoc ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <FileUp className="h-4 w-4 mr-2" />
-            )}
-            Create Test Document
-          </Button>
-          {testFileId && (
-            <p className="text-sm text-muted-foreground">
-              File ID: <code className="bg-muted px-1 rounded">{testFileId}</code>
-            </p>
-          )}
+          <Input
+            placeholder="e.g. 1AbCdEfGhIjKlMnOpQrStUvWxYz"
+            value={testFileId ?? ''}
+            onChange={(e) => setTestFileId(e.target.value.trim() || null)}
+          />
         </div>
 
         <Separator />
