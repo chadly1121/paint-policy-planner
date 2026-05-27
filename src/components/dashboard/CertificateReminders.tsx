@@ -1,3 +1,4 @@
+// TODO: surface required certs by role (WAH for painters, etc.) — see roadmap
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ interface ExpiringCert {
 const CertificateReminders = () => {
   const { user } = useAuth();
   const [expiringCerts, setExpiringCerts] = useState<ExpiringCert[]>([]);
+  const [totalCertCount, setTotalCertCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,15 +26,19 @@ const CertificateReminders = () => {
       if (!user) return;
 
       try {
+        // Pull all certs so we can distinguish "none uploaded" from "all up to date"
         const { data } = await supabase
           .from("certificates")
           .select("id, name, expiry_date")
           .eq("user_id", user.id)
-          .not("expiry_date", "is", null)
-          .order("expiry_date", { ascending: true });
+          .order("expiry_date", { ascending: true, nullsFirst: false });
+
+        const all = data || [];
+        setTotalCertCount(all.length);
 
         const now = new Date();
-        const expiring = (data || [])
+        const expiring = all
+          .filter((cert) => cert.expiry_date)
           .map((cert) => ({
             ...cert,
             expiry_date: cert.expiry_date!,
@@ -84,6 +90,7 @@ const CertificateReminders = () => {
   }
 
   if (expiringCerts.length === 0) {
+    const hasAnyCerts = totalCertCount > 0;
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -93,10 +100,20 @@ const CertificateReminders = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>All certificates are up to date!</span>
-          </div>
+          {hasAnyCerts ? (
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>All certificates are up to date!</span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No certificates uploaded yet. Add your Working at Heights, WHMIS, and other training certificates from your{" "}
+              <Link to="/profile" className="text-primary underline-offset-2 hover:underline">
+                Profile page
+              </Link>
+              .
+            </p>
+          )}
         </CardContent>
       </Card>
     );

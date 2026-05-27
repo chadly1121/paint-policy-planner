@@ -16,6 +16,7 @@ interface PendingItem {
 const AssignedTasks = () => {
   const { user } = useAuth();
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
+  const [completedAckCount, setCompletedAckCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +44,13 @@ const AssignedTasks = () => {
             .filter((f: { name: string }) => !f.name.startsWith("_TEMPLATE"))
             .map((f: { id: string }) => f.id)
         );
+
+        // Count total completed acknowledgments for empty-state branching
+        const { count: ackCount } = await supabase
+          .from("sop_acks")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        setCompletedAckCount(ackCount ?? 0);
 
         if (actualDriveFileIds.size === 0) {
           setPendingItems([]);
@@ -126,6 +134,7 @@ const AssignedTasks = () => {
   }
 
   if (pendingItems.length === 0) {
+    const hasAnyCompletion = completedAckCount > 0;
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -135,10 +144,20 @@ const AssignedTasks = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>All caught up! No pending tasks.</span>
-          </div>
+          {hasAnyCompletion ? (
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>All caught up! No pending tasks.</span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No tasks assigned yet.{" "}
+              <Link to="/policies" className="text-primary underline-offset-2 hover:underline">
+                Browse Company Policies
+              </Link>{" "}
+              to get started.
+            </p>
+          )}
         </CardContent>
       </Card>
     );
