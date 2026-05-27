@@ -120,3 +120,6 @@ verify_jwt = false
 
 [functions.expire-invitations-cron]
 verify_jwt = false
+
+[functions.cert-compliance-check]
+verify_jwt = false

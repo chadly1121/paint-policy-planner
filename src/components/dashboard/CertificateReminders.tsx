@@ -2,72 +2,58 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, AlertTriangle, Calendar, CheckCircle2 } from "lucide-react";
+import { Award, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { differenceInDays, format } from "date-fns";
+import { useOrg } from "@/contexts/OrganizationContext";
 import { Link } from "react-router-dom";
 
-interface ExpiringCert {
-  id: string;
-  name: string;
-  expiry_date: string;
-  daysLeft: number;
+interface ComplianceRow {
+  cert_type: string;
+  cert_display_name: string;
+  status: "missing" | "expired" | "expiring_soon" | "valid" | "no_expiry";
+  days_until_expiry: number | null;
+}
+
+const SHOW = new Set(["missing", "expired", "expiring_soon"]);
+
+function rank(s: ComplianceRow["status"]) {
+  if (s === "missing") return 0;
+  if (s === "expired") return 1;
+  return 2;
+}
+
+function label(r: ComplianceRow) {
+  if (r.status === "missing") return "Missing";
+  if (r.status === "expired") return `Expired ${Math.abs(r.days_until_expiry ?? 0)}d ago`;
+  return `Expires in ${r.days_until_expiry}d`;
+}
+
+function variant(s: ComplianceRow["status"]) {
+  return s === "expiring_soon" ? ("secondary" as const) : ("destructive" as const);
 }
 
 const CertificateReminders = () => {
   const { user } = useAuth();
-  const [expiringCerts, setExpiringCerts] = useState<ExpiringCert[]>([]);
-  const [totalCertCount, setTotalCertCount] = useState(0);
+  const { org } = useOrg();
+  const [rows, setRows] = useState<ComplianceRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCerts = async () => {
-      if (!user) return;
-
-      try {
-        // Pull all certs so we can distinguish "none uploaded" from "all up to date"
-        const { data } = await supabase
-          .from("certificates")
-          .select("id, name, expiry_date")
-          .eq("user_id", user.id)
-          .order("expiry_date", { ascending: true, nullsFirst: false });
-
-        const all = data || [];
-        setTotalCertCount(all.length);
-
-        const now = new Date();
-        const expiring = all
-          .filter((cert) => cert.expiry_date)
-          .map((cert) => ({
-            ...cert,
-            expiry_date: cert.expiry_date!,
-            daysLeft: differenceInDays(new Date(cert.expiry_date!), now),
-          }))
-          .filter((cert) => cert.daysLeft <= 30);
-
-        setExpiringCerts(expiring);
-      } catch (error) {
-        console.error("Error fetching certificates:", error);
-      } finally {
-        setLoading(false);
-      }
+    const load = async () => {
+      if (!user || !org?.id) return;
+      setLoading(true);
+      const { data } = await (supabase as any).rpc("get_user_cert_compliance", {
+        _user_id: user.id,
+        _org_id: org.id,
+      });
+      const all = ((data || []) as ComplianceRow[]).filter((r) => SHOW.has(r.status));
+      all.sort((a, b) => rank(a.status) - rank(b.status));
+      setRows(all);
+      setLoading(false);
     };
-
-    fetchCerts();
-  }, [user]);
-
-  const getStatusColor = (daysLeft: number) => {
-    if (daysLeft <= 0) return "destructive";
-    if (daysLeft <= 14) return "destructive";
-    return "secondary";
-  };
-
-  const getStatusText = (daysLeft: number) => {
-    if (daysLeft <= 0) return "Expired";
-    if (daysLeft === 1) return "1 day left";
-    return `${daysLeft} days left`;
-  };
+    void load();
+  }, [user, org?.id]);
 
   if (loading) {
     return (
@@ -79,18 +65,13 @@ const CertificateReminders = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-10 animate-pulse rounded bg-muted" />
-            ))}
-          </div>
+          <div className="h-10 animate-pulse rounded bg-muted" />
         </CardContent>
       </Card>
     );
   }
 
-  if (expiringCerts.length === 0) {
-    const hasAnyCerts = totalCertCount > 0;
+  if (rows.length === 0) {
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -100,24 +81,16 @@ const CertificateReminders = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {hasAnyCerts ? (
-            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <CheckCircle2 className="h-4 w-4" />
-              <span>All certificates are up to date!</span>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No certificates uploaded yet. Add your Working at Heights, WHMIS, and other training certificates from your{" "}
-              <Link to="/profile" className="text-primary underline-offset-2 hover:underline">
-                Profile page
-              </Link>
-              .
-            </p>
-          )}
+          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+            <CheckCircle2 className="h-4 w-4" />
+            <span>All required certifications are valid.</span>
+          </div>
         </CardContent>
       </Card>
     );
   }
+
+  const hasUrgent = rows.some((r) => r.status === "missing" || r.status === "expired");
 
   return (
     <Card>
@@ -127,30 +100,22 @@ const CertificateReminders = () => {
             <Award className="h-4 w-4" />
             Certificate Reminders
           </span>
-          {expiringCerts.some((c) => c.daysLeft <= 14) && (
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          )}
+          {hasUrgent && <AlertTriangle className="h-4 w-4 text-destructive" />}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-3">
-          {expiringCerts.map((cert) => (
-            <li key={cert.id}>
+        <ul className="space-y-2">
+          {rows.map((r) => (
+            <li key={r.cert_type}>
               <Link
                 to="/profile"
                 className="flex items-start justify-between gap-3 rounded-md p-2 -mx-2 hover:bg-muted transition-colors"
               >
-                <div className="flex items-start gap-3 min-w-0">
-                  <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{cert.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(cert.expiry_date), "MMM d, yyyy")}
-                    </p>
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{r.cert_display_name}</p>
                 </div>
-                <Badge variant={getStatusColor(cert.daysLeft)} className="shrink-0 text-xs">
-                  {getStatusText(cert.daysLeft)}
+                <Badge variant={variant(r.status)} className="shrink-0 text-xs">
+                  {label(r)}
                 </Badge>
               </Link>
             </li>
