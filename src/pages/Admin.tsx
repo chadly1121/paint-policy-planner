@@ -127,6 +127,7 @@ const Admin = () => {
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
   const [employeeFilter, setEmployeeFilter] = useState<"active" | "inactive" | "all">("active");
+  const [activeAdminTab, setActiveAdminTab] = useState<string>(perms.isAdmin ? "analytics" : "employees");
 
   useEffect(() => {
     if (!authLoading && !canEnter) {
