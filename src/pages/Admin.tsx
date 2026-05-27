@@ -66,6 +66,7 @@ import { useOrganization } from "@/hooks/useOrganization";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import OHSAComplianceCard from "@/components/admin/OHSAComplianceCard";
+import ComplianceTab from "@/components/admin/ComplianceTab";
 const employeeSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email address" }).max(255),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
@@ -499,6 +500,12 @@ const Admin = () => {
               <span className="hidden sm:inline">Refs</span>
             </TabsTrigger>
           )}
+          {perms.isAdmin && (
+            <TabsTrigger value="compliance" className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              <span className="hidden sm:inline">Compliance</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="analytics">
@@ -531,6 +538,10 @@ const Admin = () => {
         <TabsContent value="refs" className="space-y-6">
           <DocumentRelationshipsManager />
           <BrokenReferencesCard />
+        </TabsContent>
+
+        <TabsContent value="compliance">
+          <ComplianceTab />
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-6">

@@ -100,8 +100,47 @@ export type Database = {
           },
         ]
       }
+      cert_compliance_notices: {
+        Row: {
+          cert_type: string
+          id: string
+          notice_sent_at: string
+          org_id: string
+          status_at_notice: string
+          user_id: string
+          week_bucket: string
+        }
+        Insert: {
+          cert_type: string
+          id?: string
+          notice_sent_at?: string
+          org_id: string
+          status_at_notice: string
+          user_id: string
+          week_bucket?: string
+        }
+        Update: {
+          cert_type?: string
+          id?: string
+          notice_sent_at?: string
+          org_id?: string
+          status_at_notice?: string
+          user_id?: string
+          week_bucket?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cert_compliance_notices_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificates: {
         Row: {
+          cert_type: string | null
           certificate_url: string | null
           created_at: string
           expiry_date: string | null
@@ -115,6 +154,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cert_type?: string | null
           certificate_url?: string | null
           created_at?: string
           expiry_date?: string | null
@@ -128,6 +168,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cert_type?: string | null
           certificate_url?: string | null
           created_at?: string
           expiry_date?: string | null
@@ -956,6 +997,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "org_ai_settings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_cert_requirements: {
+        Row: {
+          cert_display_name: string
+          cert_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          notice_period_days: number
+          org_id: string
+          regulatory_reference: string | null
+          renewal_interval_months: number | null
+          required_for_roles: string[]
+          updated_at: string
+        }
+        Insert: {
+          cert_display_name: string
+          cert_type: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          notice_period_days?: number
+          org_id: string
+          regulatory_reference?: string | null
+          renewal_interval_months?: number | null
+          required_for_roles: string[]
+          updated_at?: string
+        }
+        Update: {
+          cert_display_name?: string
+          cert_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          notice_period_days?: number
+          org_id?: string
+          regulatory_reference?: string | null
+          renewal_interval_months?: number | null
+          required_for_roles?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_cert_requirements_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
@@ -2217,6 +2314,21 @@ export type Database = {
           version: number
         }[]
       }
+      get_user_cert_compliance: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: {
+          cert_display_name: string
+          cert_type: string
+          days_until_expiry: number
+          description: string
+          expiry_date: string
+          latest_cert_id: string
+          notice_period_days: number
+          regulatory_reference: string
+          renewal_interval_months: number
+          status: string
+        }[]
+      }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_role: {
         Args: { _org_id: string; _user_id: string }
@@ -2246,6 +2358,10 @@ export type Database = {
         Returns: boolean
       }
       is_org_office: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_user_cert_compliant: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }

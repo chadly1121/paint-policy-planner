@@ -17,7 +17,10 @@ interface NotificationRequest {
     | "award_granted"
     | "doc_change_alert"
     | "reack_overdue"
-    | "monthly_reack_digest";
+    | "monthly_reack_digest"
+    | "cert_missing"
+    | "cert_expired"
+    | "cert_expiring";
   userId: string;
   data: {
     sectionKey?: string;
@@ -38,8 +41,14 @@ interface NotificationRequest {
     changeSummary?: string;
     reackDeadline?: string;
     forEmployeeName?: string;
+    forEmployeeUserId?: string;
     isAdminCopy?: boolean;
     pendingItems?: Array<{ title: string; deadline: string }>;
+    certType?: string;
+    certDisplayName?: string;
+    regulatoryReference?: string | null;
+    daysUntilExpiry?: number | null;
+    renewalIntervalMonths?: number | null;
   };
 }
 
@@ -449,6 +458,41 @@ serve(async (req: Request): Promise<Response> => {
       }
 
 
+      case "cert_missing":
+      case "cert_expired":
+      case "cert_expiring": {
+        const name = data.certDisplayName ?? data.certType ?? "a required certification";
+        const ref = data.regulatoryReference ? ` (${data.regulatoryReference})` : "";
+        if (type === "cert_missing") {
+          subject = `⚠ Missing required cert: ${name}`;
+          html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #b91c1c;">Required certification missing</h1>
+              <p>Hi ${profile.full_name},</p>
+              <p>You have not uploaded a <strong>${name}</strong> certificate. This is required${ref} for your role.</p>
+              <p>Upload it from your Profile page in SOPed Pro.</p>
+            </div>`;
+        } else if (type === "cert_expired") {
+          subject = `🚨 Expired cert: ${name}`;
+          html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #b91c1c;">Certification expired</h1>
+              <p>Hi ${profile.full_name},</p>
+              <p>Your <strong>${name}</strong> certificate has expired. This is required${ref}. Upload a current certificate as soon as possible.</p>
+            </div>`;
+        } else {
+          const days = data.daysUntilExpiry ?? "soon";
+          const renew = data.renewalIntervalMonths ? ` Renewal interval is ${data.renewalIntervalMonths} months.` : "";
+          subject = `⏰ Cert expiring soon: ${name}`;
+          html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #b45309;">Certification expiring</h1>
+              <p>Hi ${profile.full_name},</p>
+              <p>Your <strong>${name}</strong> certificate expires in <strong>${days} days</strong>.${renew} Schedule renewal training and upload the new certificate.</p>
+            </div>`;
+        }
+        break;
+      }
 
       default:
         throw new Error(`Unknown notification type: ${type}`);

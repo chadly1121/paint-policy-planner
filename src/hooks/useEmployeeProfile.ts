@@ -121,6 +121,7 @@ export const useEmployeeProfile = (targetUserId?: string) => {
 
   const addCertificate = async (certificate: {
     name: string;
+    cert_type?: string;
     issuing_authority?: string;
     certificate_url?: string;
     issue_date?: string;
@@ -135,7 +136,7 @@ export const useEmployeeProfile = (targetUserId?: string) => {
           user_id: user.id,
           org_id: org?.id,
           ...certificate,
-        });
+        } as any);
 
       if (error) throw error;
       await fetchProfile();
