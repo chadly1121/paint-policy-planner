@@ -37,8 +37,6 @@ verify_jwt = false
 [functions.drive-export]
 verify_jwt = false
 
-[functions.drive-create-test-doc]
-verify_jwt = false
 
 [functions.drive-share]
 verify_jwt = false
@@ -55,8 +53,6 @@ verify_jwt = false
 [functions.drive-sync-titles]
 verify_jwt = false
 
-[functions.drive-create-from-template]
-verify_jwt = false
 
 [functions.translate-content]
 verify_jwt = false
