@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,13 +11,16 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, User, Award, FileText, Trophy, Save, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployeeProfile } from "@/hooks/useEmployeeProfile";
+import { useOrg } from "@/contexts/OrganizationContext";
+import { supabase } from "@/integrations/supabase/client";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import CertificateCard from "@/components/profile/CertificateCard";
 import AwardCard from "@/components/profile/AwardCard";
-import AddCertificateDialog from "@/components/profile/AddCertificateDialog";
+import AddCertificateDialog, { AddCertificateDialogHandle } from "@/components/profile/AddCertificateDialog";
 import AddAwardDialog from "@/components/profile/AddAwardDialog";
 import ExpiryReminders from "@/components/profile/ExpiryReminders";
 import RedemptionHistory from "@/components/profile/RedemptionHistory";
+import RequiredCertificationsCard from "@/components/profile/RequiredCertificationsCard";
 
 const Profile = () => {
   const { userId } = useParams<{ userId?: string }>();
