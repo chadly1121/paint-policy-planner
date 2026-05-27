@@ -26,7 +26,8 @@ const Profile = () => {
   const { userId } = useParams<{ userId?: string }>();
   const { t } = useTranslation();
   const { toast } = useToast();
-  
+  const { org } = useOrg();
+
   const {
     profile,
     certificates,
@@ -45,8 +46,23 @@ const Profile = () => {
   const [editingBio, setEditingBio] = useState(false);
   const [bio, setBio] = useState("");
   const [savingBio, setSavingBio] = useState(false);
+  const [requiredOptions, setRequiredOptions] = useState<{ cert_type: string; cert_display_name: string }[]>([]);
+  const [reqRefresh, setReqRefresh] = useState(0);
+  const addCertDialogRef = useRef<AddCertificateDialogHandle>(null);
 
-  const handleEditBio = () => {
+  useEffect(() => {
+    if (!org?.id) return;
+    (supabase as any)
+      .from("org_cert_requirements")
+      .select("cert_type, cert_display_name")
+      .eq("org_id", org.id)
+      .eq("is_active", true)
+      .order("cert_display_name")
+      .then(({ data }: any) => {
+        if (data) setRequiredOptions(data);
+      });
+  }, [org?.id]);
+
     setBio(profile?.bio || "");
     setEditingBio(true);
   };
