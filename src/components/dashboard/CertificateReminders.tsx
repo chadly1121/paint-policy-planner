@@ -90,6 +90,7 @@ const CertificateReminders = () => {
   }
 
   if (expiringCerts.length === 0) {
+    const hasAnyCerts = totalCertCount > 0;
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -99,10 +100,20 @@ const CertificateReminders = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>All certificates are up to date!</span>
-          </div>
+          {hasAnyCerts ? (
+            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>All certificates are up to date!</span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No certificates uploaded yet. Add your Working at Heights, WHMIS, and other training certificates from your{" "}
+              <Link to="/profile" className="text-primary underline-offset-2 hover:underline">
+                Profile page
+              </Link>
+              .
+            </p>
+          )}
         </CardContent>
       </Card>
     );
