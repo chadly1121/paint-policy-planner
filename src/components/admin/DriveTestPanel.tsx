@@ -10,14 +10,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDriveConnection } from '@/hooks/useDriveConnection';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  FileText, 
-  Download, 
-  Mail, 
+import {
+  FileText,
+  Download,
+  Mail,
   Loader2,
   CheckCircle,
   AlertCircle,
-  FileUp,
   Link,
   Send,
   ChevronDown
@@ -27,7 +26,6 @@ type SendFormat = 'gdoc' | 'docx' | 'pdf';
 
 export function DriveTestPanel() {
   const { isConnected, hasFolders, primaryToken } = useDriveConnection();
-  const [isCreatingDoc, setIsCreatingDoc] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [testFileId, setTestFileId] = useState<string | null>(null);
@@ -45,34 +43,6 @@ export function DriveTestPanel() {
     setShareLink(null);
   };
 
-  const handleCreateTestDoc = async () => {
-    clearMessages();
-    setIsCreatingDoc(true);
-    
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-
-      const response = await supabase.functions.invoke('drive-create-test-doc', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        body: { 
-          title: `Test Document - ${new Date().toISOString()}`,
-          content: `# Test Document\n\nThis is a test document created at ${new Date().toLocaleString()}\n\n## Purpose\nThis document was created to test the Google Drive integration.\n\n## Features Tested\n- Document creation\n- Native Google Docs format\n- Storage in SOPed folder structure`
-        }
-      });
-
-      if (response.error) throw response.error;
-      
-      setTestFileId(response.data.file_id);
-      setSuccess(`Test document created: ${response.data.file_name}`);
-      
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to create test document';
-      setError(message);
-    } finally {
-      setIsCreatingDoc(false);
-    }
-  };
 
   const handleExportDoc = async (format: 'docx' | 'pdf') => {
     if (!testFileId) {
@@ -305,28 +275,17 @@ export function DriveTestPanel() {
           </Alert>
         )}
 
-        {/* Step 1: Create Test Doc */}
+        {/* Step 1: Provide a File ID */}
         <div className="space-y-3">
-          <h4 className="font-medium">Step 1: Create Test Document</h4>
+          <h4 className="font-medium">Step 1: Target File ID</h4>
           <p className="text-sm text-muted-foreground">
-            Creates a native Google Doc in your SOPs folder
+            Paste a Google Drive file ID (from a doc you uploaded) to run the tests below against it.
           </p>
-          <Button 
-            onClick={handleCreateTestDoc} 
-            disabled={isCreatingDoc}
-          >
-            {isCreatingDoc ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <FileUp className="h-4 w-4 mr-2" />
-            )}
-            Create Test Document
-          </Button>
-          {testFileId && (
-            <p className="text-sm text-muted-foreground">
-              File ID: <code className="bg-muted px-1 rounded">{testFileId}</code>
-            </p>
-          )}
+          <Input
+            placeholder="e.g. 1AbCdEfGhIjKlMnOpQrStUvWxYz"
+            value={testFileId ?? ''}
+            onChange={(e) => setTestFileId(e.target.value.trim() || null)}
+          />
         </div>
 
         <Separator />
